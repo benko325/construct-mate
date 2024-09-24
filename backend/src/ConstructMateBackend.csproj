@@ -1,10 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>construct_mate_backend</RootNamespace>
+    <RootNamespace>ConstructMate</RootNamespace>
     <UserSecretsId>c1fc27a2-e064-410a-8e59-04dd5b3608bb</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
@@ -29,10 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Api\" />
-    <Folder Include="Application\" />
-    <Folder Include="Core\" />
-    <Folder Include="Infrastructure\" />
+    <Folder Include="Application\Queries\" />
   </ItemGroup>
 
 </Project>
