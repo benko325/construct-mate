@@ -1,5 +1,4 @@
 using CommunityToolkit.Diagnostics;
-using ConstructMate;
 using Marten;
 using Oakton.Resources;
 using Wolverine;
@@ -16,7 +15,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy.AllowAnyOrigin()
-            .AllowAnyHeader()
+        .AllowAnyHeader()
         .AllowAnyMethod();
     });
 });
@@ -76,3 +75,5 @@ app.MapWolverineEndpoints(opts =>
 app.UseHttpsRedirection();
 
 app.Run();
+
+// TODO: show xml comments in Swagger!!!!!
