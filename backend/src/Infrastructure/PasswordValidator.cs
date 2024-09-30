@@ -53,7 +53,7 @@ public static class PasswordValidator
         var mostCommonPasswords = File.ReadLines(Constants.MostCommonPasswordsFile);
         if (mostCommonPasswords.Contains(password))
         {
-            context.AddFailure("AdminPassword is too common.");
+            context.AddFailure("Password is too common.");
             return;
         }
     }

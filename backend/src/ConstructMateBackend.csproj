@@ -30,8 +30,4 @@
     <PackageReference Include="WolverineFx.Marten" Version="2.17.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Application\Queries\" />
-  </ItemGroup>
-
 </Project>

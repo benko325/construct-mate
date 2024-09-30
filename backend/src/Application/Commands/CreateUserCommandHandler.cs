@@ -14,14 +14,12 @@ namespace ConstructMate.Application.Commands;
 /// <param name="LastName">Last name of new user</param>
 /// <param name="Email">Email of new user</param>
 /// <param name="Password">Password of new user</param>
-/// <param name="PasswordAgain">Again password for check of equality with Password property</param>
 public record CreateUserCommand(
     Guid Id,
     string FirstName,
     string LastName,
     string Email,
-    string Password,
-    string PasswordAgain);
+    string Password);
 
 /// <summary>
 /// Create a new user in DB
@@ -30,8 +28,6 @@ public class CreateUserCommandHandler
 {
     public static async Task LoadAsync(CreateUserCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
     {
-        Guard.IsEqualTo(userCommand.Password, userCommand.PasswordAgain, "Given passwords must be the same");
-
         // Check if user with given email doesn't already exist
         var user = await session.Query<User>().FirstOrDefaultAsync(u => u.Email == userCommand.Email, token: cancellationToken);
 
