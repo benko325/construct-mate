@@ -7,6 +7,7 @@ using Wolverine.Http;
 using Microsoft.OpenApi.Models;
 using Wolverine.FluentValidation;
 using Wolverine.Http.FluentValidation;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,7 +56,17 @@ builder.Services.AddSwaggerGen( opt =>
     {
         Title = "Contruct Mate Api",
         Version = "v1",
+        Description = "Api endpoints used to integrate with Counstruct Mate application.",
+        Contact = new OpenApiContact()
+        {
+            Name = "Benjamin Havlik",
+            Email = "benko.havlik0@gmail.com"
+        }
     });
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    opt.IncludeXmlComments(xmlPath);
 
     opt.SupportNonNullableReferenceTypes();
 });
@@ -75,5 +86,3 @@ app.MapWolverineEndpoints(opts =>
 app.UseHttpsRedirection();
 
 app.Run();
-
-// TODO: show xml comments in Swagger!!!!!
