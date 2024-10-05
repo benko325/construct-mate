@@ -21,9 +21,9 @@ public record ModifyUserPasswordCommand(
 /// </summary>
 public class ModifyUserPasswordCommandHandler
 {
-    public static async Task<User> LoadAsync(ModifyUserPasswordCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
+    public static async Task<ApplicationUser> LoadAsync(ModifyUserPasswordCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
     {
-        var user = await session.LoadAsync<User>(userCommand.Id, cancellationToken);
+        var user = await session.LoadAsync<ApplicationUser>(userCommand.Id, cancellationToken);
         // TODO: update with error messages and status codes
         Guard.IsNotNull(user, "User whose password have to be changed");
 
@@ -32,7 +32,7 @@ public class ModifyUserPasswordCommandHandler
         return user;
     }
 
-    public static async Task<UserPasswordChanged> Handle(ModifyUserPasswordCommand userCommand, User user, IDocumentSession session, CancellationToken cancellationToken)
+    public static async Task<UserPasswordChanged> Handle(ModifyUserPasswordCommand userCommand, ApplicationUser user, IDocumentSession session, CancellationToken cancellationToken)
     {
         // TODO: update when hashing is resolved
         user.PasswordHash = "NewPasswordHash";

@@ -14,9 +14,9 @@ public record GetAllUsersQuery();
 /// </summary>
 public class GetAllUsersQueryHandler
 {
-    public static async Task<QueryCollectionResponse<User>> Handle(GetAllUsersQuery usersQuery, IQuerySession session)
+    public static async Task<QueryCollectionResponse<ApplicationUser>> Handle(GetAllUsersQuery usersQuery, IQuerySession session)
     {
-        var users = await session.Query<User>().ToListAsync();
-        return new QueryCollectionResponse<User>(users);
+        var users = await session.Query<ApplicationUser>().ToListAsync();
+        return new QueryCollectionResponse<ApplicationUser>(users);
     }
 }

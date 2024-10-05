@@ -16,16 +16,16 @@ public record DeleteUserCommand(Guid Id);
 /// </summary>
 public class DeleteUserCommandHandler
 {
-    public static async Task<User> LoadAsync(DeleteUserCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
+    public static async Task<ApplicationUser> LoadAsync(DeleteUserCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
     {
-        var user = await session.LoadAsync<User>(userCommand.Id, cancellationToken);
+        var user = await session.LoadAsync<ApplicationUser>(userCommand.Id, cancellationToken);
         // TODO: return 404 with message when resolved
         Guard.IsNotNull(user, "User to be deleted");
 
         return user;
     }
 
-    public static async Task<UserDeleted> Handle(DeleteUserCommand userCommand, User user, IDocumentSession session, CancellationToken cancellationToken)
+    public static async Task<UserDeleted> Handle(DeleteUserCommand userCommand, ApplicationUser user, IDocumentSession session, CancellationToken cancellationToken)
     {
         session.Delete(user);
         // TODO: delete all constructions, files, etc. that belongs to deleted user

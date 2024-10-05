@@ -1,21 +1,18 @@
-﻿using CommunityToolkit.Diagnostics;
-using ConstructMate.Core;
+﻿using ConstructMate.Core;
 using ConstructMate.Core.Events;
 using Mapster;
-using Marten;
+using Microsoft.AspNetCore.Identity;
 
 namespace ConstructMate.Application.Commands;
 
 /// <summary>
 /// Create user command
 /// </summary>
-/// <param name="Id">Id of new user</param>
 /// <param name="FirstName">First name of new user</param>
 /// <param name="LastName">Last name of new user</param>
 /// <param name="Email">Email of new user</param>
 /// <param name="Password">Password of new user</param>
 public record CreateUserCommand(
-    Guid Id,
     string FirstName,
     string LastName,
     string Email,
@@ -26,23 +23,15 @@ public record CreateUserCommand(
 /// </summary>
 public class CreateUserCommandHandler
 {
-    public static async Task LoadAsync(CreateUserCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
+    // no need to check the email duplication in LoadAsync as it is checked by userManager
+    public static async Task<IResult> Handle(CreateUserCommand userCommand, UserManager<ApplicationUser> userManager, CancellationToken cancellationToken)
     {
-        // Check if user with given email doesn't already exist
-        var user = await session.Query<User>().FirstOrDefaultAsync(u => u.Email == userCommand.Email, token: cancellationToken);
+        var newUser = userCommand.Adapt<ApplicationUser>();
+        newUser.UserName = userCommand.Email;
+        newUser.EmailConfirmed = true; // no need to confirm the email as for now
 
-        // TODO: better status codes + error messages
-        Guard.IsNull(user, "User with given email already exists");
-    }
+        var result = await userManager.CreateAsync(newUser, userCommand.Password);
 
-    public static async Task<UserCreated> Handle(CreateUserCommand userCommand, IDocumentSession session, CancellationToken cancellationToken)
-    {
-        var newUser = userCommand.Adapt<User>();
-        newUser.PasswordHash = "TODO: Save password hash";
-
-        session.Store(newUser);
-        await session.SaveChangesAsync(cancellationToken);
-
-        return newUser.Adapt<UserCreated>();
+        return result.Succeeded ? Results.Ok(newUser.Adapt<UserCreated>()) : Results.BadRequest(result.Errors);
     }
 }

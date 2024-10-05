@@ -38,4 +38,13 @@ public class UsersEndpointValidations
             RuleFor(r => r.NewPasswordAgain).NotNull().NotEmpty().Equal(r => r.NewPassword);
         }
     }
+
+    public class LoginUserRequestValidator : AbstractValidator<LoginUserRequest>
+    {
+        public LoginUserRequestValidator()
+        {
+            RuleFor(r => r.Email).NotNull().NotEmpty().EmailAddress();
+            RuleFor(r => r.Password).NotNull().NotEmpty();
+        }
+    }
 }

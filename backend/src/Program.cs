@@ -8,6 +8,13 @@ using Microsoft.OpenApi.Models;
 using Wolverine.FluentValidation;
 using Wolverine.Http.FluentValidation;
 using System.Reflection;
+using ConstructMate.Core;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using ConstructMate.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +40,58 @@ builder.Services.AddMarten(opts =>
     opts.DatabaseSchemaName = "todo";
 })
     .IntegrateWithWolverine();
+
+builder.Services.AddIdentityCore<ApplicationUser>(opts =>
+{
+    opts.Password.RequireDigit = true;
+    opts.Password.RequiredLength = 6;
+    opts.Password.RequireNonAlphanumeric = false;
+    opts.Password.RequireUppercase = true;
+    opts.Password.RequireLowercase = true;
+
+    // Lockout settings (optional)
+    opts.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    opts.Lockout.MaxFailedAccessAttempts = 5;
+    opts.Lockout.AllowedForNewUsers = true;
+
+    // User settings
+    opts.User.RequireUniqueEmail = true;
+})
+    .AddUserStore<MartenUserStore>() // Register the custom user store
+    .AddUserManager<UserManager<ApplicationUser>>()
+    .AddSignInManager<SignInManager<ApplicationUser>>()
+    //.AddRoles<IdentityRole>()
+    .AddDefaultTokenProviders();
+
+// Register UserManager and other Identity services
+builder.Services.AddScoped<UserManager<ApplicationUser>>();
+builder.Services.AddScoped<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
+builder.Services.AddScoped<IUserValidator<ApplicationUser>, UserValidator<ApplicationUser>>();
+builder.Services.AddScoped<IPasswordValidator<ApplicationUser>, PasswordValidator<ApplicationUser>>();
+
+builder.Services.AddAuthentication(opts =>
+{
+    opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(opts =>
+{
+    opts.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
+
+builder.Services.AddAuthorization();
+
+//builder.Services.AddScoped<IUserStore<User>, MartenUserStore>();
+//builder.Services.AddScoped<IRoleStore<IdentityRole>, MartenRoleStore>();
 
 builder.Services.AddResourceSetupOnStartup();
 
@@ -64,6 +123,31 @@ builder.Services.AddSwaggerGen( opt =>
         }
     });
 
+    opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter your valid token in the text input below."
+    });
+
+    opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     opt.IncludeXmlComments(xmlPath);
@@ -82,6 +166,9 @@ app.MapWolverineEndpoints(opts =>
 {
     opts.UseFluentValidationProblemDetailMiddleware();
 });
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 

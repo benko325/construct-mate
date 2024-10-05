@@ -20,16 +20,16 @@ public record ModifyUserCommand(Guid Id, string NewFirstName, string NewLastName
 /// </summary>
 public class ModifyUserCommandHandler
 {
-    public static async Task<User> LoadAsync(ModifyUserCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
+    public static async Task<ApplicationUser> LoadAsync(ModifyUserCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
     {
-        var user = await session.LoadAsync<User>(userCommand.Id, cancellationToken);
+        var user = await session.LoadAsync<ApplicationUser>(userCommand.Id, cancellationToken);
         // TODO: edit when status codes and error handling is implemented
         Guard.IsNotNull(user, "User to be modified");
 
         return user;
     }
 
-    public static async Task<UserModified> Handle(ModifyUserCommand userCommand, User user, IDocumentSession session, CancellationToken cancellationToken)
+    public static async Task<UserModified> Handle(ModifyUserCommand userCommand, ApplicationUser user, IDocumentSession session, CancellationToken cancellationToken)
     {
         user.FirstName = userCommand.NewFirstName;
         user.LastName = userCommand.NewLastName;

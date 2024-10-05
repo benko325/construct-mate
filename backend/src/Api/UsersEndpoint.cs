@@ -4,10 +4,12 @@ using ConstructMate.Application.Queries.Responses;
 using ConstructMate.Core;
 using ConstructMate.Core.Events;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 using Wolverine.Http.Marten;
+using System.Security.Claims;
 
 namespace ConstructMate.Api;
 
@@ -52,9 +54,16 @@ public record ModifyUserPasswordRequest(
     string NewPassword,
     string NewPasswordAgain);
 
+/// <summary>
+/// Login user request
+/// </summary>
+/// <param name="Email">Email of user to be logged in</param>
+/// <param name="Password">Password of the user to be logged in</param>
+public record LoginUserRequest(string Email, string Password);
+
 public class UsersEndpoint
 {
-    // TODO: password hashing, auth and then info about currently logged in user
+    // TODO: auth of all endpoints
 
     /// <summary>
     /// Get existing user by id
@@ -62,9 +71,9 @@ public class UsersEndpoint
     /// <param name="user">User with defined Id</param>
     /// <returns>User</returns>
     [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApplicationUser), StatusCodes.Status200OK)]
     [WolverineGet("/users/{id}")]
-    public static User GetUserById([Document] User user)
+    public static ApplicationUser GetUserById([Document] ApplicationUser user)
     {
         return user;
     }
@@ -75,11 +84,31 @@ public class UsersEndpoint
     /// <param name="request"><see cref="CreateUserRequest"/></param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserCreated - info about newly created user</returns>
+    [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(UserCreated), StatusCodes.Status200OK)]
+    [AllowAnonymous]
     [WolverinePost("/users")]
-    public static async Task<UserCreated> CreateNewUser([FromBody] CreateUserRequest request, IMessageBus bus)
+    public static async Task<IResult> CreateNewUser([FromBody] CreateUserRequest request, IMessageBus bus)
     {
         var command = request.Adapt<CreateUserCommand>();
-        var result = await bus.InvokeAsync<UserCreated>(command);
+        var result = await bus.InvokeAsync<IResult>(command);
+        return result;
+    }
+
+    /// <summary>
+    /// Login user
+    /// </summary>
+    /// <param name="request"><see cref="LoginUserRequest"/></param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>UserLoggedIn - token and info about expiration</returns>
+    [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(UserLoggedIn), StatusCodes.Status200OK)]
+    [AllowAnonymous]
+    [WolverinePost("/users/login")]
+    public static async Task<IResult> Login([FromBody] LoginUserRequest request, IMessageBus bus)
+    {
+        var command = request.Adapt<LoginUserCommand>();
+        var result = await bus.InvokeAsync<IResult>(command);
         return result;
     }
 
@@ -92,10 +121,14 @@ public class UsersEndpoint
     /// <returns>UserModified - id of modified user, new first name, last name, and email</returns>
     [ProducesResponseType<UserModified>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status400BadRequest)]
+    [Authorize]
     [WolverinePatch("/users/{id}")]
     public static async Task<IResult> ModifyUser([FromRoute] Guid id, [FromBody] ModifyUserRequest request, IMessageBus bus)
     {
         if (id != request.Id) return Results.BadRequest("Id in route and in request must be equal");
+
+        //var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        //if (userId == null) return Results.Unauthorized();
 
         var command = request.Adapt<ModifyUserCommand>();
         var result = await bus.InvokeAsync<UserModified>(command);
@@ -145,21 +178,26 @@ public class UsersEndpoint
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>Collection of all users from the database</returns>
     [WolverineGet("/users")]
-    public static async Task<IEnumerable<User>> GetAllUsers(IMessageBus bus)
+    public static async Task<IEnumerable<ApplicationUser>> GetAllUsers(IMessageBus bus)
     {
         var query = new GetAllUsersQuery();
-        var result = await bus.InvokeAsync<QueryCollectionResponse<User>>(query);
+        var result = await bus.InvokeAsync<QueryCollectionResponse<ApplicationUser>>(query);
         return result.QueryResponseItems;
     }
 
     /// <summary>
     /// Get info about currently logged in user
     /// </summary>
-    /// <param name="bus"></param>
+    /// <param name="httpContext"></param>
     /// <returns></returns>
+    [Authorize]
     [WolverineGet("/users/me")]
-    public static async Task GetMyInfo(IMessageBus bus)
+    public static string GetMyInfo(HttpContext httpContext)
     {
-        // TODO: finalize when auth is done
+        var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier); // Id
+        var userName = httpContext.User.FindFirstValue(ClaimTypes.Name);
+        var userEmail = httpContext.User.FindFirstValue(ClaimTypes.Email);
+
+        return $"User ID: {userId}, User Name: {userName}, Email: {userEmail}";
     }
 }
