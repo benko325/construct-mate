@@ -8,10 +8,11 @@ namespace ConstructMate.Infrastructure;
 
 public static class JWTGenerator
 {
-    // <summary>
+    /// <summary>
     /// Generates a JWT token for the authenticated user.
     /// </summary>
     /// <param name="user">The authenticated user.</param>
+    /// <param name="configuration">Injected IConfiguration from Microsoft</param>
     /// <returns>A JWT token string.</returns>
     public static string GenerateJwtToken(ApplicationUser user, IConfiguration configuration)
     {

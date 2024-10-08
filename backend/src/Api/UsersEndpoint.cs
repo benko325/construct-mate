@@ -10,6 +10,8 @@ using Wolverine;
 using Wolverine.Http;
 using Wolverine.Http.Marten;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 
 namespace ConstructMate.Api;
 
@@ -63,7 +65,7 @@ public record LoginUserRequest(string Email, string Password);
 
 public class UsersEndpoint
 {
-    // TODO: auth of all endpoints
+    // TODO: reset password via email?? when there is enough time for that
 
     /// <summary>
     /// Get existing user by id
@@ -101,8 +103,9 @@ public class UsersEndpoint
     /// <param name="request"><see cref="LoginUserRequest"/></param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserLoggedIn - token and info about expiration</returns>
-    [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(UserLoggedIn), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
     [AllowAnonymous]
     [WolverinePost("/users/login")]
     public static async Task<IResult> Login([FromBody] LoginUserRequest request, IMessageBus bus)
@@ -117,54 +120,74 @@ public class UsersEndpoint
     /// </summary>
     /// <param name="id">Id of user to be modified</param>
     /// <param name="request"><see cref="ModifyUserRequest"/></param>
+    /// <param name="httpContext">Injected HttpContext by Microsoft</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserModified - id of modified user, new first name, last name, and email</returns>
     [ProducesResponseType<UserModified>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePatch("/users/{id}")]
-    public static async Task<IResult> ModifyUser([FromRoute] Guid id, [FromBody] ModifyUserRequest request, IMessageBus bus)
+    public static async Task<IResult> ModifyUser([FromRoute] Guid id, [FromBody] ModifyUserRequest request,
+        HttpContext httpContext, IMessageBus bus)
     {
         if (id != request.Id) return Results.BadRequest("Id in route and in request must be equal");
 
-        //var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        //if (userId == null) return Results.Unauthorized();
+        var userIdFromTokenString = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdFromTokenString, out var userId) || userId != id) return Results.Unauthorized();
 
         var command = request.Adapt<ModifyUserCommand>();
-        var result = await bus.InvokeAsync<UserModified>(command);
-        return Results.Ok(result);
+        var result = await bus.InvokeAsync<IResult>(command);
+        return result;
     }
 
     /// <summary>
-    /// Create a new password for existing user
+    /// Update password for existing user
     /// </summary>
     /// <param name="id">Id of user to be modified</param>
     /// <param name="request"><see cref="ModifyUserPasswordRequest"/></param>
+    /// <param name="httpContext">Injected HttpContext by Microsoft</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserPasswordChanged - Id of user whose password has been changed</returns>
     [ProducesResponseType<UserPasswordChanged>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
+    [Authorize]
     [WolverinePatch("/users/{id}/password")]
-    public static async Task<IResult> CreateNewPassword([FromRoute] Guid id, [FromBody] ModifyUserPasswordRequest request, IMessageBus bus)
+    public static async Task<IResult> UpdatePassword([FromRoute] Guid id, [FromBody] ModifyUserPasswordRequest request,
+        HttpContext httpContext, IMessageBus bus)
     {
         if (id != request.Id) return Results.BadRequest("Id in route and in request must be equal");
 
+        var userIdFromTokenString = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdFromTokenString, out var userId) || userId != id) return Results.Unauthorized();
+
         var command = request.Adapt<ModifyUserPasswordCommand>();
-        var result = await bus.InvokeAsync<UserPasswordChanged>(command);
-        return Results.Ok(result);
+        var result = await bus.InvokeAsync<IResult>(command);
+        return result;
     }
 
     /// <summary>
-    /// Delete an existing user
+    /// Delete an existing user - user can only delete himself
     /// </summary>
     /// <param name="id">Id of user to be deleted</param>
+    /// <param name="httpContext">Injected HttpContext by Microsoft</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserDeleted - id of deleted user</returns>
+    [ProducesResponseType<UserDeleted>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
+    [Authorize]
     [WolverineDelete("/users/{id}")]
-    public static async Task<UserDeleted> DeleteUser([FromRoute] Guid id, IMessageBus bus)
+    public static async Task<IResult> DeleteUser([FromRoute] Guid id, HttpContext httpContext, IMessageBus bus)
     {
+        var userIdFromTokenString = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdFromTokenString, out var userId) || userId != id) return Results.Unauthorized();
+
         var command = new DeleteUserCommand(id);
-        var result = await bus.InvokeAsync<UserDeleted>(command);
+        var result = await bus.InvokeAsync<IResult>(command);
         return result;
     }
 
@@ -172,7 +195,7 @@ public class UsersEndpoint
     /// Get all users from the database
     /// </summary>
     /// <remarks>
-    /// This endpoints is only for testig purposes <br/>
+    /// This endpoints is only for testing purposes <br/>
     /// TODO: remove when finished or add authorization so that only I can access this endpoint
     /// </remarks>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
@@ -188,13 +211,16 @@ public class UsersEndpoint
     /// <summary>
     /// Get info about currently logged in user
     /// </summary>
+    /// <remarks>
+    /// Just for testing purposes
+    /// </remarks>
     /// <param name="httpContext"></param>
     /// <returns></returns>
     [Authorize]
     [WolverineGet("/users/me")]
     public static string GetMyInfo(HttpContext httpContext)
     {
-        var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier); // Id
+        var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
         var userName = httpContext.User.FindFirstValue(ClaimTypes.Name);
         var userEmail = httpContext.User.FindFirstValue(ClaimTypes.Email);
 

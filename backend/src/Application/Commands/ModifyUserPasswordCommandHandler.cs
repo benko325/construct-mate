@@ -2,6 +2,7 @@
 using ConstructMate.Core;
 using ConstructMate.Core.Events;
 using Marten;
+using Microsoft.AspNetCore.Identity;
 
 namespace ConstructMate.Application.Commands;
 
@@ -21,25 +22,23 @@ public record ModifyUserPasswordCommand(
 /// </summary>
 public class ModifyUserPasswordCommandHandler
 {
-    public static async Task<ApplicationUser> LoadAsync(ModifyUserPasswordCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
+    // TODO: uncomment when Guards are overrided and nice status codes and errors are implemented
+    //public static async Task<ApplicationUser> LoadAsync(ModifyUserPasswordCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
+    //{
+    //    var user = await session.LoadAsync<ApplicationUser>(userCommand.Id, cancellationToken);
+    //    Guard.IsNotNull(user, "User whose password have to be changed");
+
+    //    return user;
+    //}
+
+    public static async Task<IResult> Handle(ModifyUserPasswordCommand userCommand, IDocumentSession session,
+        UserManager<ApplicationUser> userManager, CancellationToken cancellationToken)
     {
         var user = await session.LoadAsync<ApplicationUser>(userCommand.Id, cancellationToken);
-        // TODO: update with error messages and status codes
-        Guard.IsNotNull(user, "User whose password have to be changed");
+        if (user == null) return Results.NotFound("User with defined Id not found in the DB");
 
-        // TODO: check if old password hash matches hash of new password
+        var result = await userManager.ChangePasswordAsync(user, userCommand.OldPassword, userCommand.NewPassword);
 
-        return user;
-    }
-
-    public static async Task<UserPasswordChanged> Handle(ModifyUserPasswordCommand userCommand, ApplicationUser user, IDocumentSession session, CancellationToken cancellationToken)
-    {
-        // TODO: update when hashing is resolved
-        user.PasswordHash = "NewPasswordHash";
-
-        session.Update(user);
-        await session.SaveChangesAsync(cancellationToken);
-
-        return new UserPasswordChanged(user.Id);
+        return result.Succeeded ? Results.Ok(new UserPasswordChanged(user.Id)) : Results.BadRequest(result.Errors);
     }
 }

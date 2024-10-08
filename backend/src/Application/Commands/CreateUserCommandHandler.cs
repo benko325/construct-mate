@@ -24,7 +24,7 @@ public record CreateUserCommand(
 public class CreateUserCommandHandler
 {
     // no need to check the email duplication in LoadAsync as it is checked by userManager
-    public static async Task<IResult> Handle(CreateUserCommand userCommand, UserManager<ApplicationUser> userManager, CancellationToken cancellationToken)
+    public static async Task<IResult> Handle(CreateUserCommand userCommand, UserManager<ApplicationUser> userManager)
     {
         var newUser = userCommand.Adapt<ApplicationUser>();
         newUser.UserName = userCommand.Email;

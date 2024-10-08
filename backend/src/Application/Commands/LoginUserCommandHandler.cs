@@ -32,7 +32,7 @@ public class LoginUserCommandHandler
     public static async Task<IResult> Handle(LoginUserCommand userCommand, UserManager<ApplicationUser> userManager, IConfiguration configuration)
     {
         var user = await userManager.FindByEmailAsync(userCommand.Email);
-        if (user == null) return Results.BadRequest("User with given email not found");
+        if (user == null) return Results.NotFound("User with given email not found");
 
         if (!await userManager.HasPasswordAsync(user)) return Results.BadRequest("User does not have a password set");
 

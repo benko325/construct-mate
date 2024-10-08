@@ -2,6 +2,7 @@
 using ConstructMate.Core;
 using ConstructMate.Core.Events;
 using Marten;
+using Microsoft.AspNetCore.Identity;
 
 namespace ConstructMate.Application.Commands;
 
@@ -16,21 +17,24 @@ public record DeleteUserCommand(Guid Id);
 /// </summary>
 public class DeleteUserCommandHandler
 {
-    public static async Task<ApplicationUser> LoadAsync(DeleteUserCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
+    // TODO: uncomment when Guards are overrided and nice status codes and errors are implemented
+    //public static async Task<ApplicationUser> LoadAsync(DeleteUserCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
+    //{
+    //    var user = await session.LoadAsync<ApplicationUser>(userCommand.Id, cancellationToken);
+    //    // TODO: return 404 with message when resolved
+    //    Guard.IsNotNull(user, "User to be deleted");
+
+    //    return user;
+    //}
+
+    public static async Task<IResult> Handle(DeleteUserCommand userCommand, IDocumentSession session, UserManager<ApplicationUser> userManager, CancellationToken cancellationToken)
     {
         var user = await session.LoadAsync<ApplicationUser>(userCommand.Id, cancellationToken);
-        // TODO: return 404 with message when resolved
-        Guard.IsNotNull(user, "User to be deleted");
+        if (user == null) return Results.NotFound("User with defined Id not found in the DB");
 
-        return user;
-    }
-
-    public static async Task<UserDeleted> Handle(DeleteUserCommand userCommand, ApplicationUser user, IDocumentSession session, CancellationToken cancellationToken)
-    {
-        session.Delete(user);
+        var result = await userManager.DeleteAsync(user);
         // TODO: delete all constructions, files, etc. that belongs to deleted user
-        await session.SaveChangesAsync(cancellationToken);
 
-        return new UserDeleted(user.Id);
+        return result.Succeeded ? Results.Ok(new UserDeleted(user.Id)) : Results.BadRequest(result.Errors);
     }
 }
