@@ -66,14 +66,15 @@ public record LoginUserRequest(string Email, string Password);
 public class UsersEndpoint
 {
     // TODO: reset password via email?? when there is enough time for that
+    // TODO: middleware to fill some user context with data from token
 
     /// <summary>
     /// Get existing user by id
     /// </summary>
     /// <param name="user">User with defined Id</param>
     /// <returns>User</returns>
-    [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApplicationUser), StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ApplicationUser>(StatusCodes.Status200OK)]
     [WolverineGet("/users/{id}")]
     public static ApplicationUser GetUserById([Document] ApplicationUser user)
     {
@@ -86,8 +87,8 @@ public class UsersEndpoint
     /// <param name="request"><see cref="CreateUserRequest"/></param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserCreated - info about newly created user</returns>
-    [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(UserCreated), StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<UserCreated>(StatusCodes.Status200OK)]
     [AllowAnonymous]
     [WolverinePost("/users")]
     public static async Task<IResult> CreateNewUser([FromBody] CreateUserRequest request, IMessageBus bus)
@@ -103,8 +104,8 @@ public class UsersEndpoint
     /// <param name="request"><see cref="LoginUserRequest"/></param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserLoggedIn - token and info about expiration</returns>
-    [ProducesResponseType(typeof(UserLoggedIn), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<UserLoggedIn>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
     [AllowAnonymous]
     [WolverinePost("/users/login")]
