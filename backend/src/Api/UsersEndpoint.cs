@@ -10,8 +10,7 @@ using Wolverine;
 using Wolverine.Http;
 using Wolverine.Http.Marten;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+using ConstructMate.Application.ServiceInterfaces;
 
 namespace ConstructMate.Api;
 
@@ -66,7 +65,7 @@ public record LoginUserRequest(string Email, string Password);
 public class UsersEndpoint
 {
     // TODO: reset password via email?? when there is enough time for that
-    // TODO: middleware to fill some user context with data from token
+    // TODO: implement StatusCodeGuard when resolved and edit commands
 
     /// <summary>
     /// Get existing user by id
@@ -75,6 +74,7 @@ public class UsersEndpoint
     /// <returns>User</returns>
     [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ApplicationUser>(StatusCodes.Status200OK)]
+    [Authorize]
     [WolverineGet("/users/{id}")]
     public static ApplicationUser GetUserById([Document] ApplicationUser user)
     {
@@ -121,7 +121,7 @@ public class UsersEndpoint
     /// </summary>
     /// <param name="id">Id of user to be modified</param>
     /// <param name="request"><see cref="ModifyUserRequest"/></param>
-    /// <param name="httpContext">Injected HttpContext by Microsoft</param>
+    /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserModified - id of modified user, new first name, last name, and email</returns>
     [ProducesResponseType<UserModified>(StatusCodes.Status200OK)]
@@ -131,12 +131,10 @@ public class UsersEndpoint
     [Authorize]
     [WolverinePatch("/users/{id}")]
     public static async Task<IResult> ModifyUser([FromRoute] Guid id, [FromBody] ModifyUserRequest request,
-        HttpContext httpContext, IMessageBus bus)
+        IApplicationUserContext userContext, IMessageBus bus)
     {
         if (id != request.Id) return Results.BadRequest("Id in route and in request must be equal");
-
-        var userIdFromTokenString = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdFromTokenString, out var userId) || userId != id) return Results.Unauthorized();
+        if (userContext.UserId != id) return Results.Unauthorized();
 
         var command = request.Adapt<ModifyUserCommand>();
         var result = await bus.InvokeAsync<IResult>(command);
@@ -148,7 +146,7 @@ public class UsersEndpoint
     /// </summary>
     /// <param name="id">Id of user to be modified</param>
     /// <param name="request"><see cref="ModifyUserPasswordRequest"/></param>
-    /// <param name="httpContext">Injected HttpContext by Microsoft</param>
+    /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserPasswordChanged - Id of user whose password has been changed</returns>
     [ProducesResponseType<UserPasswordChanged>(StatusCodes.Status200OK)]
@@ -158,12 +156,10 @@ public class UsersEndpoint
     [Authorize]
     [WolverinePatch("/users/{id}/password")]
     public static async Task<IResult> UpdatePassword([FromRoute] Guid id, [FromBody] ModifyUserPasswordRequest request,
-        HttpContext httpContext, IMessageBus bus)
+        IApplicationUserContext userContext, IMessageBus bus)
     {
         if (id != request.Id) return Results.BadRequest("Id in route and in request must be equal");
-
-        var userIdFromTokenString = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdFromTokenString, out var userId) || userId != id) return Results.Unauthorized();
+        if (userContext.UserId != id) return Results.Unauthorized();
 
         var command = request.Adapt<ModifyUserPasswordCommand>();
         var result = await bus.InvokeAsync<IResult>(command);
@@ -174,7 +170,7 @@ public class UsersEndpoint
     /// Delete an existing user - user can only delete himself
     /// </summary>
     /// <param name="id">Id of user to be deleted</param>
-    /// <param name="httpContext">Injected HttpContext by Microsoft</param>
+    /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserDeleted - id of deleted user</returns>
     [ProducesResponseType<UserDeleted>(StatusCodes.Status200OK)]
@@ -182,10 +178,9 @@ public class UsersEndpoint
     [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverineDelete("/users/{id}")]
-    public static async Task<IResult> DeleteUser([FromRoute] Guid id, HttpContext httpContext, IMessageBus bus)
+    public static async Task<IResult> DeleteUser([FromRoute] Guid id, IApplicationUserContext userContext, IMessageBus bus)
     {
-        var userIdFromTokenString = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdFromTokenString, out var userId) || userId != id) return Results.Unauthorized();
+        if (userContext.UserId != id) return Results.Unauthorized();
 
         var command = new DeleteUserCommand(id);
         var result = await bus.InvokeAsync<IResult>(command);
@@ -216,15 +211,16 @@ public class UsersEndpoint
     /// Just for testing purposes
     /// </remarks>
     /// <param name="httpContext"></param>
+    /// <param name="userContext"></param>
     /// <returns></returns>
     [Authorize]
     [WolverineGet("/users/me")]
-    public static string GetMyInfo(HttpContext httpContext)
+    public static string GetMyInfo(HttpContext httpContext, IApplicationUserContext userContext)
     {
         var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
         var userName = httpContext.User.FindFirstValue(ClaimTypes.Name);
         var userEmail = httpContext.User.FindFirstValue(ClaimTypes.Email);
 
-        return $"User ID: {userId}, User Name: {userName}, Email: {userEmail}";
+        return $"User ID: {userId} = {userContext.UserId}, User Name: {userName} = {userContext.UserName}, Email: {userEmail} = {userContext.UserEmail}";
     }
 }

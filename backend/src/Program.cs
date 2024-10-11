@@ -10,11 +10,13 @@ using Wolverine.Http.FluentValidation;
 using System.Reflection;
 using ConstructMate.Core;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 using ConstructMate.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ConstructMate.Application.ServiceInterfaces;
+using ConstructMate.Infrastructure.ApplicationUserContext;
+using ConstructMate.Application.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -155,6 +157,9 @@ builder.Services.AddSwaggerGen( opt =>
     opt.SupportNonNullableReferenceTypes();
 });
 
+// Add User context to DI
+builder.Services.AddScoped<IApplicationUserContext, ApplicationUserContext>();
+
 var app = builder.Build();
 
 app.UseCors();
@@ -165,6 +170,14 @@ app.UseSwaggerUI();
 app.MapWolverineEndpoints(opts =>
 {
     opts.UseFluentValidationProblemDetailMiddleware();
+
+    // NOTE: User context middleware must be for now registered as Wolverine middleware,
+    // because Wolverine uses Lamar (custom IoC container) and because of that scoped services
+    // are not available in classic aspnet middlewares.
+    //
+    // This problem should be solved in future Wolverine version 3.0, but this solution is working for now.
+
+    opts.AddMiddleware(typeof(ApplicationUserContextWolverineMiddleware), _ => true);
 });
 
 app.UseAuthentication();
