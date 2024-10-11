@@ -39,8 +39,10 @@ public class ModifyUserCommandHandler
         if (user == null) return Results.NotFound("User with defined Id not found in the DB");
 
         // with email also username must be set because email is also used as a username!!!
-        await userManager.SetEmailAsync(user, userCommand.NewEmail);
-        await userManager.SetUserNameAsync(user, userCommand.NewEmail);
+        var emailResult = await userManager.SetEmailAsync(user, userCommand.NewEmail);
+        if (!emailResult.Succeeded) return Results.BadRequest(emailResult.Errors);
+        var userNameResult = await userManager.SetUserNameAsync(user, userCommand.NewEmail);
+        if (!userNameResult.Succeeded) return Results.BadRequest(userNameResult.Errors);
 
         user.FirstName = userCommand.NewFirstName;
         user.LastName = userCommand.NewLastName;
