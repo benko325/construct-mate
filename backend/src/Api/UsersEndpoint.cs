@@ -11,6 +11,8 @@ using Wolverine.Http;
 using Wolverine.Http.Marten;
 using System.Security.Claims;
 using ConstructMate.Application.ServiceInterfaces;
+using FluentValidation.Results;
+using ConstructMate.Infrastructure.StatusCodeGuard;
 
 namespace ConstructMate.Api;
 
@@ -72,8 +74,9 @@ public class UsersEndpoint
     /// </summary>
     /// <param name="user">User with defined Id</param>
     /// <returns>User</returns>
-    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ApplicationUser>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverineGet("/users/{id}")]
     public static ApplicationUser GetUserById([Document] ApplicationUser user)
@@ -87,14 +90,15 @@ public class UsersEndpoint
     /// <param name="request"><see cref="CreateUserRequest"/></param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserCreated - info about newly created user</returns>
-    [ProducesResponseType<object>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<UserCreated>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ValidationResult>(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
     [WolverinePost("/users")]
-    public static async Task<IResult> CreateNewUser([FromBody] CreateUserRequest request, IMessageBus bus)
+    public static async Task<UserCreated> CreateNewUser([FromBody] CreateUserRequest request, IMessageBus bus)
     {
         var command = request.Adapt<CreateUserCommand>();
-        var result = await bus.InvokeAsync<IResult>(command);
+        var result = await bus.InvokeAsync<UserCreated>(command);
         return result;
     }
 
@@ -105,14 +109,15 @@ public class UsersEndpoint
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserLoggedIn - token and info about expiration</returns>
     [ProducesResponseType<UserLoggedIn>(StatusCodes.Status200OK)]
-    [ProducesResponseType<object>(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
     [AllowAnonymous]
     [WolverinePost("/users/login")]
-    public static async Task<IResult> Login([FromBody] LoginUserRequest request, IMessageBus bus)
+    public static async Task<UserLoggedIn> Login([FromBody] LoginUserRequest request, IMessageBus bus)
     {
         var command = request.Adapt<LoginUserCommand>();
-        var result = await bus.InvokeAsync<IResult>(command);
+        var result = await bus.InvokeAsync<UserLoggedIn>(command);
         return result;
     }
 
@@ -125,19 +130,20 @@ public class UsersEndpoint
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserModified - id of modified user, new first name, last name, and email</returns>
     [ProducesResponseType<UserModified>(StatusCodes.Status200OK)]
-    [ProducesResponseType<object>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePatch("/users/{id}")]
-    public static async Task<IResult> ModifyUser([FromRoute] Guid id, [FromBody] ModifyUserRequest request,
+    public static async Task<UserModified> ModifyUser([FromRoute] Guid id, [FromBody] ModifyUserRequest request,
         IApplicationUserContext userContext, IMessageBus bus)
     {
-        if (id != request.Id) return Results.BadRequest("Id in route and in request must be equal");
-        if (userContext.UserId != id) return Results.Unauthorized();
+        StatusCodeGuard.IsEqualTo(id, request.Id, StatusCodes.Status400BadRequest, "Id in route and in request must be equal");
+        StatusCodeGuard.IsEqualTo(userContext.UserId, id, StatusCodes.Status401Unauthorized, "User can modify himself only");
 
         var command = request.Adapt<ModifyUserCommand>();
-        var result = await bus.InvokeAsync<IResult>(command);
+        var result = await bus.InvokeAsync<UserModified>(command);
         return result;
     }
 
@@ -150,19 +156,20 @@ public class UsersEndpoint
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserPasswordChanged - Id of user whose password has been changed</returns>
     [ProducesResponseType<UserPasswordChanged>(StatusCodes.Status200OK)]
-    [ProducesResponseType<object>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePatch("/users/{id}/password")]
-    public static async Task<IResult> UpdatePassword([FromRoute] Guid id, [FromBody] ModifyUserPasswordRequest request,
+    public static async Task<UserPasswordChanged> UpdatePassword([FromRoute] Guid id, [FromBody] ModifyUserPasswordRequest request,
         IApplicationUserContext userContext, IMessageBus bus)
     {
-        if (id != request.Id) return Results.BadRequest("Id in route and in request must be equal");
-        if (userContext.UserId != id) return Results.Unauthorized();
+        StatusCodeGuard.IsEqualTo(id, request.Id, StatusCodes.Status400BadRequest, "Id in route and in request must be equal");
+        StatusCodeGuard.IsEqualTo(userContext.UserId, id, StatusCodes.Status401Unauthorized, "User can modify himself only");
 
         var command = request.Adapt<ModifyUserPasswordCommand>();
-        var result = await bus.InvokeAsync<IResult>(command);
+        var result = await bus.InvokeAsync<UserPasswordChanged>(command);
         return result;
     }
 
@@ -175,15 +182,16 @@ public class UsersEndpoint
     /// <returns>UserDeleted - id of deleted user</returns>
     [ProducesResponseType<UserDeleted>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverineDelete("/users/{id}")]
-    public static async Task<IResult> DeleteUser([FromRoute] Guid id, IApplicationUserContext userContext, IMessageBus bus)
+    public static async Task<UserDeleted> DeleteUser([FromRoute] Guid id, IApplicationUserContext userContext, IMessageBus bus)
     {
-        if (userContext.UserId != id) return Results.Unauthorized();
+        StatusCodeGuard.IsEqualTo(userContext.UserId, id, StatusCodes.Status401Unauthorized, "User can delete himself only");
 
         var command = new DeleteUserCommand(id);
-        var result = await bus.InvokeAsync<IResult>(command);
+        var result = await bus.InvokeAsync<UserDeleted>(command);
         return result;
     }
 

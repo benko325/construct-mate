@@ -180,6 +180,8 @@ app.MapWolverineEndpoints(opts =>
     opts.AddMiddleware(typeof(ApplicationUserContextWolverineMiddleware), _ => true);
 });
 
+app.UseMiddleware<StatusCodeExceptionMiddleware>();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

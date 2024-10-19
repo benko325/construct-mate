@@ -1,6 +1,7 @@
 ﻿using ConstructMate.Core;
 using ConstructMate.Core.Events;
 using ConstructMate.Infrastructure;
+using ConstructMate.Infrastructure.StatusCodeGuard;
 using Microsoft.AspNetCore.Identity;
 
 namespace ConstructMate.Application.Commands;
@@ -12,37 +13,30 @@ namespace ConstructMate.Application.Commands;
 /// <param name="Password">Password of the user to be logged in</param>
 public record LoginUserCommand(string Email, string Password);
 
+/// <summary>
+/// Login user - generate a jwt to access the application
+/// </summary>
 public class LoginUserCommandHandler
 {
-    // TODO: move check logic to Loadasync when resolving the issue with returning Ok and some error IResults...
-
-    //public static async Task<(IResult, ApplicationUser?)> LoadAsync(LoginUserCommand userCommand, UserManager<ApplicationUser> userManager, IQuerySession session, CancellationToken cancellationToken)
-    //{
-    //    var user = await userManager.FindByEmailAsync(userCommand.Email);
-    //    if (user == null) return (Results.BadRequest("User with given email not found"), null);
-
-    //    if (!await userManager.HasPasswordAsync(user)) return (Results.BadRequest("User does not have a password set"), null);
-
-    //    var isPasswordValid = await userManager.CheckPasswordAsync(user, userCommand.Password);
-    //    if (!isPasswordValid) return (Results.BadRequest("Invalid password"), null);
-
-    //    return (Results.Ok(), user);
-    //}
-
-    public static async Task<IResult> Handle(LoginUserCommand userCommand, UserManager<ApplicationUser> userManager, IConfiguration configuration)
+    public static async Task<ApplicationUser> LoadAsync(LoginUserCommand userCommand,
+        UserManager<ApplicationUser> userManager)
     {
         var user = await userManager.FindByEmailAsync(userCommand.Email);
-        if (user == null) return Results.NotFound("User with given email not found");
-
-        if (!await userManager.HasPasswordAsync(user)) return Results.BadRequest("User does not have a password set");
+        StatusCodeGuard.IsNotNull(user, StatusCodes.Status404NotFound, "User with given email not found");
+        StatusCodeGuard.IsTrue(await userManager.HasPasswordAsync(user), StatusCodes.Status405MethodNotAllowed,
+            "User does not have a password set");
 
         var isPasswordValid = await userManager.CheckPasswordAsync(user, userCommand.Password);
-        if (!isPasswordValid) return Results.BadRequest("Invalid password");
+        StatusCodeGuard.IsTrue(isPasswordValid, StatusCodes.Status400BadRequest, "Invalid password");
+        // StatusCodeGuard.IsFalse(await userManager.IsLockedOutAsync(user), StatusCodes.Status405MethodNotAllowed, "User account locked out");
 
-        // if (await userManager.IsLockedOutAsync(user)) return Results.BadRequest("User account locked out.");
+        return user;
+    }
 
+    public static async Task<UserLoggedIn> Handle(LoginUserCommand userCommand, ApplicationUser user, IConfiguration configuration)
+    {
         var token = JWTGenerator.GenerateJwtToken(user, configuration);
 
-        return Results.Ok(new UserLoggedIn(token, DateTime.UtcNow.AddHours(12)));
+        return await Task.FromResult(new UserLoggedIn(token, DateTime.UtcNow.AddHours(12)));
     }
 }

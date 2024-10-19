@@ -1,7 +1,6 @@
-﻿using CommunityToolkit.Diagnostics;
-using ConstructMate.Core;
+﻿using ConstructMate.Core;
 using ConstructMate.Core.Events;
-using Marten;
+using ConstructMate.Infrastructure.StatusCodeGuard;
 using Microsoft.AspNetCore.Identity;
 
 namespace ConstructMate.Application.Commands;
@@ -22,23 +21,22 @@ public record ModifyUserPasswordCommand(
 /// </summary>
 public class ModifyUserPasswordCommandHandler
 {
-    // TODO: uncomment when Guards are overrided and nice status codes and errors are implemented
-    //public static async Task<ApplicationUser> LoadAsync(ModifyUserPasswordCommand userCommand, IQuerySession session, CancellationToken cancellationToken)
-    //{
-    //    var user = await session.LoadAsync<ApplicationUser>(userCommand.Id, cancellationToken);
-    //    Guard.IsNotNull(user, "User whose password have to be changed");
-
-    //    return user;
-    //}
-
-    public static async Task<IResult> Handle(ModifyUserPasswordCommand userCommand, IDocumentSession session,
-        UserManager<ApplicationUser> userManager, CancellationToken cancellationToken)
+    public static async Task<ApplicationUser> LoadAsync(ModifyUserPasswordCommand userCommand, UserManager<ApplicationUser> userManager)
     {
-        var user = await session.LoadAsync<ApplicationUser>(userCommand.Id, cancellationToken);
-        if (user == null) return Results.NotFound("User with defined Id not found in the DB");
+        var user = await userManager.FindByIdAsync(userCommand.Id.ToString());
+        StatusCodeGuard.IsNotNull(user, StatusCodes.Status404NotFound, "User whose password have to be changed not found");
 
+        return user;
+    }
+
+    public static async Task<UserPasswordChanged> Handle(ModifyUserPasswordCommand userCommand, ApplicationUser user,
+        UserManager<ApplicationUser> userManager)
+    {
         var result = await userManager.ChangePasswordAsync(user, userCommand.OldPassword, userCommand.NewPassword);
+        var errorDescriptions = result.Errors.Select(r => r.Description);
+        var errors = string.Join(" ", errorDescriptions);
+        StatusCodeGuard.IsTrue(result.Succeeded, StatusCodes.Status400BadRequest, errors); //result.Errors.First().Description ??
 
-        return result.Succeeded ? Results.Ok(new UserPasswordChanged(user.Id)) : Results.BadRequest(result.Errors);
+        return new UserPasswordChanged(user.Id);
     }
 }

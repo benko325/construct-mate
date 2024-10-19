@@ -1,5 +1,7 @@
-﻿using ConstructMate.Core;
+﻿using CommunityToolkit.Diagnostics;
+using ConstructMate.Core;
 using ConstructMate.Core.Events;
+using ConstructMate.Infrastructure.StatusCodeGuard;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 
@@ -24,7 +26,7 @@ public record CreateUserCommand(
 public class CreateUserCommandHandler
 {
     // no need to check the email duplication in LoadAsync as it is checked by userManager
-    public static async Task<IResult> Handle(CreateUserCommand userCommand, UserManager<ApplicationUser> userManager)
+    public static async Task<UserCreated> Handle(CreateUserCommand userCommand, UserManager<ApplicationUser> userManager)
     {
         var newUser = userCommand.Adapt<ApplicationUser>();
         newUser.UserName = userCommand.Email;
@@ -32,6 +34,10 @@ public class CreateUserCommandHandler
 
         var result = await userManager.CreateAsync(newUser, userCommand.Password);
 
-        return result.Succeeded ? Results.Ok(newUser.Adapt<UserCreated>()) : Results.BadRequest(result.Errors);
+        var errorDescriptions = result.Errors.Select(r => r.Description);
+        var errors = string.Join(" ", errorDescriptions);
+        StatusCodeGuard.IsTrue(result.Succeeded, StatusCodes.Status400BadRequest, errors); //result.Errors.First().Description ??
+
+        return newUser.Adapt<UserCreated>();
     }
 }
