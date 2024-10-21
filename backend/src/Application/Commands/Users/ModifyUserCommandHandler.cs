@@ -1,12 +1,12 @@
 ﻿using ConstructMate.Core;
-using ConstructMate.Core.Events;
+using ConstructMate.Core.Events.Users;
 using ConstructMate.Infrastructure;
 using ConstructMate.Infrastructure.StatusCodeGuard;
 using Mapster;
 using Marten;
 using Microsoft.AspNetCore.Identity;
 
-namespace ConstructMate.Application.Commands;
+namespace ConstructMate.Application.Commands.Users;
 
 /// <summary>
 /// Modify an existing user command

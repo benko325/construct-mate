@@ -1,11 +1,11 @@
 ﻿using CommunityToolkit.Diagnostics;
 using ConstructMate.Core;
-using ConstructMate.Core.Events;
+using ConstructMate.Core.Events.Users;
 using ConstructMate.Infrastructure.StatusCodeGuard;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 
-namespace ConstructMate.Application.Commands;
+namespace ConstructMate.Application.Commands.Users;
 
 /// <summary>
 /// Create user command
@@ -37,6 +37,10 @@ public class CreateUserCommandHandler
         var errorDescriptions = result.Errors.Select(r => r.Description);
         var errors = string.Join(" ", errorDescriptions);
         StatusCodeGuard.IsTrue(result.Succeeded, StatusCodes.Status400BadRequest, errors); //result.Errors.First().Description ??
+
+        // create folder for this user
+        var folderPath = $"{Constants.FilesFolder}/{newUser.Id}";
+        Directory.CreateDirectory(folderPath);
 
         return newUser.Adapt<UserCreated>();
     }

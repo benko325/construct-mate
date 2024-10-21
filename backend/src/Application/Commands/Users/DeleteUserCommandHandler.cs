@@ -1,9 +1,9 @@
 ﻿using ConstructMate.Core;
-using ConstructMate.Core.Events;
+using ConstructMate.Core.Events.Users;
 using ConstructMate.Infrastructure.StatusCodeGuard;
 using Microsoft.AspNetCore.Identity;
 
-namespace ConstructMate.Application.Commands;
+namespace ConstructMate.Application.Commands.Users;
 
 /// <summary>
 /// Delete an existing user command
@@ -28,11 +28,16 @@ public class DeleteUserCommandHandler
         UserManager<ApplicationUser> userManager)
     {
         var result = await userManager.DeleteAsync(user);
-        // TODO: delete all constructions, files, etc. that belongs to deleted user
 
         var errorDescriptions = result.Errors.Select(r => r.Description);
         var errors = string.Join(" ", errorDescriptions);
         StatusCodeGuard.IsTrue(result.Succeeded, StatusCodes.Status500InternalServerError, errors); //result.Errors.First().Description ??
+
+        // delete folder with all user's files
+        var folderPath = $"{Constants.FilesFolder}/{user.Id}";
+        Directory.Delete(folderPath, true);
+
+        // TODO: delete all constructions that belongs to deleted user
 
         return new UserDeleted(user.Id);
     }

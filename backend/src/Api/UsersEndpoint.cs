@@ -1,8 +1,6 @@
-﻿using ConstructMate.Application.Commands;
-using ConstructMate.Application.Queries;
+﻿using ConstructMate.Application.Queries;
 using ConstructMate.Application.Queries.Responses;
 using ConstructMate.Core;
-using ConstructMate.Core.Events;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +10,9 @@ using Wolverine.Http.Marten;
 using System.Security.Claims;
 using ConstructMate.Application.ServiceInterfaces;
 using ConstructMate.Infrastructure.StatusCodeGuard;
+using ConstructMate.Core.Events.Users;
+using ConstructMate.Application.Commands.Users;
+using ConstructMate.Application.Queries.Users;
 
 namespace ConstructMate.Api;
 
@@ -93,7 +94,7 @@ public class UsersEndpoint
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
     [WolverinePost("/users")]
-    public static async Task<UserCreated> CreateNewUser([FromBody] CreateUserRequest request, IMessageBus bus)
+    public static async Task<UserCreated> CreateNewUserAsync([FromBody] CreateUserRequest request, IMessageBus bus)
     {
         var command = request.Adapt<CreateUserCommand>();
         var result = await bus.InvokeAsync<UserCreated>(command);
@@ -113,7 +114,7 @@ public class UsersEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
     [AllowAnonymous]
     [WolverinePost("/users/login")]
-    public static async Task<UserLoggedIn> Login([FromBody] LoginUserRequest request, IMessageBus bus)
+    public static async Task<UserLoggedIn> LoginAsync([FromBody] LoginUserRequest request, IMessageBus bus)
     {
         var command = request.Adapt<LoginUserCommand>();
         var result = await bus.InvokeAsync<UserLoggedIn>(command);
@@ -136,7 +137,7 @@ public class UsersEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePatch("/users/{id}")]
-    public static async Task<UserModified> ModifyUser([FromRoute] Guid id, [FromBody] ModifyUserRequest request,
+    public static async Task<UserModified> ModifyUserAsync([FromRoute] Guid id, [FromBody] ModifyUserRequest request,
         IApplicationUserContext userContext, IMessageBus bus)
     {
         StatusCodeGuard.IsEqualTo(id, request.Id, StatusCodes.Status400BadRequest, "Id in route and in request must be equal");
@@ -163,7 +164,7 @@ public class UsersEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePatch("/users/{id}/password")]
-    public static async Task<UserPasswordChanged> UpdatePassword([FromRoute] Guid id, [FromBody] ModifyUserPasswordRequest request,
+    public static async Task<UserPasswordChanged> UpdatePasswordAsync([FromRoute] Guid id, [FromBody] ModifyUserPasswordRequest request,
         IApplicationUserContext userContext, IMessageBus bus)
     {
         StatusCodeGuard.IsEqualTo(id, request.Id, StatusCodes.Status400BadRequest, "Id in route and in request must be equal");
@@ -187,7 +188,7 @@ public class UsersEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverineDelete("/users/{id}")]
-    public static async Task<UserDeleted> DeleteUser([FromRoute] Guid id, IApplicationUserContext userContext, IMessageBus bus)
+    public static async Task<UserDeleted> DeleteUserAsync([FromRoute] Guid id, IApplicationUserContext userContext, IMessageBus bus)
     {
         StatusCodeGuard.IsEqualTo(userContext.UserId, id, StatusCodes.Status401Unauthorized, "User can delete himself only");
 
@@ -206,7 +207,7 @@ public class UsersEndpoint
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>Collection of all users from the database</returns>
     [WolverineGet("/users")]
-    public static async Task<IEnumerable<ApplicationUser>> GetAllUsers(IMessageBus bus)
+    public static async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync(IMessageBus bus)
     {
         var query = new GetAllUsersQuery();
         var result = await bus.InvokeAsync<QueryCollectionResponse<ApplicationUser>>(query);

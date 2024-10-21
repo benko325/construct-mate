@@ -2,7 +2,7 @@
 using ConstructMate.Core;
 using Marten;
 
-namespace ConstructMate.Application.Queries;
+namespace ConstructMate.Application.Queries.Users;
 
 /// <summary>
 /// Get all users from the db query
