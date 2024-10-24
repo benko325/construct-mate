@@ -6,19 +6,19 @@ using Marten;
 namespace ConstructMate.Application.Commands.UploadedFiles;
 
 /// <summary>
-/// Upload building permit command
+/// Upload construction approval command
 /// </summary>
-/// <param name="ConstructionId">Id of construction where a building permit has to be uploaded</param>
-/// <param name="File">Building permit file to be uploaded</param>
+/// <param name="ConstructionId">Id of construction where a construction approval has to be uploaded</param>
+/// <param name="File">Construction approval to be uploaded</param>
 /// <param name="RequesterId">Id of user who sent the request</param>
-public record UploadBuildingPermitCommand(Guid ConstructionId, IFormFile File, Guid RequesterId);
+public record UploadConstructionApprovalCommand(Guid ConstructionId, IFormFile File, Guid RequesterId);
 
 /// <summary>
-/// Upload building permit (if there is already one, it will be replaced)
+/// Upload construction approval (if there is already one, it will be replaced)
 /// </summary>
-public class UploadBuildingPermitCommandHandler
+public class UploadConstructionApprovalCommandHandler
 {
-    public static async Task<Construction> LoadAsync(UploadBuildingPermitCommand fileCommand, IQuerySession session,
+    public static async Task<Construction> LoadAsync(UploadConstructionApprovalCommand fileCommand, IQuerySession session,
         CancellationToken cancellationToken)
     {
         StatusCodeGuard.IsNotNull(fileCommand.File, StatusCodes.Status400BadRequest, "File to upload is missing");
@@ -36,12 +36,12 @@ public class UploadBuildingPermitCommandHandler
         return construction;
     }
 
-    public static async Task<BuildingPermitUploaded> Handle(UploadBuildingPermitCommand fileCommand, Construction construction,
+    public static async Task<ConstructionApprovalUploaded> Handle(UploadConstructionApprovalCommand fileCommand, Construction construction,
         IDocumentSession session, CancellationToken cancellationToken)
     {
-        if (construction.BuildingPermitFileUrl != null)
+        if (construction.ConstructionApprovalFileUrl != null)
         {
-            File.Delete(construction.BuildingPermitFileUrl);
+            File.Delete(construction.ConstructionApprovalFileUrl);
         }
 
         var newId = Guid.NewGuid();
@@ -50,10 +50,10 @@ public class UploadBuildingPermitCommandHandler
         using var stream = new FileStream(filePath, FileMode.Create);
         await fileCommand.File.CopyToAsync(stream, cancellationToken);
 
-        construction.BuildingPermitFileUrl = filePath;
+        construction.ConstructionApprovalFileUrl = filePath;
         session.Update(construction);
         await session.SaveChangesAsync(cancellationToken);
 
-        return new BuildingPermitUploaded(construction.Id, construction.BuildingPermitFileUrl);
+        return new ConstructionApprovalUploaded(construction.Id, construction.ConstructionApprovalFileUrl);
     }
 }

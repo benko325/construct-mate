@@ -101,7 +101,7 @@ public class UploadedFilesEndpoint
     /// Get building permit Url for defined construction
     /// </summary>
     /// <param name="construction">Construction with defined Id</param>
-    /// <returns>Building permit url or null, when permit was not uploaded</returns>
+    /// <returns>Building permit url or 404, when permit was not uploaded</returns>
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
@@ -133,6 +133,68 @@ public class UploadedFilesEndpoint
     {
         var command = new DeleteBuildingPermitCommand(id, userContext.UserId);
         var result = await bus.InvokeAsync<BuildingPermitDeleted>(command);
+        return result;
+    }
+
+    /// <summary>
+    /// Upload construction approval file (in .pdf format) - if there is already one, it will be replaced
+    /// </summary>
+    /// <param name="id">Id of construction for which a construction approval file has to be uploaded</param>
+    /// <param name="file">Construction approval to be uploaded</param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>ConstructionApprovalUploaded - Id of construction and path of the file</returns>
+    [ProducesResponseType<ConstructionApprovalUploaded>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [Authorize]
+    [WolverinePost("/constructions/{id}/construction-approval")]
+    public static async Task<ConstructionApprovalUploaded> UploadConstructionApprovalAsync([FromRoute] Guid id,
+        [FromForm] IFormFile file, IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var command = new UploadConstructionApprovalCommand(id, file, userContext.UserId);
+        var result = await bus.InvokeAsync<ConstructionApprovalUploaded>(command);
+        return result;
+    }
+
+    /// <summary>
+    /// Get construction approval Url for defined construction
+    /// </summary>
+    /// <param name="construction">Construction with defined Id</param>
+    /// <returns>Construction approval url or 404, when permit was not uploaded</returns>
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [Authorize]
+    [WolverineGet("/constructions/{id}/construction-approval")]
+    public static string GetConstructionApprovalForConstruction([Document] Construction construction)
+    {
+        StatusCodeGuard.IsNotNull(construction.ConstructionApprovalFileUrl, StatusCodes.Status404NotFound, "Construction approval not found");
+        return construction.ConstructionApprovalFileUrl;
+    }
+
+    /// <summary>
+    /// Delete construction approval for defined construction (set url to null)
+    /// </summary>
+    /// <param name="id">Id of construction which construction approval has to be deleted</param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>ConstructionApprovalDeleted - Id of construction</returns>
+    [ProducesResponseType<ConstructionApprovalDeleted>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
+    [Authorize]
+    [WolverineDelete("/constructions/{id}/construction-approval")]
+    public static async Task<ConstructionApprovalDeleted> DeleteConstructionApprovalForConstructionAsync([FromRoute] Guid id,
+        IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var command = new DeleteConstructionApprovalCommand(id, userContext.UserId);
+        var result = await bus.InvokeAsync<ConstructionApprovalDeleted>(command);
         return result;
     }
 

@@ -17,13 +17,13 @@ public record DeleteBuildingPermitCommand(Guid ConstructionId, Guid RequesterId)
 /// </summary>
 public class DeleteBuildingPermitCommandHandler
 {
-    public static async Task<Construction> LoadAsync(DeleteBuildingPermitCommand buildingPermitCommand, IQuerySession session,
+    public static async Task<Construction> LoadAsync(DeleteBuildingPermitCommand fileCommand, IQuerySession session,
         CancellationToken cancellationToken)
     {
-        var construction = await session.LoadAsync<Construction>(buildingPermitCommand.ConstructionId, cancellationToken);
+        var construction = await session.LoadAsync<Construction>(fileCommand.ConstructionId, cancellationToken);
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
             "Construction from which the building permit has to be deleted not found");
-        StatusCodeGuard.IsEqualTo(buildingPermitCommand.RequesterId, construction.OwnerId, StatusCodes.Status401Unauthorized,
+        StatusCodeGuard.IsEqualTo(fileCommand.RequesterId, construction.OwnerId, StatusCodes.Status401Unauthorized,
             "User can only manipulate with his constructions");
         StatusCodeGuard.IsNotNull(construction.BuildingPermitFileUrl,
             StatusCodes.Status405MethodNotAllowed, "No building permit to be deleted");
@@ -31,7 +31,7 @@ public class DeleteBuildingPermitCommandHandler
         return construction;
     }
 
-    public static async Task<BuildingPermitDeleted> Handle(DeleteBuildingPermitCommand buildingPermitCommand, Construction construction,
+    public static async Task<BuildingPermitDeleted> Handle(DeleteBuildingPermitCommand fileCommand, Construction construction,
         IDocumentSession session, CancellationToken cancellationToken)
     {
         // can not be null as it is checked in LoadAsync
