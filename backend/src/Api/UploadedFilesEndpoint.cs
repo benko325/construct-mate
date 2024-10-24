@@ -44,11 +44,13 @@ public class UploadedFilesEndpoint
     /// <returns>Profile picture url</returns>
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverineGet("/constructions/{id}/profile-picture")]
     public static string GetProfilePictureForConstruction([Document] Construction construction)
     {
+        StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
+            "Construction for wich a profile picture url has to be returned not found");
         return construction.ProfilePictureUrl;
     }
 
@@ -110,6 +112,8 @@ public class UploadedFilesEndpoint
     [WolverineGet("/constructions/{id}/building-permit")]
     public static string GetBuildingPermitForConstruction([Document] Construction construction)
     {
+        StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
+            "Construction for wich a building permit url has to be returned not found");
         StatusCodeGuard.IsNotNull(construction.BuildingPermitFileUrl, StatusCodes.Status404NotFound, "Building permit not found");
         return construction.BuildingPermitFileUrl;
     }
@@ -172,6 +176,8 @@ public class UploadedFilesEndpoint
     [WolverineGet("/constructions/{id}/construction-approval")]
     public static string GetConstructionApprovalForConstruction([Document] Construction construction)
     {
+        StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
+            "Construction for wich a construction approval url has to be returned not found");
         StatusCodeGuard.IsNotNull(construction.ConstructionApprovalFileUrl, StatusCodes.Status404NotFound, "Construction approval not found");
         return construction.ConstructionApprovalFileUrl;
     }
@@ -234,6 +240,8 @@ public class UploadedFilesEndpoint
     [WolverineGet("/constructions/{id}/construction-handover")]
     public static string GetConstructionHandoverForConstruction([Document] Construction construction)
     {
+        StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
+            "Construction for wich a construction handover url has to be returned not found");
         StatusCodeGuard.IsNotNull(construction.ConstructionHandoverFileUrl, StatusCodes.Status404NotFound, "Construction handover not found");
         return construction.ConstructionHandoverFileUrl;
     }
