@@ -87,7 +87,7 @@ public class ConstructionsEndpoint
     }
 
     /// <summary>
-    /// Modify an existing construction
+    /// Modify an existing construction (it's name and description)
     /// </summary>
     /// <param name="id">Id of construction to be modified</param>
     /// <param name="request"><see cref="ModifyConstructionRequest"/></param>

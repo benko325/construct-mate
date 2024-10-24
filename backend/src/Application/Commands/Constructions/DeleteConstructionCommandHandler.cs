@@ -35,7 +35,7 @@ public class DeleteConstructionCommandHandler
         session.Delete(construction);
         await session.SaveChangesAsync(cancellationToken);
 
-        // delete folder with all construction's files
+        // delete folder with all construction's files + also in DB!!
         var folderPath = $"{Constants.FilesFolder}/{construction.OwnerId}/{construction.Id}";
         Directory.Delete(folderPath, true);
 

@@ -1,5 +1,4 @@
-﻿using ConstructMate.Application.Queries;
-using ConstructMate.Application.Queries.Responses;
+﻿using ConstructMate.Application.Queries.Responses;
 using ConstructMate.Core;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;

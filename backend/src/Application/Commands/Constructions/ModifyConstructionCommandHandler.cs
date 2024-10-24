@@ -16,7 +16,7 @@ namespace ConstructMate.Application.Commands.Constructions;
 public record ModifyConstructionCommand(Guid Id, string Name, string? Description, Guid RequesterId);
 
 /// <summary>
-/// Modify an existing construction
+/// Modify an existing construction (it's name and description)
 /// </summary>
 public class ModifyConstructionCommandHandler
 {
@@ -36,6 +36,8 @@ public class ModifyConstructionCommandHandler
     {
         var modifiedConstruction = constructionCommand.Adapt<Construction>();
         modifiedConstruction.OwnerId = construction.OwnerId;
+        modifiedConstruction.Files = construction.Files;
+        modifiedConstruction.ProfilePictureUrl = construction.ProfilePictureUrl;
 
         session.Update(modifiedConstruction);
         await session.SaveChangesAsync(cancellationToken);
