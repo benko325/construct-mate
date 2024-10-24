@@ -47,10 +47,8 @@ public class UploadProfilePictureCommandHandler
         var newId = Guid.NewGuid();
         var filePath = $"{Constants.FilesFolder}/{construction.OwnerId}/{construction.Id}/{newId}-{fileCommand.File.FileName}";
 
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await fileCommand.File.CopyToAsync(stream, cancellationToken);
-        }
+        using var stream = new FileStream(filePath, FileMode.Create);
+        await fileCommand.File.CopyToAsync(stream, cancellationToken);
 
         construction.ProfilePictureUrl = filePath;
         session.Update(construction);

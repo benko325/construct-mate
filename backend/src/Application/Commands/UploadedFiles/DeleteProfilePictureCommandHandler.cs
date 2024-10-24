@@ -8,12 +8,12 @@ namespace ConstructMate.Application.Commands.UploadedFiles;
 /// <summary>
 /// Delete construction's profile picture command
 /// </summary>
-/// <param name="ConstructionId">Id of construction which profiloe picture has to be deleted</param>
+/// <param name="ConstructionId">Id of construction which profile picture has to be deleted</param>
 /// <param name="RequesterId">Id of user who sent the request</param>
 public record DeleteProfilePictureCommand(Guid ConstructionId, Guid RequesterId);
 
 /// <summary>
-/// Delete construction's profile picture (delete from system and set url to defaul)
+/// Delete construction's profile picture (delete from system and set url to default)
 /// </summary>
 public class DeleteProfilePictureCommandHandler
 {
