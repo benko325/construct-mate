@@ -34,14 +34,12 @@ public class ModifyConstructionCommandHandler
     public static async Task<ConstructionModified> Handle(ModifyConstructionCommand constructionCommand, Construction construction,
         IDocumentSession session, CancellationToken cancellationToken)
     {
-        var modifiedConstruction = constructionCommand.Adapt<Construction>();
-        modifiedConstruction.OwnerId = construction.OwnerId;
-        modifiedConstruction.Files = construction.Files;
-        modifiedConstruction.ProfilePictureUrl = construction.ProfilePictureUrl;
+        construction.Name = constructionCommand.Name;
+        construction.Description = constructionCommand.Description;
 
-        session.Update(modifiedConstruction);
+        session.Update(construction);
         await session.SaveChangesAsync(cancellationToken);
 
-        return modifiedConstruction.Adapt<ConstructionModified>();
+        return construction.Adapt<ConstructionModified>();
     }
 }
