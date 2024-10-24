@@ -28,7 +28,7 @@ public class UploadBuildingPermitCommandHandler
 
         var construction = await session.LoadAsync<Construction>(fileCommand.ConstructionId, cancellationToken);
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
-            "Construction for which a profile picture has to be uploaded not found");
+            "Construction for which a building permit has to be uploaded not found");
 
         StatusCodeGuard.IsEqualTo(construction.OwnerId, fileCommand.RequesterId, StatusCodes.Status401Unauthorized,
             "User can only manipulate his constructions");

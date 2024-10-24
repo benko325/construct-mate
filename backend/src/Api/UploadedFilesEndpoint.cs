@@ -198,5 +198,67 @@ public class UploadedFilesEndpoint
         return result;
     }
 
-    // TODO: update, get, delete for other file types
+    /// <summary>
+    /// Upload construction handover file (in .pdf format) - if there is already one, it will be replaced
+    /// </summary>
+    /// <param name="id">Id of construction for which a construction handover file has to be uploaded</param>
+    /// <param name="file">Construction handover to be uploaded</param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>ConstructionHandoverUploaded - Id of construction and path of the file</returns>
+    [ProducesResponseType<ConstructionHandoverUploaded>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [Authorize]
+    [WolverinePost("/constructions/{id}/construction-handover")]
+    public static async Task<ConstructionHandoverUploaded> UploadConstructionHandoverAsync([FromRoute] Guid id,
+        [FromForm] IFormFile file, IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var command = new UploadConstructionHandoverCommand(id, file, userContext.UserId);
+        var result = await bus.InvokeAsync<ConstructionHandoverUploaded>(command);
+        return result;
+    }
+
+    /// <summary>
+    /// Get construction handover Url for defined construction
+    /// </summary>
+    /// <param name="construction">Construction with defined Id</param>
+    /// <returns>Construction handover url or 404, when handover was not uploaded</returns>
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<object>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [Authorize]
+    [WolverineGet("/constructions/{id}/construction-handover")]
+    public static string GetConstructionHandoverForConstruction([Document] Construction construction)
+    {
+        StatusCodeGuard.IsNotNull(construction.ConstructionHandoverFileUrl, StatusCodes.Status404NotFound, "Construction handover not found");
+        return construction.ConstructionHandoverFileUrl;
+    }
+
+    /// <summary>
+    /// Delete construction handover for defined construction (set url to null)
+    /// </summary>
+    /// <param name="id">Id of construction which construction handover has to be deleted</param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>ConstructionHandoverDeleted - Id of construction</returns>
+    [ProducesResponseType<ConstructionHandoverDeleted>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
+    [Authorize]
+    [WolverineDelete("/constructions/{id}/construction-handover")]
+    public static async Task<ConstructionHandoverDeleted> DeleteConstructionHandoverForConstructionAsync([FromRoute] Guid id,
+        IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var command = new DeleteConstructionHandoverCommand(id, userContext.UserId);
+        var result = await bus.InvokeAsync<ConstructionHandoverDeleted>(command);
+        return result;
+    }
+
+    // TODO: upload, get, delete for default files (or just photos???) - resolve!!! but it is not must have
 }

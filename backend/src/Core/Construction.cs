@@ -8,7 +8,7 @@ public class Construction
     public required string ProfilePictureUrl { get; set; } = Constants.DefaultConstructionProfilePictureUrl;
     public string? BuildingPermitFileUrl { get; set; } = null;
     public string? ConstructionApprovalFileUrl { get; set; } = null;
-    public string? HandoverOfConstructionFileUrl { get; set; } = null;
+    public string? ConstructionHandoverFileUrl { get; set; } = null;
     public Guid OwnerId { get; set; }
     public List<UploadedFile> Files { get; set; } = [];
     // public ConstructionDiary ConstructionDiary { get; set; }
