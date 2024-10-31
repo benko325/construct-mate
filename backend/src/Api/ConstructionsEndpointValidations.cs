@@ -22,4 +22,24 @@ public class ConstructionsEndpointValidations
             RuleFor(r => r.Description).MaximumLength(512);
         }
     }
+
+    public class AddNewDiaryContributorRequestValidator : AbstractValidator<AddNewDiaryContributorRequest>
+    {
+        public AddNewDiaryContributorRequestValidator()
+        {
+            RuleFor(r => r.ConstructionId).NotNull().NotEmpty();
+            RuleFor(r => r.ContributorEmail).NotNull().NotEmpty().EmailAddress();
+            RuleFor(r => r.ContributorRole).NotNull().NotEmpty().MinimumLength(1);
+        }
+    }
+
+    public class ModifyConstructionStartEndDateRequestValidator : AbstractValidator<ModifyConstructionStartEndDateRequest>
+    {
+        public ModifyConstructionStartEndDateRequestValidator()
+        {
+            RuleFor(r => r.ConstructionId).NotNull().NotEmpty();
+            RuleFor(r => r.StartDate).NotNull().NotEmpty();
+            RuleFor(r => r.EndDate).NotNull().NotEmpty();
+        }
+    }
 }
