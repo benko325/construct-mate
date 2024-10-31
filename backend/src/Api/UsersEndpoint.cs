@@ -175,24 +175,27 @@ public class UsersEndpoint
     }
 
     /// <summary>
-    /// Delete an existing user - user can only delete himself
+    /// Delete an existing user's files (all files and constructions that belongs to him) - user can only delete his files
     /// </summary>
+    /// <remarks>
+    /// User will remain in the db (because he can contribute to the other diaries), just all his files will be removed
+    /// </remarks>
     /// <param name="id">Id of user to be deleted</param>
     /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserDeleted - id of deleted user</returns>
-    [ProducesResponseType<UserDeleted>(StatusCodes.Status200OK)]
+    [ProducesResponseType<UserFilesDeleted>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
-    [WolverineDelete("/users/{id}")]
-    public static async Task<UserDeleted> DeleteUserAsync([FromRoute] Guid id, IApplicationUserContext userContext, IMessageBus bus)
+    [WolverineDelete("/users/{id}/files")]
+    public static async Task<UserFilesDeleted> DeleteUserAsync([FromRoute] Guid id, IApplicationUserContext userContext, IMessageBus bus)
     {
-        StatusCodeGuard.IsEqualTo(userContext.UserId, id, StatusCodes.Status401Unauthorized, "User can delete himself only");
+        StatusCodeGuard.IsEqualTo(userContext.UserId, id, StatusCodes.Status401Unauthorized, "User can delete his files only");
 
-        var command = new DeleteUserCommand(id);
-        var result = await bus.InvokeAsync<UserDeleted>(command);
+        var command = new DeleteUserFilesCommand(id);
+        var result = await bus.InvokeAsync<UserFilesDeleted>(command);
         return result;
     }
 

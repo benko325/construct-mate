@@ -1,3 +1,3 @@
 ﻿namespace ConstructMate.Core.Events.Users;
 
-public record UserDeleted(Guid Id);
+public record UserFilesDeleted(Guid Id);
