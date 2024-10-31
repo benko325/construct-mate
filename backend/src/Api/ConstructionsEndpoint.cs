@@ -37,7 +37,7 @@ public record ModifyConstructionRequest(Guid Id, string Name, string? Descriptio
 /// <param name="ConstructionId">Id of construction where a new diary contributor has to be added</param>
 /// <param name="ContributorEmail">Email of new contributor to the diary</param>
 /// <param name="ContributorRole">Role of the contributor (for example designer (projektant), supervisor (dozor), ...)</param>
-public record AddNewDiaryContributorRequest(Guid ConstructionId, string ContributorEmail, string ContributorRole);
+public record AddNewDiaryContributorRequest(Guid ConstructionId, string ContributorEmail, DiaryContributorRole ContributorRole);
 
 /// <summary>
 /// Modify construction's start and end date request

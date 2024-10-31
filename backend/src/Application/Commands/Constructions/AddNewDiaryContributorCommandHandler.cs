@@ -13,7 +13,7 @@ namespace ConstructMate.Application.Commands.Constructions;
 /// <param name="ContributorEmail">Email of new contributor to the diary</param>
 /// <param name="ContributorRole">Role of the contributor (for example designer (projektant), supervisor (dozor), ...)</param>
 /// <param name="RequesterId">Id of user who sent the request</param>
-public record AddNewDiaryContributorCommand(Guid ConstructionId, string ContributorEmail, string ContributorRole, Guid RequesterId);
+public record AddNewDiaryContributorCommand(Guid ConstructionId, string ContributorEmail, DiaryContributorRole ContributorRole, Guid RequesterId);
 
 /// <summary>
 /// Add new contributor to the diary

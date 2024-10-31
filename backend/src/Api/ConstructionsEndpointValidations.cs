@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using ConstructMate.Core;
+using FluentValidation;
 
 namespace ConstructMate.Api;
 
@@ -29,7 +30,7 @@ public class ConstructionsEndpointValidations
         {
             RuleFor(r => r.ConstructionId).NotNull().NotEmpty();
             RuleFor(r => r.ContributorEmail).NotNull().NotEmpty().EmailAddress();
-            RuleFor(r => r.ContributorRole).NotNull().NotEmpty().MinimumLength(1);
+            RuleFor(r => r.ContributorRole).NotNull().IsInEnum();
         }
     }
 
