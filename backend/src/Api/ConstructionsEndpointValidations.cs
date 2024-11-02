@@ -24,16 +24,6 @@ public class ConstructionsEndpointValidations
         }
     }
 
-    public class AddNewDiaryContributorRequestValidator : AbstractValidator<AddNewDiaryContributorRequest>
-    {
-        public AddNewDiaryContributorRequestValidator()
-        {
-            RuleFor(r => r.ConstructionId).NotNull().NotEmpty();
-            RuleFor(r => r.ContributorEmail).NotNull().NotEmpty().EmailAddress();
-            RuleFor(r => r.ContributorRole).NotNull().IsInEnum();
-        }
-    }
-
     public class ModifyConstructionStartEndDateRequestValidator : AbstractValidator<ModifyConstructionStartEndDateRequest>
     {
         public ModifyConstructionStartEndDateRequestValidator()

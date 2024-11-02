@@ -1,3 +1,3 @@
 ﻿namespace ConstructMate.Core.Events.Constructions;
 
-public record ConstructionCreated(Guid Id, string Name, string? Description, Guid OwnerId);
+public record ConstructionCreated(Guid Id, string Name, string? Description, Guid OwnerId, DateOnly StartDate, DateOnly EndDate);

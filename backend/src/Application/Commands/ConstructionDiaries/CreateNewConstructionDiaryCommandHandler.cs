@@ -7,23 +7,27 @@ using Marten;
 namespace ConstructMate.Application.Commands.ConstructionDiaries;
 
 /// <summary>
-/// 
+/// Create a new construction diary command
 /// </summary>
-/// <param name="RequesterId"></param>
-/// <param name="ConstructionId"></param>
-/// <param name="Id"></param>
-/// <param name="ConstructionManager"></param>
-/// <param name="ConstructionSupervisor"></param>
-/// <param name="Name"></param>
-/// <param name="Address"></param>
-/// <param name="ConstructionApproval"></param>
-/// <param name="Investor"></param>
-/// <param name="Implementer"></param>
-/// <param name="Description"></param>
+/// <param name="RequesterId">Id of user who sent the request</param>
+/// <param name="ConstructionId">Id of construction for which a diary has to be created</param>
+/// <param name="Id">Id of new diary</param>
+/// <param name="DiaryDateFrom">Start date of new diary</param>
+/// <param name="DiaryDateTo">End date of new diary</param>
+/// <param name="ConstructionManager">Manager of the construction</param>
+/// <param name="ConstructionSupervisor">Supervisor of the construction</param>
+/// <param name="Name">Name of the construction</param>
+/// <param name="Address">Address of the construction</param>
+/// <param name="ConstructionApproval">Approval for the construction</param>
+/// <param name="Investor">Investor of the construction</param>
+/// <param name="Implementer">Implementer of the construction</param>
+/// <param name="UpdateConstructionDates">Update dates of the construction with the diary ones</param>
 public record CreateNewConstructionDiaryCommand(
     Guid RequesterId,
     Guid ConstructionId,
     Guid Id,
+    DateOnly DiaryDateFrom,
+    DateOnly DiaryDateTo,
     string ConstructionManager,
     string ConstructionSupervisor,
     string Name,
@@ -31,10 +35,10 @@ public record CreateNewConstructionDiaryCommand(
     string ConstructionApproval,
     string Investor,
     string Implementer,
-    string? Description = null);
+    bool UpdateConstructionDates);
 
 /// <summary>
-/// 
+/// Create a new construction diary
 /// </summary>
 public class CreateNewConstructionDiaryCommandHandler
 {
@@ -56,7 +60,17 @@ public class CreateNewConstructionDiaryCommandHandler
         Construction construction, IDocumentSession session, CancellationToken cancellationToken)
     {
         var diary = diaryCommand.Adapt<ConstructionDiary>();
-        // TODO: create daily records in diary based on startDate and endDate
+        for (var date = diaryCommand.DiaryDateFrom; date <= diaryCommand.DiaryDateTo; date = date.AddDays(1))
+        {
+            var dailyRecord = new DailyRecord() { Date = date };
+            diary.DailyRecords.Add(dailyRecord);
+        }
+
+        if (diaryCommand.UpdateConstructionDates)
+        {
+            construction.StartDate = diary.DiaryDateFrom;
+            construction.EndDate = diary.DiaryDateTo;
+        }
 
         construction.ConstructionDiary = diary;
         session.Update(construction);

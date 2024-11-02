@@ -12,7 +12,7 @@ namespace ConstructMate.Application.Commands.Constructions;
 /// <param name="StartDate">New start date</param>
 /// <param name="EndDate">New end date</param>
 /// <param name="RequesterId">Id of user who sent the request</param>
-public record ModifyConstructionStartEndDateCommand(Guid ConstructionId, DateTime StartDate, DateTime EndDate, Guid RequesterId);
+public record ModifyConstructionStartEndDateCommand(Guid ConstructionId, DateOnly StartDate, DateOnly EndDate, Guid RequesterId);
 
 /// <summary>
 /// Modify construction's start and end date

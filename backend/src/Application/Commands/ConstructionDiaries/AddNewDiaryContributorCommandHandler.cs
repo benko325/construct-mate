@@ -1,10 +1,10 @@
 ﻿using ConstructMate.Core;
-using ConstructMate.Core.Events.Constructions;
+using ConstructMate.Core.Events.ConstructionDiaries;
 using ConstructMate.Infrastructure.StatusCodeGuard;
 using Marten;
 using Microsoft.AspNetCore.Identity;
 
-namespace ConstructMate.Application.Commands.Constructions;
+namespace ConstructMate.Application.Commands.ConstructionDiaries;
 
 /// <summary>
 /// Add new diary contributor request
@@ -24,13 +24,16 @@ public class AddNewDiaryContributorCommandHandler
         IQuerySession session, CancellationToken cancellationToken)
     {
         var construction = await session.LoadAsync<Construction>(constructionCommand.ConstructionId, cancellationToken);
-        StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound, "Construction where a new contributor has to be added not found");
+        StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
+            "Construction to which diary a new contributor has to be added not found");
         StatusCodeGuard.IsEqualTo(construction.OwnerId, constructionCommand.RequesterId, StatusCodes.Status401Unauthorized,
             "User can only modify his constructions");
+        StatusCodeGuard.IsNotNull(construction.ConstructionDiary, StatusCodes.Status404NotFound,
+            "Construction diary where a new contributor has to be added not found");
 
         var newContributorUser = await userManager.FindByEmailAsync(constructionCommand.ContributorEmail);
         StatusCodeGuard.IsNotNull(newContributorUser, StatusCodes.Status404NotFound, "New contributor not found");
-        StatusCodeGuard.IsFalse(construction.DiaryContributors.Select(c => c.ContributorId).Contains(newContributorUser.Id),
+        StatusCodeGuard.IsFalse(construction.ConstructionDiary.DiaryContributors.Select(c => c.ContributorId).Contains(newContributorUser.Id),
             StatusCodes.Status400BadRequest, "User already added as contributor to this diary");
 
         var newContributor = new DiaryContributor()
@@ -48,7 +51,8 @@ public class AddNewDiaryContributorCommandHandler
         var construction = constructionContributor.Item1;
         var contributor = constructionContributor.Item2;
 
-        construction.DiaryContributors.Add(contributor);
+        // nullability of diary checked in LoadAsync
+        construction.ConstructionDiary!.DiaryContributors.Add(contributor);
         session.Update(construction);
         await session.SaveChangesAsync(cancellationToken);
 

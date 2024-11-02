@@ -21,7 +21,7 @@ namespace ConstructMate.Api;
 /// <param name="StartDate">Start date of the construction</param>
 /// <param name="EndDate">Estimated end date of the construction</param>
 /// <param name="Description">Description of the construction to be created (not required)</param>
-public record CreateConstructionRequest(string Name, DateTime StartDate, DateTime EndDate, string? Description = null);
+public record CreateConstructionRequest(string Name, DateOnly StartDate, DateOnly EndDate, string? Description = null);
 
 /// <summary>
 /// Modify construction request (name and description)
@@ -32,20 +32,12 @@ public record CreateConstructionRequest(string Name, DateTime StartDate, DateTim
 public record ModifyConstructionRequest(Guid Id, string Name, string? Description = null);
 
 /// <summary>
-/// Add new contributor to the diary request
-/// </summary>
-/// <param name="ConstructionId">Id of construction where a new diary contributor has to be added</param>
-/// <param name="ContributorEmail">Email of new contributor to the diary</param>
-/// <param name="ContributorRole">Role of the contributor (for example designer (projektant), supervisor (dozor), ...)</param>
-public record AddNewDiaryContributorRequest(Guid ConstructionId, string ContributorEmail, DiaryContributorRole ContributorRole);
-
-/// <summary>
 /// Modify construction's start and end date request
 /// </summary>
 /// <param name="ConstructionId">Id of construction where a start and end date has to be modified</param>
 /// <param name="StartDate">New start date</param>
 /// <param name="EndDate">New end date</param>
-public record ModifyConstructionStartEndDateRequest(Guid ConstructionId, DateTime StartDate, DateTime EndDate);
+public record ModifyConstructionStartEndDateRequest(Guid ConstructionId, DateOnly StartDate, DateOnly EndDate);
 
 public class ConstructionsEndpoint
 {
@@ -135,30 +127,6 @@ public class ConstructionsEndpoint
     }
 
     /// <summary>
-    /// Add new contributor to the diary (with his role) - this operation can not be undone!!
-    /// </summary>
-    /// <param name="id">Id of construction where a new contributor has to be added</param>
-    /// <param name="request"><see cref="AddNewDiaryContributorRequest"/></param>
-    /// <param name="bus">Injected IMessageBus by Wolverine</param>
-    /// <param name="userContext">Injected custom user context</param>
-    /// <returns>ConstructionDiaryContributorAdded - Id of construction, contributor and role of contributor</returns>
-    [ProducesResponseType<ConstructionDiaryContributorAdded>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
-    [Authorize]
-    [WolverinePost("/constructions/{id}/new-diary-contributor")]
-    public static async Task<ConstructionDiaryContributorAdded> AddNewContributorToTheConstructionDiary([FromRoute] Guid id,
-        [FromBody] AddNewDiaryContributorRequest request, IMessageBus bus, IApplicationUserContext userContext)
-    {
-        StatusCodeGuard.IsEqualTo(id, request.ConstructionId, StatusCodes.Status400BadRequest, "Id from route and request must be equal");
-
-        var command = request.Adapt<AddNewDiaryContributorCommand>() with { RequesterId = userContext.UserId };
-        var result = await bus.InvokeAsync<ConstructionDiaryContributorAdded>(command);
-        return result;
-    }
-
-    /// <summary>
     /// Modify construction's start and end date
     /// </summary>
     /// <param name="id">Id of construction where a new start and end date has to be set</param>
@@ -200,4 +168,6 @@ public class ConstructionsEndpoint
         var response = await bus.InvokeAsync<QueryCollectionResponse<Construction>>(query);
         return response.QueryResponseItems;
     }
+    
+    // TODO: add any file to the construction (photos, pdfs, ... of projects, construction, ...)
 }

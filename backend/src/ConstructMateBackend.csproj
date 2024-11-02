@@ -35,7 +35,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\Queries\ConstructionDiaries\" />
     <Folder Include="Application\Queries\UploadedFiles\" />
     <Folder Include="data\" />
   </ItemGroup>

@@ -10,9 +10,17 @@ namespace ConstructMate.Application.Commands.Constructions;
 /// </summary>
 /// <param name="Id">Id of construction to be created</param>
 /// <param name="Name">Name of the construction to be created</param>
+/// <param name="StartDate">Start date of the construction to be created</param>
+/// <param name="EndDate">End date of the construction to be created</param>
 /// <param name="Description">Description of the construction to be created (not required)</param>
 /// <param name="OwnerId">Id of user who created the new construction</param>
-public record CreateConstructionCommand(Guid Id, string Name, string? Description, Guid OwnerId);
+public record CreateConstructionCommand(
+    Guid Id,
+    string Name,
+    DateOnly StartDate,
+    DateOnly EndDate, 
+    string? Description,
+    Guid OwnerId);
 
 /// <summary>
 /// Create a new construction with directory to store its files
