@@ -8,7 +8,7 @@ namespace ConstructMate.Application.Queries.ConstructionDiaries;
 /// <summary>
 /// Get first and last day that contains any record in the diary query
 /// </summary>
-/// <param name="DiaryId"></param>
+/// <param name="DiaryId">Id of diary for which the first and last days with records have to be returned</param>
 public record GetDiaryFirstAndLastDayWithRecordQuery(Guid DiaryId);
 
 /// <summary>
