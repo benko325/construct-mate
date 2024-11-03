@@ -207,6 +207,25 @@ public class ConstructionDiariesEndpoint
         var result = await bus.InvokeAsync<DiaryFromToDatesModified>(command);
         return result;
     }
+    
+    /// <summary>
+    /// Get diary's first and last day with record
+    /// </summary>
+    /// <param name="id">Id of diary which first and last day with records have to be returned</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>DiaryFirstLastDayWithRecords - diary's Id with days (if days are null then there is no record in the diary)</returns>
+    [ProducesResponseType<DiaryFirstLastDayWithRecords>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status500InternalServerError)]
+    [Authorize]
+    [WolverineGet("/construction-diaries/{id}/first-last-day-with-records")]
+    public static async Task<DiaryFirstLastDayWithRecords> GetFirstAndLastDayWithDiaryRecord(Guid id, IMessageBus bus)
+    {
+        var query = new GetDiaryFirstAndLastDayWithRecordQuery(id);
+        var result = await bus.InvokeAsync<DiaryFirstLastDayWithRecords>(query);
+        return result;
+    }
 
     // [Authorize]
     // [WolverinePost("/construction-diaries/{id}/diary-records")]
