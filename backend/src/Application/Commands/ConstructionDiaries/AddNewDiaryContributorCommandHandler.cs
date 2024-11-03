@@ -32,7 +32,8 @@ public class AddNewDiaryContributorCommandHandler
             "Construction diary where a new contributor has to be added not found");
 
         var newContributorUser = await userManager.FindByEmailAsync(constructionCommand.ContributorEmail);
-        StatusCodeGuard.IsNotNull(newContributorUser, StatusCodes.Status404NotFound, "New contributor not found");
+        StatusCodeGuard.IsNotNull(newContributorUser, StatusCodes.Status404NotFound,
+            "New contributor not found");
         StatusCodeGuard.IsFalse(construction.ConstructionDiary.DiaryContributors.Select(c => c.ContributorId).Contains(newContributorUser.Id),
             StatusCodes.Status400BadRequest, "User already added as contributor to this diary");
 
