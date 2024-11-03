@@ -190,7 +190,10 @@ public class ConstructionDiariesEndpoint
     /// <returns>DiaryFromToDatesModified - id of the diary and new dates</returns>
     [ProducesResponseType<DiaryFromToDatesModified>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePatch("/construction-diaries/{id}/from-to-dates")]
     public static async Task<DiaryFromToDatesModified> ModifyDiaryDatesFromAndTo([FromRoute] Guid id,

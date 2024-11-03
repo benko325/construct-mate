@@ -21,7 +21,7 @@ public record ModifyDiaryFromToDatesCommand(
     Guid RequesterId);
 
 /// <summary>
-/// Modify diary from and to dates
+/// Modify diary from and to dates and add new (or remove) daily records
 /// </summary>
 public class ModifyDiaryFromToDatesCommandHandler
 {
@@ -34,7 +34,7 @@ public class ModifyDiaryFromToDatesCommandHandler
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
             "Construction for diary not found");
         StatusCodeGuard.IsEqualTo(construction.OwnerId, diaryCommand.RequesterId, StatusCodes.Status401Unauthorized,
-            "Dates can be only modified by construciton owner");
+            "Dates can be only modified by construction owner");
         
         var diary = construction.ConstructionDiary;
         StatusCodeGuard.IsNotNull(diary, StatusCodes.Status404NotFound, "Diary not found");
@@ -86,28 +86,66 @@ public class ModifyDiaryFromToDatesCommandHandler
         Construction construction, IDocumentSession session, CancellationToken cancellationToken)
     {
         // nullability of the diary checked in LoadAsync
-        if (diaryCommand.NewDateFrom < construction.ConstructionDiary!.DiaryDateFrom)
+        UpdateDailyRecords(construction, diaryCommand);
+
+        if (diaryCommand.UpdateConstructionDates)
         {
-            // TODO: add new daily records
-        }
-        else
-        {
-            // TODO: delete daily records
+            construction.StartDate = diaryCommand.NewDateFrom;
+            construction.EndDate = diaryCommand.NewDateTo;
         }
 
-        if (diaryCommand.NewDateTo > construction.ConstructionDiary.DiaryDateTo)
-        {
-            // TODO: add new daily records
-        }
-        else
-        {
-            // TODO: delete daily records
-        }
+        construction.ConstructionDiary!.DiaryDateFrom = diaryCommand.NewDateFrom;
+        construction.ConstructionDiary.DiaryDateTo = diaryCommand.NewDateTo;
         
-        // TODO: Update diary dates + update the db
-        // !!! check if also the construction dates have to be updated
+        session.Update(construction);
+        await session.SaveChangesAsync(cancellationToken);
 
         return new DiaryFromToDatesModified(construction.ConstructionDiary.Id,
             construction.ConstructionDiary.DiaryDateFrom, construction.ConstructionDiary.DiaryDateTo);
+    }
+
+    private static void UpdateDailyRecords(Construction construction, ModifyDiaryFromToDatesCommand diaryCommand)
+    {
+        var oldDateFrom = construction.ConstructionDiary!.DiaryDateFrom;
+        var newDateFrom = diaryCommand.NewDateFrom;
+        
+        // nullability of the diary checked in LoadAsync
+        // add new records for new period
+        if (newDateFrom < oldDateFrom)
+        {
+            for (var date = newDateFrom; date < oldDateFrom; date = date.AddDays(1))
+            {
+                var dailyRecord = new DailyRecord() { Date = date };
+                construction.ConstructionDiary.DailyRecords.Add(dailyRecord);
+            }
+        }
+        // remove old records that are out of new period
+        else
+        {
+            var recordsToBeDeleted = construction.ConstructionDiary.DailyRecords
+                .Where(r => r.Date < newDateFrom);
+            construction.ConstructionDiary.DailyRecords =
+                construction.ConstructionDiary.DailyRecords.Except(recordsToBeDeleted).ToList();
+        }
+
+        var oldDateTo = construction.ConstructionDiary.DiaryDateTo;
+        var newDateTo = diaryCommand.NewDateTo;
+        // add new records for new period
+        if (newDateTo > oldDateTo)
+        {
+            for (var date = oldDateTo.AddDays(1); date <= newDateTo; date = date.AddDays(1))
+            {
+                var dailyRecord = new DailyRecord() { Date = date };
+                construction.ConstructionDiary.DailyRecords.Add(dailyRecord);
+            }
+        }
+        // remove old records that are out of new period
+        else
+        {
+            var recordsToBeDeleted = construction.ConstructionDiary.DailyRecords
+                .Where(r => r.Date > newDateTo);
+            construction.ConstructionDiary.DailyRecords =
+                construction.ConstructionDiary.DailyRecords.Except(recordsToBeDeleted).ToList();
+        }
     }
 }
