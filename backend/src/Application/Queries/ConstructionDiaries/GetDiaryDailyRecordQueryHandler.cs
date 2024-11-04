@@ -39,10 +39,10 @@ public class GetDiaryDailyRecordQueryHandler
         return diary;
     }
 
-    public static Task<DailyRecord> Handle(GetDiaryDailyRecordQuery diaryQuery, ConstructionDiary diary,
+    public static async Task<DailyRecord> Handle(GetDiaryDailyRecordQuery diaryQuery, ConstructionDiary diary,
         CancellationToken cancellationToken)
     {
-        return Task.FromResult(diary.DailyRecords
+        return await Task.FromResult(diary.DailyRecords
             .First(d => d.Date == diaryQuery.Date));
     }
 }

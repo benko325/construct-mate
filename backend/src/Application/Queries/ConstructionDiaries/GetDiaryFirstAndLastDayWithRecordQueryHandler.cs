@@ -30,7 +30,7 @@ public class GetDiaryFirstAndLastDayWithRecordQueryHandler
         return construction;
     }
 
-    public static DiaryFirstLastDayWithRecords Handle(GetDiaryFirstAndLastDayWithRecordQuery diaryQuery,
+    public static async Task<DiaryFirstLastDayWithRecords> Handle(GetDiaryFirstAndLastDayWithRecordQuery diaryQuery,
         Construction construction)
     {
         // diary nullability checked in LoadAsync
@@ -81,9 +81,9 @@ public class GetDiaryFirstAndLastDayWithRecordQueryHandler
         // if there is no record in the whole diary, first date will be greater because of the first while loop
         if (firstDate > lastDate)
         {
-            return new DiaryFirstLastDayWithRecords(diaryQuery.DiaryId, null, null);
+            return await Task.FromResult(new DiaryFirstLastDayWithRecords(diaryQuery.DiaryId, null, null));
         }
 
-        return new DiaryFirstLastDayWithRecords(diaryQuery.DiaryId, firstDate, lastDate);
+        return await Task.FromResult(new DiaryFirstLastDayWithRecords(diaryQuery.DiaryId, firstDate, lastDate));
     }
 }

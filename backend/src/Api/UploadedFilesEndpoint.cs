@@ -268,5 +268,5 @@ public class UploadedFilesEndpoint
         return result;
     }
 
-    // TODO: upload, get, delete for default files (or just photos???) - resolve!!! but it is not must have
+    // TODO: upload, get, delete for default files (or just photos, pdfs??) - nice to have
 }

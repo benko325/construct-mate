@@ -63,6 +63,13 @@ public record ModifyDiaryFromToDatesRequest(
     DateOnly NewDateTo,
     bool UpdateConstructionDates);
 
+/// <summary>
+/// Add new diary record request
+/// </summary>
+/// <param name="Content">Content (text) of the record</param>
+/// <param name="RecordCategory">Category of the record</param>
+public record AddNewDiaryRecordRequest(string Content, DiaryRecordCategory RecordCategory);
+
 public class ConstructionDiariesEndpoint
 {
     /// <summary>
@@ -113,6 +120,27 @@ public class ConstructionDiariesEndpoint
             "User can see only diaries made by him or where he is allowed to contribute");
 
         return construction.ConstructionDiary;
+    }
+
+    /// <summary>
+    /// Get construction diary by Id
+    /// </summary>
+    /// <param name="id">Id of the diary</param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>ConstructionDiary</returns>
+    [ProducesResponseType<ConstructionDiary>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [Authorize]
+    [WolverineGet("/construction-diaries/{id}")]
+    public static async Task<ConstructionDiary> GetConstructionDiaryById([FromRoute] Guid id,
+        IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var query = new GetConstructionDiaryByIdQuery(id, userContext.UserId);
+        var response = await bus.InvokeAsync<ConstructionDiary>(query);
+        return response;
     }
     
     /// <summary>
@@ -227,14 +255,64 @@ public class ConstructionDiariesEndpoint
         return result;
     }
 
-    // [Authorize]
-    // [WolverinePost("/construction-diaries/{id}/diary-records")]
-    // public static async Task<> AddNewDiaryRecord()
-    // {
-    //     
-    // }
+    /// <summary>
+    /// Add new diary text record
+    /// </summary>
+    /// <remarks>
+    /// If date is greater than diary's DiaryDateTo, new Daily record for the day will be added and DiaryDateTo will be updated <br/>
+    /// Text will be added chronologically after the last record in respected category
+    /// </remarks>
+    /// <param name="id">Id of diary where a new record has to be added</param>
+    /// <param name="request"><see cref="AddNewDiaryRecordRequest"/></param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>NewDiaryRecordAdded</returns>
+    [ProducesResponseType<NewDiaryTextRecordAdded>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status500InternalServerError)]
+    [Authorize]
+    [WolverinePost("/construction-diaries/{id}/diary-text-records")]
+    public static async Task<NewDiaryTextRecordAdded> AddNewDiaryTextRecord([FromRoute] Guid id,
+        [FromBody] AddNewDiaryRecordRequest request,
+        IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var command = request.Adapt<AddNewDiaryTextRecordCommand>() with { RequesterId = userContext.UserId, DiaryId = id };
+        var response = await bus.InvokeAsync<NewDiaryTextRecordAdded>(command);
+        return response;
+    }
     
-    // TODO: add attachments to the diary records (just pictures)
-    // TODO: export to PDF
+    /// <summary>
+    /// Add new diary picture record (jpg, jpeg, png and svg are only allowed)
+    /// </summary>
+    /// <remarks>
+    /// If date is greater than diary's DiaryDateTo, new Daily record for the day will be added and DiaryDateTo will be updated <br/>
+    /// Picture will be added chronologically after the last record in respected category
+    /// </remarks>
+    /// <param name="id">Id of diary where a new record has to be added</param>
+    /// <param name="file">Picture that has to be added to the diary</param>
+    /// <param name="diaryRecordCategory"><see cref="DiaryRecordCategory"/></param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>NewDiaryPictureRecordAdded</returns>
+    [ProducesResponseType<NewDiaryPictureRecordAdded>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [Authorize]
+    [WolverinePost("/construction-diaries/{id}/diary-picture")]
+    public static async Task<NewDiaryPictureRecordAdded> AddNewPictureToTheDiary([FromRoute] Guid id,
+        [FromForm] IFormFile file, [FromQuery] DiaryRecordCategory diaryRecordCategory,
+        IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var command = new AddNewDiaryPictureRecordCommand(id, file, userContext.UserId, diaryRecordCategory);
+        var result = await bus.InvokeAsync<NewDiaryPictureRecordAdded>(command);
+        return result;
+    }
+    
+    // TODO: export diary to PDF
+    // TODO: contribute to diary for non-registered user (one time code usage) - if there is time left
     // TODO: TEST IT ALL!!!
 }

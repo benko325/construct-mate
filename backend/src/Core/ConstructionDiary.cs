@@ -35,11 +35,12 @@ public class DailyRecord
 }
 
 // governmental control will be as diary record written by person of relevant type
+// record has Content or PicturePath
 public class DiaryRecord
 {
-    public required string Content { get; set; }
+    public string? Content { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now; // local time
     public required string AuthorName { get; set; }
     public DiaryContributorRole AuthorRole { get; set; }
-    public List<string> AttachmentUrls { get; set; } = [];
+    public string? PicturePath { get; set; }
 }

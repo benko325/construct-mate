@@ -1,3 +1,4 @@
+using ConstructMate.Core;
 using FluentValidation;
 
 namespace ConstructMate.Api;
@@ -27,7 +28,10 @@ public class ConstructionDiariesEndpointValidations
         {
             RuleFor(r => r.ConstructionId).NotNull().NotEmpty();
             RuleFor(r => r.ContributorEmail).NotNull().NotEmpty().EmailAddress();
-            RuleFor(r => r.ContributorRole).NotNull().IsInEnum();
+            RuleFor(r => r.ContributorRole)
+                .IsInEnum()
+                .Must(x => x != DiaryContributorRole.None)
+                .WithMessage("'Contributor Role' must be a valid value and cannot be None.");
         }
     }
     
@@ -39,6 +43,18 @@ public class ConstructionDiariesEndpointValidations
             RuleFor(r => r.NewDateFrom).NotNull().NotEmpty();
             RuleFor(r => r.NewDateTo).NotNull().NotEmpty();
             RuleFor(r => r.UpdateConstructionDates).NotNull().NotEmpty();
+        }
+    }
+    
+    public class AddNewDiaryRecordRequestValidator : AbstractValidator<AddNewDiaryRecordRequest>
+    {
+        public AddNewDiaryRecordRequestValidator()
+        {
+            RuleFor(r => r.Content).NotNull().NotEmpty();
+            RuleFor(r => r.RecordCategory)
+                .IsInEnum()
+                .Must(x => x != DiaryRecordCategory.None)
+                .WithMessage("'Record Category' must be a valid value and cannot be None.");
         }
     }
 }
