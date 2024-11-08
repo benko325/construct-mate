@@ -1,9 +1,13 @@
 import './App.css'
+import { Outlet } from 'react-router-dom'
+import { ThemeProvider } from './components/theme-provider'
 
 function App() {
   return (
     <>
-      <h1>Test me</h1>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <Outlet />
+      </ThemeProvider>
     </>
   )
 }
