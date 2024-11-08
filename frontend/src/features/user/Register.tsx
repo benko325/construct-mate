@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Link } from 'react-router-dom'
 
 const formSchema = z.object({
   firstName: z.string().min(2, { message: 'First name must be at least 2 characters' }),
@@ -141,6 +142,13 @@ export default function Register() {
                 </Button>
             </form>
             </Form>
+            <div className="mt-4 text-center">
+              <Link to="/login">
+                <Button variant="outline" className="w-full">
+                  Login to existing account
+                </Button>
+              </Link>
+            </div>
         </CardContent>
         </Card>
     </div>
