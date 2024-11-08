@@ -92,7 +92,7 @@ public class UsersEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
-    [WolverinePost("/users")]
+    [WolverinePost("/users/register")]
     public static async Task<UserCreated> CreateNewUserAsync([FromBody] CreateUserRequest request, IMessageBus bus)
     {
         var command = request.Adapt<CreateUserCommand>();

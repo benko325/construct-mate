@@ -165,7 +165,10 @@ var app = builder.Build();
 app.UseCors();
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+});
 
 app.MapWolverineEndpoints(opts =>
 {
