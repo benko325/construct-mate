@@ -5,6 +5,7 @@
 
 # Custom
 backend/src/data/
+backend/.idea/
 
 # User-specific files
 *.rsuser
