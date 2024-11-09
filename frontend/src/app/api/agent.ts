@@ -2,6 +2,8 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from 'react-toastify';
 import { router } from '../router/Routes';
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 const responseBody = (response: AxiosResponse) => response.data;
 
 const requests = {
@@ -24,9 +26,9 @@ const requests = {
 // })
 
 const Account = {
-    login: (values: any) => requests.post('users/login', values),
-    register: (values: any) => requests.post('users/register', values),
-    currentUser: () => requests.get('users/me'),
+    login: (values: any) => requests.post(`${apiUrl}/users/login`, values),
+    register: (values: any) => requests.post(`${apiUrl}/users/register`, values),
+    currentUser: () => requests.get(`${apiUrl}/users/me`),
 }
 
 const agent = {

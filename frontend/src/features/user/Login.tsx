@@ -1,21 +1,24 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-
-const apiUrl = import.meta.env.VITE_API_URL;
+import agent from "@/app/api/agent"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Loader2 } from "lucide-react"
 
 const formSchema = z.object({
     email: z.string().email({ message: 'Invalid email address' }),
-    password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
+    password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
   })
 
 export default function Login() {
+    // const navigate = useNavigate();
+    // const dispatch = useAppDispatch();
+
     const [isLoading, setIsLoading] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -29,27 +32,21 @@ export default function Login() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true)
         try {
-          const response = await fetch('<URL>', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(values),
-          })
+          await agent.Account.login({email: values.email, password: values.password});
     
-          if (response.ok) {
-            // Handle successful login
-            console.log('Login successful')
-            // Redirect or update UI as needed
-          } else {
-            // Handle error response
-            const errorData = await response.json()
-            console.error('Login failed:', errorData)
-            form.setError('root', {
-              type: 'manual',
-              message: errorData.message || 'Login failed. Please try again.',
-            })
-          }
+        //   if (response.ok) {
+        //     // Handle successful login
+        //     console.log('Login successful')
+        //     // Redirect or update UI as needed
+        //   } else {
+        //     // Handle error response
+        //     const errorData = await response.json()
+        //     console.error('Login failed:', errorData)
+        //     form.setError('root', {
+        //       type: 'manual',
+        //       message: errorData.message || 'Login failed. Please try again.',
+        //     })
+        //   }
         } catch (error) {
           console.error('Login error:', error)
           form.setError('root', {
@@ -69,25 +66,57 @@ export default function Login() {
                 <CardDescription>Enter your email and password to login to your account</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" placeholder="m@example.com" required />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input id="password" type="password" required />
-                    </div>
-                    <Button type="submit" className="w-full">
-                        Login
-                    </Button>
-                    <div className="mt-4 text-center">
-                        <Link to="/register">
-                            <Button variant="outline" className="w-full">
-                                Create an account
-                            </Button>
-                        </Link>
-                    </div>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Enter your email" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Password</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" placeholder="Enter your password" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        {form.formState.errors.root && (
+                        <div className="text-red-500 text-sm mt-2">
+                            {form.formState.errors.root.message}
+                        </div>
+                        )}
+                        <Button type="submit" className="w-full" disabled={isLoading}>
+                            {isLoading ? (
+                                <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Please wait
+                                </>
+                            ) : (
+                                'Sign In'
+                            )}
+                        </Button>
+                    </form>
+                </Form>
+                <div className="mt-4 text-center">
+                    <Link to="/register">
+                        <Button variant="outline" className="w-full">
+                            Create an account
+                        </Button>
+                    </Link>
                 </div>
             </CardContent>
         </Card>
