@@ -17,21 +17,37 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import agent from '@/app/api/agent'
+import { AxiosError } from 'axios'
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: 'First name must be at least 1 character' }),
   lastName: z.string().min(1, { message: 'Last name must be at least 1 character' }),
   email: z.string().email({ message: 'Invalid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  password: z.string()
+    .min(6, { message: 'Password must be at least 6 characters' })
+    .max(128, { message: 'Password must be max 128 characters'})
+    .regex(new RegExp("[a-z]"), {
+        message: "Must contain at least one lowercase letter",
+    })
+    .regex(new RegExp("[A-Z]"), {
+        message: "Must contain at least one uppercase letter",
+    })
+    .regex(new RegExp("[0-9]"), {
+        message: "Must contain at least one number",
+    }),
   passwordConfirmation: z.string(),
 }).refine((data) => data.password === data.passwordConfirmation, {
   message: "Passwords don't match",
   path: ["passwordConfirmation"],
 })
 
+
 export default function Register() {
+  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -46,37 +62,36 @@ export default function Register() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-    try {
-      await agent.Account.register({
-        firstName: values.firstName,
-        lastName: values.lastName,
-        email: values.email,
-        password: values.password,
-        passwordAgain: values.passwordConfirmation
-      });
+    setIsLoading(true);
 
-    //   if (response.ok) {
-    //     // Handle successful login
-    //     console.log('Login successful')
-    //     // Redirect or update UI as needed
-    //   } else {
-    //     // Handle error response
-    //     const errorData = await response.json()
-    //     console.error('Login failed:', errorData)
-    //     form.setError('root', {
-    //       type: 'manual',
-    //       message: errorData.message || 'Login failed. Please try again.',
-    //     })
-    //   }
+    try {
+        await agent.Account.register({
+            firstName: values.firstName,
+            lastName: values.lastName,
+            email: values.email,
+            password: values.password,
+            passwordAgain: values.passwordConfirmation
+        });
+
+        toast.success("Registration successful.");
+        setTimeout(() => {
+            navigate('/login');
+        }, 3000);
     } catch (error) {
-      console.error('Login error:', error)
-      form.setError('root', {
-        type: 'manual',
-        message: 'An error occurred. Please try again.',
-      })
+        if (error instanceof AxiosError) {
+            console.error('Register (Axios) error:', error);
+            form.setError('root', {
+                type: 'manual',
+                message: `${error.response?.data.ErrorMessage}`,
+            });
+        } else {
+            form.setError('root', {
+                type: 'manual',
+                message: 'An error occurred. Please try again.',
+            });
+        }
     } finally {
-      setIsLoading(false)
+        setIsLoading(false);
     }
   }
 
@@ -157,6 +172,11 @@ export default function Register() {
                                 </FormItem>
                             )}
                         />
+                        {form.formState.errors.root && (
+                        <div className="text-red-500 text-sm mt-2">
+                            {form.formState.errors.root.message}
+                        </div>
+                        )}
                         <Button type="submit" className="w-full" disabled={isLoading}>
                             {isLoading ? (
                                 <>
@@ -178,6 +198,7 @@ export default function Register() {
                 </div>
             </CardContent>
         </Card>
+        <ToastContainer position="bottom-right" autoClose={2000} hideProgressBar={true} closeOnClick pauseOnHover/>
     </div>
   )
 }
