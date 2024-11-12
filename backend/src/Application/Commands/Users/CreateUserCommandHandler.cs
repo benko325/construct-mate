@@ -1,9 +1,9 @@
-﻿using CommunityToolkit.Diagnostics;
-using ConstructMate.Core;
+﻿using ConstructMate.Core;
 using ConstructMate.Core.Events.Users;
 using ConstructMate.Infrastructure.StatusCodeGuard;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ConstructMate.Application.Commands.Users;
 
@@ -34,9 +34,14 @@ public class CreateUserCommandHandler
 
         var result = await userManager.CreateAsync(newUser, userCommand.Password);
 
-        var errorDescriptions = result.Errors.Select(r => r.Description);
-        var errors = string.Join(" ", errorDescriptions);
-        StatusCodeGuard.IsTrue(result.Succeeded, StatusCodes.Status400BadRequest, errors); //result.Errors.First().Description ??
+        // var errorDescriptions = result.Errors.Select(r => r.Description);
+        // var errors = string.Join(" ", errorDescriptions);
+        
+        StatusCodeGuard.IsTrue(result.Succeeded, StatusCodes.Status400BadRequest,
+            result.Errors.IsNullOrEmpty() ? "" : result.Errors.Last().Description);
+        // result.Errors got 4 elements when email is already taken
+        // first and third got description about "username" being taken (because emails are also used as usernames in this app)
+        // second and fourth got description about "email" being taken
 
         // create folder for this user
         var folderPath = $"{Constants.FilesFolder}/{newUser.Id}";
