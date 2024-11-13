@@ -9,15 +9,26 @@ import * as z from 'zod'
 import agent from "@/app/api/agent"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Loader2 } from "lucide-react"
+import { AxiosError } from "axios"
 
 const formSchema = z.object({
     email: z.string().email({ message: 'Invalid email address' }),
-    password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-  })
+    password: z.string()
+        .min(6, { message: 'Password must be at least 6 characters' })
+        .max(128, { message: 'Password must be max 128 characters' })
+        .regex(new RegExp("[a-z]"), {
+            message: "Password must contain at least one lowercase letter",
+        })
+        .regex(new RegExp("[A-Z]"), {
+            message: "Password must contain at least one uppercase letter",
+        })
+        .regex(new RegExp("[0-9]"), {
+            message: "Must contain at least one number",
+        }),
+});
 
 export default function Login() {
-    // const navigate = useNavigate();
-    // const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -32,29 +43,26 @@ export default function Login() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true)
         try {
-          await agent.Account.login({email: values.email, password: values.password});
-    
-        //   if (response.ok) {
-        //     // Handle successful login
-        //     console.log('Login successful')
-        //     // Redirect or update UI as needed
-        //   } else {
-        //     // Handle error response
-        //     const errorData = await response.json()
-        //     console.error('Login failed:', errorData)
-        //     form.setError('root', {
-        //       type: 'manual',
-        //       message: errorData.message || 'Login failed. Please try again.',
-        //     })
-        //   }
+            const result = await agent.Account.login({email: values.email, password: values.password});
+            console.log(result);
+            // result.token
+            // result.expiration
+            // add anything on BE??? 
         } catch (error) {
-          console.error('Login error:', error)
-          form.setError('root', {
-            type: 'manual',
-            message: 'An error occurred. Please try again.',
-          })
+            if (error instanceof AxiosError) {
+                console.error('Login (Axios) error:', error);
+                form.setError('root', {
+                    type: 'manual',
+                    message: `${error.response?.data.ErrorMessage}`,
+                });
+            } else {
+                form.setError('root', {
+                    type: 'manual',
+                    message: 'An error occurred. Please try again.',
+                });
+            }
         } finally {
-          setIsLoading(false)
+            setIsLoading(false)
         }
     }
     

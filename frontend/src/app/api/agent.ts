@@ -1,20 +1,40 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
+import { axiosInstance, responseBody } from './axiosInstance.ts';
 import { toast } from 'react-toastify';
 import { router } from '../router/Routes';
+import { error } from "console";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-const responseBody = (response: AxiosResponse) => response.data;
+// axios.interceptors.response.use(async response => {
+//     return response
+// }, (error: AxiosError) => {
+//     const {data, status} = error.response as AxiosResponse;
+//     switch (status) {
+//         case 400:
+//             toast.error(data.title);
+//             break;
+//         case 401:
+//             toast.error(data.title);
+//             break;
+//     }
+// })
+
+// Create an Axios instance for API requests
+const apiClient = axios.create({
+    baseURL: apiUrl,
+    withCredentials: true, // Send cookies with each request
+});
 
 const requests = {
-    get: (url: string, params?: URLSearchParams) => axios.get(url, {params}).then(responseBody),
-    post: (url: string, body: object) => axios.post(url, body).then(responseBody),
-    put: (url: string, body: object) => axios.put(url, body).then(responseBody),
-    del: (url: string) => axios.delete(url).then(responseBody),
-    postForm: (url: string, data: FormData) => axios.post(url, data, {
+    get: (url: string, params?: URLSearchParams) => apiClient.get(url, {params}).then(responseBody),
+    post: (url: string, body: object) => apiClient.post(url, body).then(responseBody),
+    put: (url: string, body: object) => apiClient.put(url, body).then(responseBody),
+    del: (url: string) => apiClient.delete(url).then(responseBody),
+    postForm: (url: string, data: FormData) => apiClient.post(url, data, {
         headers: {'Content-type': 'multipart/form-data'}
     }).then(responseBody),
-    putForm: (url: string, data: FormData) => axios.put(url, data, {
+    putForm: (url: string, data: FormData) => apiClient.put(url, data, {
         headers: {'Content-type': 'multipart/form-data'}
     }).then(responseBody)
 }
@@ -26,9 +46,9 @@ const requests = {
 // })
 
 const Account = {
-    login: (values: any) => requests.post(`${apiUrl}/users/login`, values),
-    register: (values: any) => requests.post(`${apiUrl}/users/register`, values),
-    currentUser: () => requests.get(`${apiUrl}/users/me`),
+    login: (values: any) => requests.post(`/users/login`, values),
+    register: (values: any) => requests.post(`/users/register`, values),
+    currentUser: () => requests.get(`/users/me`),
 }
 
 const agent = {

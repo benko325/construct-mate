@@ -22,11 +22,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("AllowLocalFrontendOrigin", policy =>
     {
-        policy.AllowAnyOrigin()
-        .AllowAnyHeader()
-        .AllowAnyMethod();
+        policy
+            .WithOrigins("http://localhost:3000") // Allow only the frontend's origin
+            .AllowCredentials()                   // Allow cookies and credentials
+            .AllowAnyHeader()                     // Allow any header
+            .AllowAnyMethod();                    // Allow any HTTP method (GET, POST, etc.)
     });
 });
 
@@ -87,6 +89,21 @@ builder.Services.AddAuthentication(opts =>
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+    
+    // get token from cookie instead of header
+    opts.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // Check for JWT in the cookie
+            var jwtToken = context.Request.Cookies["cm-jwt"];
+            if (!string.IsNullOrEmpty(jwtToken))
+            {
+                context.Token = jwtToken; // Set token for validation
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -162,7 +179,7 @@ builder.Services.AddScoped<IApplicationUserContext, ApplicationUserContext>();
 
 var app = builder.Build();
 
-app.UseCors();
+app.UseCors("AllowLocalFrontendOrigin");
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
