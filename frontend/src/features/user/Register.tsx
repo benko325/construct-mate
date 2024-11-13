@@ -77,15 +77,44 @@ export default function Register() {
         toast.success("Registration successful.");
         setTimeout(() => {
             navigate('/login');
-        }, 3000);
+        }, 2500);
     } catch (error) {
         if (error instanceof AxiosError) {
-            console.error('Register (Axios) error:', error);
-            form.setError('root', {
-                type: 'manual',
-                message: `${error.response?.data.ErrorMessage}`,
-            });
+            const responseData = error.response?.data || {};
+            let messages = "";
+
+            // valdation error - should not happen because of same setting of validator as in BE
+            if (responseData.status === 400 &&
+                responseData.errors) {
+                const validationErrors = responseData.errors;
+                Object.keys(validationErrors).forEach((field) => {
+                    const message = validationErrors[field][0];
+                    messages = messages + "/n" + message;
+                });
+                console.error('Register error from BE validations:', error);
+                form.setError('root', {
+                    type: 'manual',
+                    message: `${messages}`,
+                });
+            // custom error on BE by StatusCodeGuard
+            } else if (responseData.ErrorMessage) {
+                console.error('Register error:', error);
+                form.setError('root', {
+                    type: 'manual',
+                    message: `${responseData.ErrorMessage}`,
+                });
+            } else {
+                // Handle any other unexpected error structure
+                console.error("Unknown register error:", error);
+                form.setError('root', {
+                    type: 'manual',
+                    message: 'An error occurred. Please try again.',
+                });
+            }
+        // Handle any other unexpected error structure
+        // TODO: make prettier so the code is not duplicated
         } else {
+            console.error("Unknown register error:", error);
             form.setError('root', {
                 type: 'manual',
                 message: 'An error occurred. Please try again.',
@@ -199,7 +228,7 @@ export default function Register() {
                 </div>
             </CardContent>
         </Card>
-        <ToastContainer position="bottom-right" autoClose={2000} hideProgressBar={true} closeOnClick pauseOnHover/>
+        <ToastContainer position="bottom-right" autoClose={1500} hideProgressBar={true} closeOnClick pauseOnHover/>
     </div>
   )
 }
