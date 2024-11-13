@@ -105,6 +105,7 @@ public class UsersEndpoint
     /// </summary>
     /// <param name="request"><see cref="LoginUserRequest"/></param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <param name="httpContext">Injected HttpContext</param>
     /// <returns>UserLoggedIn - token and info about expiration</returns>
     [ProducesResponseType<UserLoggedIn>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
@@ -113,11 +114,37 @@ public class UsersEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
     [AllowAnonymous]
     [WolverinePost("/users/login")]
-    public static async Task<UserLoggedIn> LoginAsync([FromBody] LoginUserRequest request, IMessageBus bus)
+    public static async Task<UserLoggedIn> LoginAsync([FromBody] LoginUserRequest request, IMessageBus bus, HttpContext httpContext)
     {
         var command = request.Adapt<LoginUserCommand>();
         var result = await bus.InvokeAsync<UserLoggedIn>(command);
+        
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddHours(12)
+        };
+        httpContext.Response.Cookies.Append("cm-jwt", result.Token, cookieOptions);
+        
         return result;
+    }
+
+    /// <summary>
+    /// Log out the current logged-in user (delete jwt from cookie)
+    /// </summary>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="httpContext">Injected HttpContext</param>
+    /// <returns><see cref="UserLoggedOut"/></returns>
+    [ProducesResponseType<UserLoggedOut>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [Authorize]
+    [WolverineDelete("/users/logout")]
+    public static UserLoggedOut Logout(IApplicationUserContext userContext, HttpContext httpContext)
+    {
+        httpContext.Response.Cookies.Delete("cm-jwt");
+        return new UserLoggedOut(userContext.UserId);
     }
 
     /// <summary>
