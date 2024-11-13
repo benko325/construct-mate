@@ -23,9 +23,10 @@ import { AxiosError } from 'axios'
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// validations match ones on BE
 const formSchema = z.object({
-  firstName: z.string().min(1, { message: 'First name must be at least 1 character' }),
-  lastName: z.string().min(1, { message: 'Last name must be at least 1 character' }),
+  firstName: z.string().min(1, { message: 'First name must be at least 1 character' }).max(64, { message: 'First name must be max 64 characters' }),
+  lastName: z.string().min(1, { message: 'Last name must be at least 1 character' }).max(64, { message: 'Last name must be max 64 characters' }),
   email: z.string().email({ message: 'Invalid email address' }),
   password: z.string()
     .min(6, { message: 'Password must be at least 6 characters' })

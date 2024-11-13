@@ -48,13 +48,13 @@ public static class PasswordValidator
             return;
         }
 
-        // Most common passwords list:
-        // https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10k-most-common.txt
-        var mostCommonPasswords = File.ReadLines(Constants.MostCommonPasswordsFile);
-        if (mostCommonPasswords.Contains(password))
-        {
-            context.AddFailure("Password is too common.");
-            return;
-        }
+        // // Most common passwords list:
+        // // https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10k-most-common.txt
+        // var mostCommonPasswords = File.ReadLines(Constants.MostCommonPasswordsFile);
+        // if (mostCommonPasswords.Contains(password))
+        // {
+        //     context.AddFailure("Password is too common.");
+        //     return;
+        // }
     }
 }
