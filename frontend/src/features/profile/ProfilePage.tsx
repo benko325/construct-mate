@@ -31,8 +31,7 @@ export default function ProfilePage() {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await agent.Account.getNameAndEmail();
-                const { firstName, lastName, email } = response;
+                const { firstName, lastName, email } = await agent.Account.getNameAndEmail();
                 reset({ firstName, lastName, email }); // Set the initial values for the form
             } catch (error) {
                 console.error('Failed to fetch user data', error);
