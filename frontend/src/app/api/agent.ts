@@ -1,10 +1,11 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { axiosInstance, responseBody } from './axiosInstance.ts';
 import { toast } from 'react-toastify';
 import { router } from '../router/Routes';
 import { error } from "console";
 
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const responseBody = (response: AxiosResponse) => response.data;
 
 // axios.interceptors.response.use(async response => {
 //     return response
@@ -19,6 +20,29 @@ const apiUrl = import.meta.env.VITE_API_URL;
 //             break;
 //     }
 // })
+
+// axiosInstance.interceptors.response.use(
+//     (response: any) => response,
+//     (error: AxiosError) => {
+//         if (error.response) {
+//         // Server responded with a status other than 200 range
+//         console.error('Response error:', error.response.status, error.response.data);
+//         } else if (error.request) {
+//         // Request was made but no response was received
+//         console.error('Request error:', error.request);
+//         } else {
+//         // Something happened in setting up the request
+//         console.error('Error message:', error.message);
+//         }
+
+//         // Optionally, you can throw custom errors based on status
+//         if (error.response?.status === 401) {
+//         // Unauthorized error handling, e.g., redirect to login
+//         }
+
+//         return Promise.reject(error);
+//     }
+// );
 
 // Create an Axios instance for API requests
 const apiClient = axios.create({
@@ -39,16 +63,11 @@ const requests = {
     }).then(responseBody)
 }
 
-// axios.interceptors.request.use(config => {
-//     const token = store.getState().account.user?.token;
-//     if (token) config.headers.Authorization = `Bearer ${token}`;
-//     return config;
-// })
-
 const Account = {
     login: (values: any) => requests.post(`/users/login`, values),
+    logout: () => requests.del(`/users/logout`),
     register: (values: any) => requests.post(`/users/register`, values),
-    currentUser: () => requests.get(`/users/me`),
+    currentUser: () => requests.get(`/users/me`), // is also used to verify if the user is logged-in
 }
 
 const agent = {

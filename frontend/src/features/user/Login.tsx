@@ -10,6 +10,7 @@ import agent from "@/app/api/agent"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Loader2 } from "lucide-react"
 import { AxiosError } from "axios"
+import { useAuth } from "../../context/AuthContext.tsx"
 
 const formSchema = z.object({
     email: z.string().email({ message: 'Invalid email address' }),
@@ -28,6 +29,7 @@ const formSchema = z.object({
 });
 
 export default function Login() {
+    const { setIsAuthenticated } = useAuth();
     const navigate = useNavigate();
 
     const [isLoading, setIsLoading] = useState(false);
@@ -43,11 +45,9 @@ export default function Login() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true)
         try {
-            const result = await agent.Account.login({email: values.email, password: values.password});
-            console.log(result);
-            // result.token
-            // result.expiration
-            // add anything on BE??? 
+            await agent.Account.login({email: values.email, password: values.password});
+            setIsAuthenticated(true);
+            navigate('/dashboard');
         } catch (error) {
             if (error instanceof AxiosError) {
                 console.error('Login (Axios) error:', error);
