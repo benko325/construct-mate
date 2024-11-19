@@ -45,6 +45,12 @@ export default function Login() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true)
         try {
+            await agent.Account.logout();
+        } catch (error) {
+            // no need to do nothing, logoud is there just until protected routes are behaving correctly
+        }
+
+        try {
             await agent.Account.login({email: values.email, password: values.password});
             setIsAuthenticated(true);
             navigate('/dashboard');
@@ -71,7 +77,7 @@ export default function Login() {
         <Card className="mx-auto max-w-sm">
             <CardHeader className="space-y-1">
                 <CardTitle className="text-2xl font-bold">Login</CardTitle>
-                <CardDescription>Enter your email and password to login to your account</CardDescription>
+                <CardDescription>Zadajte email a heslo pre prihlásanie do účtu</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -83,7 +89,7 @@ export default function Login() {
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Enter your email" {...field} />
+                                        <Input placeholder="Zadajte email" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -94,9 +100,9 @@ export default function Login() {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel>Heslo</FormLabel>
                                     <FormControl>
-                                        <Input type="password" placeholder="Enter your password" {...field} />
+                                        <Input type="password" placeholder="Zadajte heslo" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -111,10 +117,10 @@ export default function Login() {
                             {isLoading ? (
                                 <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Please wait
+                                Prosím počkajte...
                                 </>
                             ) : (
-                                'Sign In'
+                                'Prihlásiť sa'
                             )}
                         </Button>
                     </form>
@@ -122,7 +128,7 @@ export default function Login() {
                 <div className="mt-4 text-center">
                     <Link to="/register">
                         <Button variant="outline" className="w-full">
-                            Create an account
+                            Vytvoriť nový účet
                         </Button>
                     </Link>
                 </div>

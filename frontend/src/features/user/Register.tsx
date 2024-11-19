@@ -129,8 +129,8 @@ export default function Register() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <Card className="w-[400px]">
             <CardHeader>
-                <CardTitle>Register</CardTitle>
-                <CardDescription>Create a new account to get started.</CardDescription>
+                <CardTitle>Registrácia</CardTitle>
+                <CardDescription>Vytvorte si nový účet pre používanie aplikácie</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -141,9 +141,9 @@ export default function Register() {
                                 name="firstName"
                                 render={({ field }) => (
                                 <FormItem className="flex-1">
-                                    <FormLabel>First Name</FormLabel>
+                                    <FormLabel>Meno</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="John" {...field} />
+                                        <Input placeholder="Peter" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -154,9 +154,9 @@ export default function Register() {
                                 name="lastName"
                                 render={({ field }) => (
                                 <FormItem className="flex-1">
-                                    <FormLabel>Last Name</FormLabel>
+                                    <FormLabel>Priezvisko</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Doe" {...field} />
+                                        <Input placeholder="Toth" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -168,11 +168,11 @@ export default function Register() {
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl>
-                                    <Input type="email" placeholder="john.doe@example.com" {...field} />
-                                </FormControl>
-                                <FormMessage />
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                        <Input type="email" placeholder="peter.toth@example.com" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
@@ -181,9 +181,9 @@ export default function Register() {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Password</FormLabel>
+                                <FormLabel>Heslo</FormLabel>
                                 <FormControl>
-                                    <Input type="password" placeholder="Enter your password" {...field} />
+                                    <Input type="password" placeholder="Vložte svoje heslo" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -194,9 +194,9 @@ export default function Register() {
                             name="passwordConfirmation"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Confirm Password</FormLabel>
+                                <FormLabel>Heslo znovu</FormLabel>
                                 <FormControl>
-                                    <Input type="password" placeholder="Confirm your password" {...field} />
+                                    <Input type="password" placeholder="Zadajte znovu svoje heslo" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -211,10 +211,10 @@ export default function Register() {
                             {isLoading ? (
                                 <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Please wait
+                                Prosím počkajte...
                                 </>
                             ) : (
-                                'Create Account'
+                                'Vytvoriť účet'
                             )}
                         </Button>
                     </form>
@@ -222,7 +222,7 @@ export default function Register() {
                 <div className="mt-4 text-center">
                     <Link to="/login">
                         <Button variant="outline" className="w-full">
-                            Login to existing account
+                            Prihlásiť sa to exstujúceho účtu
                         </Button>
                     </Link>
                 </div>

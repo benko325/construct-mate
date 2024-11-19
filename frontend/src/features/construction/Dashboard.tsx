@@ -29,10 +29,10 @@ export default function Dashboard() {
                 <h1 className="text-lg font-semibold">Dashboard</h1>
                 <div className="flex space-x-4">
                     <Button onClick={goToProfile} variant="outline">
-                        My Profile
+                        Môj profil
                     </Button>
                     <Button onClick={handleLogout} variant="link" color="red">
-                        Logout
+                        Odhlásiť sa
                     </Button>
                 </div>
             </div>
