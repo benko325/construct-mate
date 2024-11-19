@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Wolverine;
 using Wolverine.Http;
 using Wolverine.Http.Marten;
-using System.Security.Claims;
 using ConstructMate.Application.ServiceInterfaces;
 using ConstructMate.Infrastructure.StatusCodeGuard;
 using ConstructMate.Core.Events.Users;
@@ -244,22 +243,19 @@ public class UsersEndpoint
     }
 
     /// <summary>
-    /// Get info about currently logged in user
+    /// Get info about currently logged-in user
     /// </summary>
     /// <remarks>
-    /// Just for testing purposes
+    /// Endpoint is used to verify if the user is logged-in
     /// </remarks>
-    /// <param name="httpContext"></param>
-    /// <param name="userContext"></param>
-    /// <returns></returns>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <returns><see cref="UserInfo"/></returns>
+    [ProducesResponseType<UserInfo>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [Authorize]
     [WolverineGet("/users/me")]
-    public static string GetMyInfo(HttpContext httpContext, IApplicationUserContext userContext)
+    public static UserInfo GetMyInfo(IApplicationUserContext userContext)
     {
-        var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var userName = httpContext.User.FindFirstValue(ClaimTypes.Name);
-        var userEmail = httpContext.User.FindFirstValue(ClaimTypes.Email);
-
-        return $"User ID: {userId} = {userContext.UserId}, User Name: {userName} = {userContext.UserName}, Email: {userEmail} = {userContext.UserEmail}";
+        return new UserInfo(userContext.UserId, userContext.UserName, userContext.UserEmail);
     }
 }
