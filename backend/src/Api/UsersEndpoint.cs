@@ -32,12 +32,10 @@ public record CreateUserRequest(
 /// <summary>
 /// Modify user request (first name, last name and email)
 /// </summary>
-/// <param name="Id">Id of existing user to be modified</param>
 /// <param name="NewFirstName">New first name of modified user</param>
 /// <param name="NewLastName">New last name of modified user</param>
 /// <param name="NewEmail">New email of modified user</param>
 public record ModifyUserRequest(
-    Guid Id,
     string NewFirstName,
     string NewLastName,
     string NewEmail);
@@ -45,12 +43,10 @@ public record ModifyUserRequest(
 /// <summary>
 /// Modify existing user's password request
 /// </summary>
-/// <param name="Id">Id of user whose password has to be updated</param>
 /// <param name="OldPassword">Old password of specified user</param>
 /// <param name="NewPassword">New password of specified user</param>
 /// <param name="NewPasswordAgain">New password again for check of equality with NewPassword field</param>
 public record ModifyUserPasswordRequest(
-    Guid Id,
     string OldPassword,
     string NewPassword,
     string NewPasswordAgain);
@@ -149,26 +145,20 @@ public class UsersEndpoint
     /// <summary>
     /// Modify an existing user (his first name, last name and email)
     /// </summary>
-    /// <param name="id">Id of user to be modified</param>
     /// <param name="request"><see cref="ModifyUserRequest"/></param>
     /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserModified - id of modified user, new first name, last name, and email</returns>
     [ProducesResponseType<UserModified>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
-    [WolverinePatch("/users/{id}")]
-    public static async Task<UserModified> ModifyUserAsync([FromRoute] Guid id, [FromBody] ModifyUserRequest request,
+    [WolverinePatch("/users")]
+    public static async Task<UserModified> ModifyUserAsync([FromBody] ModifyUserRequest request,
         IApplicationUserContext userContext, IMessageBus bus)
     {
-        StatusCodeGuard.IsEqualTo(id, request.Id, StatusCodes.Status400BadRequest, "Id in route and in request must be equal");
-        StatusCodeGuard.IsEqualTo(userContext.UserId, id, StatusCodes.Status401Unauthorized, "User can modify himself only");
-
-        var command = request.Adapt<ModifyUserCommand>();
+        var command = request.Adapt<ModifyUserCommand>() with { Id = userContext.UserId };
         var result = await bus.InvokeAsync<UserModified>(command);
         return result;
     }
@@ -176,26 +166,20 @@ public class UsersEndpoint
     /// <summary>
     /// Update password for existing user
     /// </summary>
-    /// <param name="id">Id of user to be modified</param>
     /// <param name="request"><see cref="ModifyUserPasswordRequest"/></param>
     /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>UserPasswordChanged - Id of user whose password has been changed</returns>
     [ProducesResponseType<UserPasswordChanged>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
-    [WolverinePatch("/users/{id}/password")]
-    public static async Task<UserPasswordChanged> UpdatePasswordAsync([FromRoute] Guid id, [FromBody] ModifyUserPasswordRequest request,
+    [WolverinePatch("/users/password")]
+    public static async Task<UserPasswordChanged> UpdatePasswordAsync([FromBody] ModifyUserPasswordRequest request,
         IApplicationUserContext userContext, IMessageBus bus)
     {
-        StatusCodeGuard.IsEqualTo(id, request.Id, StatusCodes.Status400BadRequest, "Id in route and in request must be equal");
-        StatusCodeGuard.IsEqualTo(userContext.UserId, id, StatusCodes.Status401Unauthorized, "User can modify himself only");
-
-        var command = request.Adapt<ModifyUserPasswordCommand>();
+        var command = request.Adapt<ModifyUserPasswordCommand>() with { Id = userContext.UserId };
         var result = await bus.InvokeAsync<UserPasswordChanged>(command);
         return result;
     }

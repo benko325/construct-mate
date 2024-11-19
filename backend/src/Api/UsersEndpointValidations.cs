@@ -21,7 +21,6 @@ public class UsersEndpointValidations
     {
         public ModifyUserRequestValidator()
         {
-            RuleFor(r => r.Id).NotNull().NotEmpty();
             RuleFor(r => r.NewFirstName).NotNull().NotEmpty().MinimumLength(1).MaximumLength(64);
             RuleFor(r => r.NewLastName).NotNull().NotEmpty().MinimumLength(1).MaximumLength(64);
             RuleFor(r => r.NewEmail).NotNull().NotEmpty().EmailAddress();
@@ -32,7 +31,6 @@ public class UsersEndpointValidations
     {
         public CreateNewPasswordRequestValidator()
         {
-            RuleFor(r => r.Id).NotNull().NotEmpty();
             RuleFor(r => r.OldPassword).NotNull().NotEmpty();
             RuleFor(r => r.NewPassword).NotNull().NotEmpty().Custom(PasswordValidator.Validate);
             RuleFor(r => r.NewPasswordAgain).NotNull().NotEmpty().Equal(r => r.NewPassword);
