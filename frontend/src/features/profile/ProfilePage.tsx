@@ -1,10 +1,9 @@
-import { Button } from "@/components/ui/button";
+import TopBar from "../TopBar";
 
 export default function ProfilePage() {
     return (
-        <>
-            <h1>Test me</h1>
-            <Button onClick={() => alert('Button clicked!')}>Click Me</Button>
-        </>
+        <div className="min-h-screen bg-gray-100">
+            <TopBar />
+        </div>
     )
 }
