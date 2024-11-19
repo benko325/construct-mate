@@ -67,6 +67,7 @@ const Account = {
     login: (values: any) => requests.post(`/users/login`, values),
     logout: () => requests.del(`/users/logout`),
     register: (values: any) => requests.post(`/users/register`, values),
+    getNameAndEmail: () => requests.get(`/users/name-email`),
     currentUser: () => requests.get(`/users/me`), // is also used to verify if the user is logged-in
 }
 

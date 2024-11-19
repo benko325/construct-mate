@@ -242,4 +242,25 @@ public class UsersEndpoint
     {
         return new UserInfo(userContext.UserId, userContext.UserName, userContext.UserEmail);
     }
+
+    /// <summary>
+    /// Get first name, last name and email of currently logged-in user
+    /// </summary>
+    /// <remarks>
+    /// For update first name, last name and email endpoint
+    /// </remarks>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns><see cref="UserNameEmail"/></returns>
+    [ProducesResponseType<UserNameEmail>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [Authorize]
+    [WolverineGet("/users/name-email")]
+    public static async Task<UserNameEmail> GetMyNameAndEmail(IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var query = new GetUserNameAndEmailQuery(userContext.UserId);
+        var result = await bus.InvokeAsync<UserNameEmail>(query);
+        return result;
+    }
 }
