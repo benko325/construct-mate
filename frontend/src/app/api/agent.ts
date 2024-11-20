@@ -71,6 +71,7 @@ const Account = {
     register: (values: any) => requests.post(`/users/register`, values),
     getNameAndEmail: () => requests.get(`/users/name-email`),
     setNameAndEmail: (values: any) => requests.patch(`/users`, values),
+    changePassword: (values: any) => requests.patch(`/users/password`, values),
     currentUser: () => requests.get(`/users/me`), // is also used to verify if the user is logged-in
 }
 
