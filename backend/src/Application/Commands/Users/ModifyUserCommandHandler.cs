@@ -33,16 +33,19 @@ public class ModifyUserCommandHandler
     public static async Task<UserModified> Handle(ModifyUserCommand userCommand, ApplicationUser user, IDocumentSession session,
         UserManager<ApplicationUser> userManager, IConfiguration configuration, CancellationToken cancellationToken)
     {
-        var emailResult = await userManager.SetEmailAsync(user, userCommand.NewEmail);
-        var emailErrorDescriptions = emailResult.Errors.Select(r => r.Description);
-        var emailErrors = string.Join(" ", emailErrorDescriptions);
-        StatusCodeGuard.IsTrue(emailResult.Succeeded, StatusCodes.Status400BadRequest, emailErrors); //emailResult.Errors.First().Description ??
+        if (userCommand.NewEmail != user.Email)
+        {
+            var emailResult = await userManager.SetEmailAsync(user, userCommand.NewEmail);
+            // var emailErrorDescriptions = emailResult.Errors.Select(r => r.Description);
+            // var emailErrors = string.Join(" ", emailErrorDescriptions);
+            StatusCodeGuard.IsTrue(emailResult.Succeeded, StatusCodes.Status400BadRequest, emailResult.Errors.First().Description); //emailErrors ??
 
-        // with email also username must be set because email is also used as a username!!!
-        var userNameResult = await userManager.SetUserNameAsync(user, userCommand.NewEmail);
-        var userNameErrorDescriptions = userNameResult.Errors.Select(r => r.Description);
-        var userNameErrors = string.Join(" ", userNameErrorDescriptions);
-        StatusCodeGuard.IsTrue(userNameResult.Succeeded, StatusCodes.Status400BadRequest, userNameErrors); //userNameResult.Errors.First().Description ??
+            // with email also username must be set because email is also used as a username!!!
+            var userNameResult = await userManager.SetUserNameAsync(user, userCommand.NewEmail);
+            // var userNameErrorDescriptions = userNameResult.Errors.Select(r => r.Description);
+            // var userNameErrors = string.Join(" ", userNameErrorDescriptions);
+            StatusCodeGuard.IsTrue(userNameResult.Succeeded, StatusCodes.Status400BadRequest, userNameResult.Errors.First().Description); //userNameErrors ??
+        }
 
         user.FirstName = userCommand.NewFirstName;
         user.LastName = userCommand.NewLastName;

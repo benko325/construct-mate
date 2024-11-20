@@ -53,6 +53,7 @@ const apiClient = axios.create({
 const requests = {
     get: (url: string, params?: URLSearchParams) => apiClient.get(url, {params}).then(responseBody),
     post: (url: string, body: object) => apiClient.post(url, body).then(responseBody),
+    patch: (url: string, body: object) => apiClient.patch(url, body).then(responseBody),
     put: (url: string, body: object) => apiClient.put(url, body).then(responseBody),
     del: (url: string) => apiClient.delete(url).then(responseBody),
     postForm: (url: string, data: FormData) => apiClient.post(url, data, {
@@ -63,11 +64,13 @@ const requests = {
     }).then(responseBody)
 }
 
+// TODO: change type any to actual type
 const Account = {
     login: (values: any) => requests.post(`/users/login`, values),
     logout: () => requests.del(`/users/logout`),
     register: (values: any) => requests.post(`/users/register`, values),
     getNameAndEmail: () => requests.get(`/users/name-email`),
+    setNameAndEmail: (values: any) => requests.patch(`/users`, values),
     currentUser: () => requests.get(`/users/me`), // is also used to verify if the user is logged-in
 }
 

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import agent from "@/app/api/agent";
+import { toast, ToastContainer } from "react-toastify";
+import { AxiosError } from "axios";
 
 
 const formSchema = z.object({
@@ -18,7 +20,7 @@ const formSchema = z.object({
 type ProfileFormData = z.infer<typeof formSchema>;
 
 export default function ProfilePage() {
-    const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ProfileFormData>({
+    const { register, handleSubmit, reset, formState: { errors, isSubmitting }, setError } = useForm<ProfileFormData>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             firstName: '',
@@ -27,7 +29,7 @@ export default function ProfilePage() {
         },
     });
     
-    // Fetch user data and populate the form with it
+    // get user data and populate the form with it
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -41,14 +43,54 @@ export default function ProfilePage() {
         fetchUserData();
     }, [reset]);
     
-    // Handle form submission
     const onSubmit = async (data: ProfileFormData) => {
         try {
-            //await axios.patch('/api/user', data); // Adjust the endpoint as necessary
-            alert('Profile updated successfully!');
+            await agent.Account.setNameAndEmail({newFirstName: data.firstName, newLastName: data.lastName, newEmail: data.email});
+            toast.success("Údaje boli aktualizované.");
         } catch (error) {
+            if (error instanceof AxiosError) {
+                const responseData = error.response?.data || {};
+                let messages = "";
+    
+                // valdation error - should not happen because of same setting of validator as in BE
+                if (responseData.status === 400 &&
+                    responseData.errors) {
+                    const validationErrors = responseData.errors;
+                    Object.keys(validationErrors).forEach((field) => {
+                        const message = validationErrors[field][0];
+                        messages = messages + "/n" + message;
+                    });
+                    console.error('Register error from BE validations:', error);
+                    setError('root', {
+                        type: 'manual',
+                        message: `${messages}`,
+                    });
+                // custom error on BE by StatusCodeGuard
+                } else if (responseData.ErrorMessage) {
+                    console.error('Register error:', error);
+                    setError('root', {
+                        type: 'manual',
+                        message: `${responseData.ErrorMessage}`,
+                    });
+                } else {
+                    // Handle any other unexpected error structure
+                    console.error("Unknown register error:", error);
+                    setError('root', {
+                        type: 'manual',
+                        message: 'An error occurred. Please try again.',
+                    });
+                }
+            // Handle any other unexpected error structure
+            // TODO: make prettier so the code is not duplicated
+            } else {
+                console.error("Unknown register error:", error);
+                setError('root', {
+                    type: 'manual',
+                    message: 'An error occurred. Please try again.',
+                });
+            }
             console.error('Failed to update profile', error);
-            alert('Failed to update profile.');
+            toast.error('Údaje sa nepodarilo aktualizovať.');
         }
     };
 
@@ -59,7 +101,7 @@ export default function ProfilePage() {
                 <h2 className="text-xl font-semibold mb-4">Aktualizovať profil</h2>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="mb-4">
-                        <Label htmlFor="firstName">Meno</Label>
+                        <Label htmlFor="firstName">Nové Meno</Label>
                         <Input
                             id="firstName"
                             placeholder="Meno"
@@ -69,7 +111,7 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="mb-4">
-                        <Label htmlFor="lastName">Priezvisko</Label>
+                        <Label htmlFor="lastName">Nové Priezvisko</Label>
                         <Input
                             id="lastName"
                             placeholder="Priezvisko"
@@ -79,7 +121,7 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="mb-4">
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="email">Nový Email</Label>
                         <Input
                             id="email"
                             type="email"
@@ -89,11 +131,18 @@ export default function ProfilePage() {
                         {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
                     </div>
 
+                    {errors.root && (
+                        <div className="text-red-500 text-sm m-2">
+                            {errors.root.message}
+                        </div>
+                    )}
+
                     <Button type="submit" variant="default" disabled={isSubmitting}>
                         {isSubmitting ? 'Aktualizujem...' : 'Aktualizovať profil'}
                     </Button>
                 </form>
             </div>
+            <ToastContainer position="bottom-right" autoClose={1500} hideProgressBar={true} closeOnClick pauseOnHover/>
         </div>
     )
 }

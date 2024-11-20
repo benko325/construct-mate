@@ -222,7 +222,7 @@ export default function Register() {
                 <div className="mt-4 text-center">
                     <Link to="/login">
                         <Button variant="outline" className="w-full">
-                            Prihlásiť sa to exstujúceho účtu
+                            Prihlásiť sa do existujúceho účtu
                         </Button>
                     </Link>
                 </div>
