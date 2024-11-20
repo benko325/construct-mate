@@ -5,6 +5,7 @@ using ConstructMate.Infrastructure.StatusCodeGuard;
 using Mapster;
 using Marten;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ConstructMate.Application.Commands.Users;
 
@@ -38,13 +39,15 @@ public class ModifyUserCommandHandler
             var emailResult = await userManager.SetEmailAsync(user, userCommand.NewEmail);
             // var emailErrorDescriptions = emailResult.Errors.Select(r => r.Description);
             // var emailErrors = string.Join(" ", emailErrorDescriptions);
-            StatusCodeGuard.IsTrue(emailResult.Succeeded, StatusCodes.Status400BadRequest, emailResult.Errors.First().Description); //emailErrors ??
+            StatusCodeGuard.IsTrue(emailResult.Succeeded, StatusCodes.Status400BadRequest,
+                emailResult.Errors.IsNullOrEmpty() ? "" : emailResult.Errors.First().Description); //emailErrors ??
 
             // with email also username must be set because email is also used as a username!!!
             var userNameResult = await userManager.SetUserNameAsync(user, userCommand.NewEmail);
             // var userNameErrorDescriptions = userNameResult.Errors.Select(r => r.Description);
             // var userNameErrors = string.Join(" ", userNameErrorDescriptions);
-            StatusCodeGuard.IsTrue(userNameResult.Succeeded, StatusCodes.Status400BadRequest, userNameResult.Errors.First().Description); //userNameErrors ??
+            StatusCodeGuard.IsTrue(userNameResult.Succeeded, StatusCodes.Status400BadRequest,
+                userNameResult.Errors.IsNullOrEmpty() ? "" : userNameResult.Errors.First().Description); //userNameErrors ??
         }
 
         user.FirstName = userCommand.NewFirstName;

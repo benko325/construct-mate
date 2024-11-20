@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -49,7 +48,6 @@ const formSchema = z.object({
 
 export default function Register() {
   const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -63,8 +61,6 @@ export default function Register() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-
     try {
         await agent.Account.register({
             firstName: values.firstName,
@@ -104,14 +100,12 @@ export default function Register() {
                     message: `${responseData.ErrorMessage}`,
                 });
             } else {
-                // Handle any other unexpected error structure
                 console.error("Unknown register error:", error);
                 form.setError('root', {
                     type: 'manual',
                     message: 'An error occurred. Please try again.',
                 });
             }
-        // Handle any other unexpected error structure
         // TODO: make prettier so the code is not duplicated
         } else {
             console.error("Unknown register error:", error);
@@ -120,8 +114,6 @@ export default function Register() {
                 message: 'An error occurred. Please try again.',
             });
         }
-    } finally {
-        setIsLoading(false);
     }
   }
 
@@ -207,8 +199,8 @@ export default function Register() {
                             {form.formState.errors.root.message}
                         </div>
                         )}
-                        <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading ? (
+                        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                            {form.formState.isSubmitting ? (
                                 <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 Prosím počkajte...

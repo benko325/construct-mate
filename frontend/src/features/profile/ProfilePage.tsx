@@ -1,14 +1,23 @@
 import { useForm } from "react-hook-form";
 import TopBar from "../TopBar";
 import { useEffect } from "react";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+  } from '@/components/ui/form'
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import agent from "@/app/api/agent";
 import { toast, ToastContainer } from "react-toastify";
 import { AxiosError } from "axios";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 
 const formSchema = z.object({
@@ -20,7 +29,7 @@ const formSchema = z.object({
 type ProfileFormData = z.infer<typeof formSchema>;
 
 export default function ProfilePage() {
-    const { register, handleSubmit, reset, formState: { errors, isSubmitting }, setError } = useForm<ProfileFormData>({
+    const nameEmailForm = useForm<ProfileFormData>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             firstName: '',
@@ -34,14 +43,14 @@ export default function ProfilePage() {
         const fetchUserData = async () => {
             try {
                 const { firstName, lastName, email } = await agent.Account.getNameAndEmail();
-                reset({ firstName, lastName, email }); // Set the initial values for the form
+                nameEmailForm.reset({ firstName, lastName, email }); // Set the initial values for the form
             } catch (error) {
                 console.error('Failed to fetch user data', error);
             }
         };
     
         fetchUserData();
-    }, [reset]);
+    }, [nameEmailForm.reset]);
     
     const onSubmit = async (data: ProfileFormData) => {
         try {
@@ -61,30 +70,28 @@ export default function ProfilePage() {
                         messages = messages + "/n" + message;
                     });
                     console.error('Register error from BE validations:', error);
-                    setError('root', {
+                    nameEmailForm.setError('root', {
                         type: 'manual',
                         message: `${messages}`,
                     });
                 // custom error on BE by StatusCodeGuard
                 } else if (responseData.ErrorMessage) {
                     console.error('Register error:', error);
-                    setError('root', {
+                    nameEmailForm.setError('root', {
                         type: 'manual',
                         message: `${responseData.ErrorMessage}`,
                     });
                 } else {
-                    // Handle any other unexpected error structure
                     console.error("Unknown register error:", error);
-                    setError('root', {
+                    nameEmailForm.setError('root', {
                         type: 'manual',
                         message: 'An error occurred. Please try again.',
                     });
                 }
-            // Handle any other unexpected error structure
             // TODO: make prettier so the code is not duplicated
             } else {
                 console.error("Unknown register error:", error);
-                setError('root', {
+                nameEmailForm.setError('root', {
                     type: 'manual',
                     message: 'An error occurred. Please try again.',
                 });
@@ -97,50 +104,75 @@ export default function ProfilePage() {
     return (
         <div className="min-h-screen bg-gray-100">
             <TopBar />
-            <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-md mt-6">
-                <h2 className="text-xl font-semibold mb-4">Aktualizovať profil</h2>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <div className="mb-4">
-                        <Label htmlFor="firstName">Nové Meno</Label>
-                        <Input
-                            id="firstName"
-                            placeholder="Meno"
-                            {...register('firstName')}
-                        />
-                        {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName.message}</p>}
-                    </div>
-
-                    <div className="mb-4">
-                        <Label htmlFor="lastName">Nové Priezvisko</Label>
-                        <Input
-                            id="lastName"
-                            placeholder="Priezvisko"
-                            {...register('lastName')}
-                        />
-                        {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName.message}</p>}
-                    </div>
-
-                    <div className="mb-4">
-                        <Label htmlFor="email">Nový Email</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            placeholder="Email"
-                            {...register('email')}
-                        />
-                        {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-                    </div>
-
-                    {errors.root && (
-                        <div className="text-red-500 text-sm m-2">
-                            {errors.root.message}
-                        </div>
-                    )}
-
-                    <Button type="submit" variant="default" disabled={isSubmitting}>
-                        {isSubmitting ? 'Aktualizujem...' : 'Aktualizovať profil'}
-                    </Button>
-                </form>
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <Card className="w-[400px]">
+                    <CardHeader>
+                        <CardTitle>Aktualizovať profil</CardTitle>
+                        <CardDescription>Aktualizujte si meno, prizvisko a email</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Form {...nameEmailForm}>
+                            <form onSubmit={nameEmailForm.handleSubmit(onSubmit)} className="space-y-6">
+                                <div className="flex space-x-4">
+                                    <FormField
+                                        control={nameEmailForm.control}
+                                        name="firstName"
+                                        render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                            <FormLabel>Meno</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={nameEmailForm.control}
+                                        name="lastName"
+                                        render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                            <FormLabel>Priezvisko</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <FormField
+                                    control={nameEmailForm.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Email</FormLabel>
+                                            <FormControl>
+                                                <Input type="email" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                {nameEmailForm.formState.errors.root && (
+                                <div className="text-red-500 text-sm mt-2">
+                                    {nameEmailForm.formState.errors.root.message}
+                                </div>
+                                )}
+                                <Button type="submit" className="w-full" disabled={nameEmailForm.formState.isSubmitting}>
+                                    {nameEmailForm.formState.isSubmitting ? (
+                                        <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Prosím počkajte...
+                                        </>
+                                    ) : (
+                                        'Aktualizovať údaje'
+                                    )}
+                                </Button>
+                            </form>
+                        </Form>
+                    </CardContent>
+                </Card>
             </div>
             <ToastContainer position="bottom-right" autoClose={1500} hideProgressBar={true} closeOnClick pauseOnHover/>
         </div>
