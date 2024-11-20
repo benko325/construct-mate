@@ -202,152 +202,150 @@ export default function ProfilePage() {
         <div className="min-h-screen bg-gray-100 flex flex-col">
             <TopBar />
             <div className="flex-grow flex items-center justify-center">
-                <div className="flex flex-col lg:flex-row items-center justify-center">
-                    <Tabs defaultValue="name-email" className="w-[400px]">
-                        <TabsList>
-                            <TabsTrigger value="name-email">Meno a email</TabsTrigger>
-                            <TabsTrigger value="password">Heslo</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="name-email">
-                            <Card className="w-[400px]">
-                                <CardHeader>
-                                    <CardTitle>Aktualizovať profil</CardTitle>
-                                    <CardDescription>Aktualizujte si meno, priezvisko a email</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <Form {...nameEmailForm}>
-                                        <form onSubmit={nameEmailForm.handleSubmit(onSubmitNameEmail)} className="space-y-6">
-                                            <div className="flex space-x-4">
-                                                <FormField
-                                                    control={nameEmailForm.control}
-                                                    name="firstName"
-                                                    render={({ field }) => (
-                                                    <FormItem className="flex-1">
-                                                        <FormLabel>Meno</FormLabel>
-                                                        <FormControl>
-                                                            <Input {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={nameEmailForm.control}
-                                                    name="lastName"
-                                                    render={({ field }) => (
-                                                    <FormItem className="flex-1">
-                                                        <FormLabel>Priezvisko</FormLabel>
-                                                        <FormControl>
-                                                            <Input {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                    )}
-                                                />
-                                            </div>
+                <Tabs defaultValue="name-email" className="w-[400px]">
+                    <TabsList>
+                        <TabsTrigger value="name-email">Meno a email</TabsTrigger>
+                        <TabsTrigger value="password">Heslo</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="name-email">
+                        <Card className="w-[400px]">
+                            <CardHeader>
+                                <CardTitle>Aktualizovať profil</CardTitle>
+                                <CardDescription>Aktualizujte si meno, priezvisko a email</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Form {...nameEmailForm}>
+                                    <form onSubmit={nameEmailForm.handleSubmit(onSubmitNameEmail)} className="space-y-6">
+                                        <div className="flex space-x-4">
                                             <FormField
                                                 control={nameEmailForm.control}
-                                                name="email"
+                                                name="firstName"
                                                 render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Email</FormLabel>
-                                                        <FormControl>
-                                                            <Input type="email" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
+                                                <FormItem className="flex-1">
+                                                    <FormLabel>Meno</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
                                                 )}
                                             />
-                                            {nameEmailForm.formState.errors.root && (
+                                            <FormField
+                                                control={nameEmailForm.control}
+                                                name="lastName"
+                                                render={({ field }) => (
+                                                <FormItem className="flex-1">
+                                                    <FormLabel>Priezvisko</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                        <FormField
+                                            control={nameEmailForm.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="email" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        {nameEmailForm.formState.errors.root && (
+                                        <div className="text-red-500 text-sm mt-2">
+                                            {nameEmailForm.formState.errors.root.message}
+                                        </div>
+                                        )}
+                                        <Button type="submit" className="w-full" disabled={nameEmailForm.formState.isSubmitting}>
+                                            {nameEmailForm.formState.isSubmitting ? (
+                                                <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Prosím počkajte...
+                                                </>
+                                            ) : (
+                                                'Aktualizovať údaje'
+                                            )}
+                                        </Button>
+                                    </form>
+                                </Form>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="password">
+                        <Card className="w-[400px]">
+                            <CardHeader>
+                                <CardTitle>Aktualizovať heslo</CardTitle>
+                                <CardDescription>Aktualizujte heslo zadaním starého a nového hesla</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Form {...newPasswordForm}>
+                                    <form onSubmit={newPasswordForm.handleSubmit(onSubmitNewPassword)} className="space-y-6">
+                                        <FormField
+                                            control={newPasswordForm.control}
+                                            name="oldPassword"
+                                            render={({ field }) => (
+                                            <FormItem className="flex-1">
+                                                <FormLabel>Staré heslo</FormLabel>
+                                                <FormControl>
+                                                    <Input type="password" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={newPasswordForm.control}
+                                            name="newPassword"
+                                            render={({ field }) => (
+                                            <FormItem className="flex-1">
+                                                <FormLabel>Nové heslo</FormLabel>
+                                                <FormControl>
+                                                    <Input type="password" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={newPasswordForm.control}
+                                            name="newPasswordAgain"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Nové heslo znovu</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="password" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        {newPasswordForm.formState.errors.root && (
                                             <div className="text-red-500 text-sm mt-2">
-                                                {nameEmailForm.formState.errors.root.message}
+                                                {newPasswordForm.formState.errors.root.message}
                                             </div>
+                                        )}
+                                        <Button type="submit" className="w-full" disabled={newPasswordForm.formState.isSubmitting}>
+                                            {newPasswordForm.formState.isSubmitting ? (
+                                                <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Prosím počkajte...
+                                                </>
+                                            ) : (
+                                                'Aktualizovať heslo'
                                             )}
-                                            <Button type="submit" className="w-full" disabled={nameEmailForm.formState.isSubmitting}>
-                                                {nameEmailForm.formState.isSubmitting ? (
-                                                    <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Prosím počkajte...
-                                                    </>
-                                                ) : (
-                                                    'Aktualizovať údaje'
-                                                )}
-                                            </Button>
-                                        </form>
-                                    </Form>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                        <TabsContent value="password">
-                            <Card className="w-[400px]">
-                                <CardHeader>
-                                    <CardTitle>Aktualizovať heslo</CardTitle>
-                                    <CardDescription>Aktualizujte heslo zadaním starého a nového hesla</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <Form {...newPasswordForm}>
-                                        <form onSubmit={newPasswordForm.handleSubmit(onSubmitNewPassword)} className="space-y-6">
-                                            <FormField
-                                                control={newPasswordForm.control}
-                                                name="oldPassword"
-                                                render={({ field }) => (
-                                                <FormItem className="flex-1">
-                                                    <FormLabel>Staré heslo</FormLabel>
-                                                    <FormControl>
-                                                        <Input type="password" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={newPasswordForm.control}
-                                                name="newPassword"
-                                                render={({ field }) => (
-                                                <FormItem className="flex-1">
-                                                    <FormLabel>Nové heslo</FormLabel>
-                                                    <FormControl>
-                                                        <Input type="password" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={newPasswordForm.control}
-                                                name="newPasswordAgain"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Nové heslo znovu</FormLabel>
-                                                        <FormControl>
-                                                            <Input type="password" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            {newPasswordForm.formState.errors.root && (
-                                                <div className="text-red-500 text-sm mt-2">
-                                                    {newPasswordForm.formState.errors.root.message}
-                                                </div>
-                                            )}
-                                            <Button type="submit" className="w-full" disabled={newPasswordForm.formState.isSubmitting}>
-                                                {newPasswordForm.formState.isSubmitting ? (
-                                                    <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Prosím počkajte...
-                                                    </>
-                                                ) : (
-                                                    'Aktualizovať heslo'
-                                                )}
-                                            </Button>
-                                        </form>
-                                    </Form>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                    </Tabs>
-                </div>
+                                        </Button>
+                                    </form>
+                                </Form>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
             </div>
             <ToastContainer position="bottom-right" autoClose={1500} hideProgressBar={true} closeOnClick pauseOnHover/>
         </div>
