@@ -19,7 +19,7 @@ const responseBody = (response: AxiosResponse) => response.data;
 //             toast.error(data.title);
 //             break;
 //     }
-// })
+// });
 
 // axiosInstance.interceptors.response.use(
 //     (response: any) => response,
@@ -62,7 +62,7 @@ const requests = {
     putForm: (url: string, data: FormData) => apiClient.put(url, data, {
         headers: {'Content-type': 'multipart/form-data'}
     }).then(responseBody)
-}
+};
 
 // TODO: change type any to actual type
 const Account = {
@@ -73,10 +73,16 @@ const Account = {
     setNameAndEmail: (values: any) => requests.patch(`/users`, values),
     changePassword: (values: any) => requests.patch(`/users/password`, values),
     currentUser: () => requests.get(`/users/me`), // is also used to verify if the user is logged-in
-}
+};
+
+const Construction = {
+    getAllUnfinished: () => requests.get(`/constructions`),
+    getAllFinished: () => requests.get(`/finished-constructions`),
+};
 
 const agent = {
-    Account
-}
+    Account,
+    Construction
+};
 
 export default agent;
