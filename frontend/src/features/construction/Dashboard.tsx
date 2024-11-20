@@ -6,7 +6,6 @@ import agent from '@/app/api/agent.ts';
 import TopBar from '../TopBar.tsx';
 
 export default function Dashboard() {
-    const { setIsAuthenticated } = useAuth();
     const navigate = useNavigate();
 
     return (
