@@ -140,7 +140,8 @@ public class ConstructionsEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePatch("/constructions/{id}/start-end-date")]
-    public static async Task<ConstructionStartEndDateModified> ModifyConstructionStartAndEndDate([FromRoute] Guid id, [FromBody] ModifyConstructionStartEndDateRequest request,
+    public static async Task<ConstructionStartEndDateModified> ModifyConstructionStartAndEndDate([FromRoute] Guid id,
+        [FromBody] ModifyConstructionStartEndDateRequest request,
         IMessageBus bus, IApplicationUserContext userContext)
     {
         StatusCodeGuard.IsEqualTo(id, request.ConstructionId, StatusCodes.Status400BadRequest, "Id from route and request must be equal");
@@ -153,7 +154,7 @@ public class ConstructionsEndpoint
     }
 
     /// <summary>
-    /// Get all constructions that belong to logged-in user
+    /// Get all unfinished constructions that belong to logged-in user (end date is greater or equal as actual date)
     /// </summary>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <param name="userContext">Injected custom user context</param>
@@ -162,9 +163,28 @@ public class ConstructionsEndpoint
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [Authorize]
     [WolverineGet("/constructions")]
-    public static async Task<IEnumerable<Construction>> GetAllUsersConstructionsAsync(IMessageBus bus, IApplicationUserContext userContext)
+    public static async Task<IEnumerable<Construction>> GetAllUsersUnfinishedConstructionsAsync(IMessageBus bus,
+        IApplicationUserContext userContext)
     {
-        var query = new GetAllUsersConstructionsQuery(userContext.UserId);
+        var query = new GetAllUsersUnfinishedConstructionsQuery(userContext.UserId);
+        var response = await bus.InvokeAsync<QueryCollectionResponse<Construction>>(query);
+        return response.QueryResponseItems;
+    }
+    
+    /// <summary>
+    /// Get all finished constructions that belong to logged-in user (end date is smaller than actual date)
+    /// </summary>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <returns>Collection of all user's constructions</returns>
+    [ProducesResponseType<IEnumerable<Construction>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [Authorize]
+    [WolverineGet("/finished-constructions")]
+    public static async Task<IEnumerable<Construction>> GetAllUsersFinishedConstructionsAsync(IMessageBus bus,
+        IApplicationUserContext userContext)
+    {
+        var query = new GetAllUsersFinishedConstructionsQuery(userContext.UserId);
         var response = await bus.InvokeAsync<QueryCollectionResponse<Construction>>(query);
         return response.QueryResponseItems;
     }
