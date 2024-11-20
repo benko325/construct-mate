@@ -181,6 +181,13 @@ var app = builder.Build();
 
 app.UseCors("AllowLocalFrontendOrigin");
 
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "data")),
+    RequestPath = "/data"
+});
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
