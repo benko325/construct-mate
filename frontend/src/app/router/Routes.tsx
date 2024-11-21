@@ -14,15 +14,20 @@ export const router = createBrowserRouter([
             { path: 'login', element: <Login /> },
             { path: 'register', element: <Register /> },
 
-            // Protected routes
-            {
-                element: <ProtectedRoute />,
-                children: [
-                    { path: '', element: <Navigate replace to='/dashboard' /> },
-                    { path: 'dashboard', element: <Dashboard /> },
-                    { path: 'profile', element: <ProfilePage /> },
-                ],
-            },
+            { path: '', element: <Navigate replace to='/dashboard' /> },
+            { path: 'dashboard', element: <Dashboard /> },
+            { path: 'profile', element: <ProfilePage /> },
+
+            // // Protected routes
+            // {
+            //     element: <ProtectedRoute />,
+            //     children: [
+            //         { path: '', element: <Navigate replace to='/dashboard' /> },
+            //         { path: 'dashboard', element: <Dashboard /> },
+            //         { path: 'profile', element: <ProfilePage /> },
+            //     ],
+            // },
+            // TODO: uncomment when protected routes are acting correctly
 
             { path: '*', element: <Navigate replace to='/not-found' /> },
         ]

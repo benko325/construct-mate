@@ -41,11 +41,11 @@ export default function Login() {
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        // try {
-        //     await agent.Account.logout();
-        // } catch (error) {
-        //     // no need to do nothing, logout is there just until protected routes are behaving correctly
-        // }
+        try {
+            await agent.Account.logout();
+        } catch (error) {
+            // no need to do nothing, logout is there just until protected routes are behaving correctly
+        }
 
         try {
             await agent.Account.login({email: values.email, password: values.password});
