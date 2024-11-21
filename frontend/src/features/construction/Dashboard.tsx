@@ -1,5 +1,5 @@
 import { Button } from '../../components/ui/button.tsx';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import agent from '@/app/api/agent.ts';
 import TopBar from '../TopBar.tsx';
 import { useQuery } from '@tanstack/react-query';
@@ -17,7 +17,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input.tsx';
-import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useForm } from 'react-hook-form';
 import { toast, ToastContainer } from 'react-toastify';
 import { AxiosError } from 'axios';
@@ -65,8 +65,6 @@ const newConstructionFormSchema = z.object({
 type NewConstructionFormData = z.infer<typeof newConstructionFormSchema>;
 
 export default function Dashboard() {
-    const navigate = useNavigate();
-
     const { data: unfinishedConstructions, isLoading: unfinishedIsLoading, error: unfinishedError } = useQuery<Construction[]>({queryKey: ["unfinishedConstructions"], queryFn: fetchUnfinishedConstructions});
     const { data: finishedConstructions, isLoading: finishedIsLoading, error: finishedError } = useQuery<Construction[]>({queryKey: ["finishedConstructions"], queryFn: fetchFinishedConstructions});
 
