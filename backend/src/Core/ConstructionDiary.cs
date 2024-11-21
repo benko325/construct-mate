@@ -39,7 +39,7 @@ public class DailyRecord
 public class DiaryRecord
 {
     public string? Content { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now; // local time
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // UTC
     public required string AuthorName { get; set; }
     public DiaryContributorRole AuthorRole { get; set; }
     public string? PicturePath { get; set; }
