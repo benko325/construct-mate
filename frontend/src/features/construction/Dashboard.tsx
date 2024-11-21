@@ -32,6 +32,7 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { useState } from 'react';
+import { Textarea } from '@/components/ui/textarea.tsx';
 
 const apiUrl = import.meta.env.VITE_API_URL + "/" || 'http://localhost:5000/';
 
@@ -211,7 +212,12 @@ export default function Dashboard() {
                                             <FormItem className="flex-1">
                                                 <FormLabel>Opis (nepovinný)</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Novostavba na Staromyjavskej ulici, ..." {...field} />
+                                                    <Textarea
+                                                        placeholder="Novostavba na Staromyjavskej ulici, ..."
+                                                        {...field}
+                                                        className=""
+                                                        rows={1}
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
