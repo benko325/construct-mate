@@ -89,10 +89,11 @@ export default function Dashboard() {
                 startDate: format(data.startDate, 'yyyy-MM-dd'),
                 endDate: format(data.endDate, 'yyyy-MM-dd')
             });
-            
-            setDialogOpen(false);
-            window.location.href = window.location.href;
             toast.success("Stavba bola vytvorená.");
+            setTimeout(() => {
+                setDialogOpen(false);
+                window.location.href = window.location.href;
+            }, 2500);
         } catch (error) {
             if (error instanceof AxiosError) {
                 const responseData = error.response?.data || {};
