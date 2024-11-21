@@ -1,7 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { toast } from 'react-toastify';
-import { router } from '../router/Routes';
-import { error } from "console";
+import { ChangeUserPasswordRequest, CreateConstructionRequest, LoginUserRequest, RegisterUserRequest, SetUserNameAndEmailRequest } from "./types/requestTypes";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -64,19 +62,18 @@ const requests = {
     }).then(responseBody)
 };
 
-// TODO: change type any to actual type
 const Account = {
-    login: (values: any) => requests.post(`/users/login`, values),
+    login: (values: LoginUserRequest) => requests.post(`/users/login`, values),
     logout: () => requests.del(`/users/logout`),
-    register: (values: any) => requests.post(`/users/register`, values),
+    register: (values: RegisterUserRequest) => requests.post(`/users/register`, values),
     getNameAndEmail: () => requests.get(`/users/name-email`),
-    setNameAndEmail: (values: any) => requests.patch(`/users`, values),
-    changePassword: (values: any) => requests.patch(`/users/password`, values),
+    setNameAndEmail: (values: SetUserNameAndEmailRequest) => requests.patch(`/users`, values),
+    changePassword: (values: ChangeUserPasswordRequest) => requests.patch(`/users/password`, values),
     currentUser: () => requests.get(`/users/me`), // is also used to verify if the user is logged-in
 };
 
 const Construction = {
-    createNew: (values: any) => requests.post(`/constructions`, values),
+    createNew: (values: CreateConstructionRequest) => requests.post(`/constructions`, values),
     getAllUnfinished: () => requests.get(`/constructions`),
     getAllFinished: () => requests.get(`/finished-constructions`),
 };

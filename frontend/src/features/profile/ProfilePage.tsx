@@ -102,7 +102,12 @@ export default function ProfilePage() {
     
     const onSubmitNameEmail = async (data: ProfileFormData) => {
         try {
-            await agent.Account.setNameAndEmail({newFirstName: data.firstName, newLastName: data.lastName, newEmail: data.email});
+            await agent.Account.setNameAndEmail({
+                newFirstName: data.firstName,
+                newLastName: data.lastName,
+                newEmail: data.email
+            });
+
             toast.success("Údaje boli aktualizované.");
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -151,7 +156,12 @@ export default function ProfilePage() {
 
     const onSubmitNewPassword = async (data: PasswordFormData) => {
         try {
-            await agent.Account.changePassword({oldPassword: data.oldPassword, newPassword: data.newPassword, newPasswordAgain: data.newPasswordAgain});
+            await agent.Account.changePassword({
+                oldPassword: data.oldPassword,
+                newPassword: data.newPassword,
+                newPasswordAgain: data.newPasswordAgain
+            });
+            
             toast.success("Heslo bolo aktualizované.");
         } catch (error) {
             if (error instanceof AxiosError) {
