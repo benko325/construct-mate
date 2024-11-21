@@ -5,13 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import agent from '@/app/api/agent';
 
 const TopBar: React.FC = () => {
-    const { setIsAuthenticated } = useAuth();
+    // const { setIsAuthenticated } = useAuth(); // TODO: uncomment when useAuth is correctly resolved
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
             await agent.Account.logout();
-            setIsAuthenticated(false);
+            // setIsAuthenticated(false); // TODO: uncomment when useAuth is correctly resolved
             navigate('/login');
         } catch (error) {
             console.error('Logout failed', error);

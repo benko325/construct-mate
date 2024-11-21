@@ -29,7 +29,7 @@ const formSchema = z.object({
 });
 
 export default function Login() {
-    const { setIsAuthenticated } = useAuth();
+    // const { setIsAuthenticated } = useAuth(); // TODO: uncomment when useAuth is correctly resolved
     const navigate = useNavigate();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -49,7 +49,7 @@ export default function Login() {
 
         try {
             await agent.Account.login({email: values.email, password: values.password});
-            setIsAuthenticated(true);
+            // setIsAuthenticated(true); // TODO: uncomment when useAuth is correctly resolved
             navigate('/dashboard');
         } catch (error) {
             if (error instanceof AxiosError) {
