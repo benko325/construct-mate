@@ -11,9 +11,9 @@ const queryClient = new QueryClient();
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <QueryClientProvider client={queryClient}>
-            <AuthProvider>
+            {/* <AuthProvider> */} {/* TODO: uncomment when resolved */}
                 <RouterProvider router={router} />
-            </AuthProvider>
+            {/* </AuthProvider> */}
         </QueryClientProvider>
     </StrictMode>,
 )
