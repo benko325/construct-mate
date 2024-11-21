@@ -32,8 +32,6 @@ export default function Login() {
     const { setIsAuthenticated } = useAuth();
     const navigate = useNavigate();
 
-    const [isLoading, setIsLoading] = useState(false);
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -43,7 +41,6 @@ export default function Login() {
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        setIsLoading(true)
         // try {
         //     await agent.Account.logout();
         // } catch (error) {
@@ -67,8 +64,6 @@ export default function Login() {
                     message: 'An error occurred. Please try again.',
                 });
             }
-        } finally {
-            setIsLoading(false)
         }
     }
     
@@ -113,8 +108,8 @@ export default function Login() {
                             {form.formState.errors.root.message}
                         </div>
                         )}
-                        <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading ? (
+                        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                            {form.formState.isSubmitting ? (
                                 <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 Prosím počkajte...
