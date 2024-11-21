@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { ChangeUserPasswordRequest, CreateConstructionRequest, LoginUserRequest, RegisterUserRequest, SetUserNameAndEmailRequest } from "./types/requestTypes";
+import { UUID } from "crypto";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -74,6 +75,7 @@ const Account = {
 
 const Construction = {
     createNew: (values: CreateConstructionRequest) => requests.post(`/constructions`, values),
+    getConstructionById: (id: UUID) => requests.get(`/constructions/${id}`),
     getAllUnfinished: () => requests.get(`/constructions`),
     getAllFinished: () => requests.get(`/finished-constructions`),
 };

@@ -6,6 +6,7 @@ import Register from "@/features/user/Register";
 import Dashboard from "@/features/construction/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import NotFound from "@/features/NotFound";
+import Construction from "@/features/construction/Construction";
 
 export const router = createBrowserRouter([
     {
@@ -18,6 +19,7 @@ export const router = createBrowserRouter([
             { path: '', element: <Navigate replace to='/dashboard' /> },
             { path: 'dashboard', element: <Dashboard /> },
             { path: 'profile', element: <ProfilePage /> },
+            { path: 'construction/:id', element: <Construction /> },
 
             // // Protected routes
             // {

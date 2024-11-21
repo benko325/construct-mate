@@ -1,5 +1,5 @@
 import { Button } from '../../components/ui/button.tsx';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import agent from '@/app/api/agent.ts';
 import TopBar from '../TopBar.tsx';
 import { useQuery } from '@tanstack/react-query';
@@ -179,7 +179,7 @@ export default function Dashboard() {
                     <h2 className="text-2xl font-semibold mb-2">Moje aktuálne stavby</h2>
                     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                         <DialogTrigger asChild className="mb-2">
-                            <Button variant="outline" className="bg-green-500 hover:bg-green-300">Vytvoriť novú stavbu</Button>
+                            <Button variant="outline" className="bg-green-300 hover:bg-green-100">Vytvoriť novú stavbu</Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
@@ -285,17 +285,27 @@ export default function Dashboard() {
                     {unfinishedConstructions?.map((construction) => (
                     <Card key={construction.id} className="w-full">
                         <CardHeader>
-                            <div className="flex items-center space-x-4">
-                                <Avatar>
-                                    {/* Images and other static files are served in the <apiUrl>/data - configured in BE */}
-                                    <AvatarImage src={apiUrl + construction.profilePictureUrl} alt={construction.id} />
-                                    <AvatarFallback>SBA</AvatarFallback>
-                                </Avatar>
-                                <CardTitle>{construction.name}</CardTitle>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                    <Avatar>
+                                        {/* Images and other static files are served in the <apiUrl>/data - configured in BE */}
+                                        <AvatarImage src={apiUrl + construction.profilePictureUrl} alt={construction.id} />
+                                        <AvatarFallback>SBA</AvatarFallback>
+                                    </Avatar>
+                                    <CardTitle>{construction.name}</CardTitle>
+                                </div>
+                                <Link 
+                                    to={`/construction/${construction.id}`}
+                                    className="ml-auto text-sm"
+                                >
+                                    <Button variant="outline" size="sm" className="bg-blue-100 hover:bg-blue-50">
+                                        Otvoriť
+                                    </Button>
+                                </Link>
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm text-muted-foreground mb-2">{construction.description}</p>
+                            {/* <p className="text-sm text-muted-foreground mb-2">{construction.description}</p> */}
                             <div className="flex justify-between text-sm text-muted-foreground mb-2">
                                 <span>{format(parseISO(construction.startDate), 'dd.MM.yyyy')}</span>
                                 <span>{format(parseISO(construction.endDate), 'dd.MM.yyyy')}</span>
@@ -312,17 +322,27 @@ export default function Dashboard() {
                     {finishedConstructions?.map((construction) => (
                     <Card key={construction.id} className="w-full">
                         <CardHeader>
-                            <div className="flex items-center space-x-4">
-                                <Avatar>
-                                    {/* Images and other static files are served in the <apiUrl>/data - configured in BE */}
-                                    <AvatarImage src={apiUrl + construction.profilePictureUrl} alt={construction.id} />
-                                    <AvatarFallback>SBA</AvatarFallback>
-                                </Avatar>
-                                <CardTitle>{construction.name}</CardTitle>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                    <Avatar>
+                                        {/* Images and other static files are served in the <apiUrl>/data - configured in BE */}
+                                        <AvatarImage src={apiUrl + construction.profilePictureUrl} alt={construction.id} />
+                                        <AvatarFallback>SBA</AvatarFallback>
+                                    </Avatar>
+                                    <CardTitle>{construction.name}</CardTitle>
+                                </div>
+                                <Link 
+                                    to={`/construction/${construction.id}`}
+                                    className="ml-auto text-sm"
+                                >
+                                    <Button variant="outline" size="sm" className="bg-blue-100 hover:bg-blue-50">
+                                        Otvoriť
+                                    </Button>
+                                </Link>
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm text-muted-foreground mb-2">{construction.description}</p>
+                            {/* <p className="text-sm text-muted-foreground mb-2">{construction.description}</p> */}
                             <div className="flex justify-between text-sm text-muted-foreground mb-2">
                                 <span>{format(parseISO(construction.startDate), 'dd.MM.yyyy')}</span>
                                 <span>{format(parseISO(construction.endDate), 'dd.MM.yyyy')}</span>
