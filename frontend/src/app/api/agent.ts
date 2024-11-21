@@ -76,6 +76,7 @@ const Account = {
 };
 
 const Construction = {
+    createNew: (values: any) => requests.post(`/constructions`, values),
     getAllUnfinished: () => requests.get(`/constructions`),
     getAllFinished: () => requests.get(`/finished-constructions`),
 };

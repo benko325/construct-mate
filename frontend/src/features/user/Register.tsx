@@ -22,83 +22,91 @@ import { AxiosError } from 'axios'
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// validations match ones on BE
+// validations match one's on BE
 const formSchema = z.object({
-  firstName: z.string().min(1, { message: 'First name must be at least 1 character' }).max(64, { message: 'First name must be max 64 characters' }),
-  lastName: z.string().min(1, { message: 'Last name must be at least 1 character' }).max(64, { message: 'Last name must be max 64 characters' }),
-  email: z.string().email({ message: 'Invalid email address' }),
-  password: z.string()
-    .min(6, { message: 'Password must be at least 6 characters' })
-    .max(128, { message: 'Password must be max 128 characters'})
-    .regex(new RegExp("[a-z]"), {
-        message: "Must contain at least one lowercase letter",
-    })
-    .regex(new RegExp("[A-Z]"), {
-        message: "Must contain at least one uppercase letter",
-    })
-    .regex(new RegExp("[0-9]"), {
-        message: "Must contain at least one number",
-    }),
-  passwordConfirmation: z.string(),
+    firstName: z.string().min(1, { message: 'First name must be at least 1 character' }).max(64, { message: 'First name must be max 64 characters' }),
+    lastName: z.string().min(1, { message: 'Last name must be at least 1 character' }).max(64, { message: 'Last name must be max 64 characters' }),
+    email: z.string().email({ message: 'Invalid email address' }),
+    password: z.string()
+        .min(6, { message: 'Password must be at least 6 characters' })
+        .max(128, { message: 'Password must be max 128 characters'})
+        .regex(new RegExp("[a-z]"), {
+            message: "Must contain at least one lowercase letter",
+        })
+        .regex(new RegExp("[A-Z]"), {
+            message: "Must contain at least one uppercase letter",
+        })
+        .regex(new RegExp("[0-9]"), {
+            message: "Must contain at least one number",
+        }),
+    passwordConfirmation: z.string(),
 }).refine((data) => data.password === data.passwordConfirmation, {
-  message: "Passwords don't match",
-  path: ["passwordConfirmation"],
-})
+    message: "Passwords don't match",
+    path: ["passwordConfirmation"],
+});
 
 
 export default function Register() {
-  const navigate = useNavigate()
+    const navigate = useNavigate()
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
-      passwordConfirmation: '',
-    },
-  })
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            firstName: '',
+            lastName: '',
+            email: '',
+            password: '',
+            passwordConfirmation: '',
+        },
+    })
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-        await agent.Account.register({
-            firstName: values.firstName,
-            lastName: values.lastName,
-            email: values.email,
-            password: values.password,
-            passwordAgain: values.passwordConfirmation
-        });
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            await agent.Account.register({
+                firstName: values.firstName,
+                lastName: values.lastName,
+                email: values.email,
+                password: values.password,
+                passwordAgain: values.passwordConfirmation
+            });
 
-        toast.success("Registration successful.");
-        setTimeout(() => {
-            navigate('/login');
-        }, 2500);
-    } catch (error) {
-        if (error instanceof AxiosError) {
-            const responseData = error.response?.data || {};
-            let messages = "";
+            toast.success("Registration successful.");
+            setTimeout(() => {
+                navigate('/login');
+            }, 2500);
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                const responseData = error.response?.data || {};
+                let messages = "";
 
-            // valdation error - should not happen because of same setting of validator as in BE
-            if (responseData.status === 400 &&
-                responseData.errors) {
-                const validationErrors = responseData.errors;
-                Object.keys(validationErrors).forEach((field) => {
-                    const message = validationErrors[field][0];
-                    messages = messages + "/n" + message;
-                });
-                console.error('Register error from BE validations:', error);
-                form.setError('root', {
-                    type: 'manual',
-                    message: `${messages}`,
-                });
-            // custom error on BE by StatusCodeGuard
-            } else if (responseData.ErrorMessage) {
-                console.error('Register error:', error);
-                form.setError('root', {
-                    type: 'manual',
-                    message: `${responseData.ErrorMessage}`,
-                });
+                // valdation error - should not happen because of same setting of validator as in BE
+                if (responseData.status === 400 &&
+                    responseData.errors) {
+                    const validationErrors = responseData.errors;
+                    Object.keys(validationErrors).forEach((field) => {
+                        const message = validationErrors[field][0];
+                        messages = messages + "/n" + message;
+                    });
+                    console.error('Register error from BE validations:', error);
+                    form.setError('root', {
+                        type: 'manual',
+                        message: `${messages}`,
+                    });
+                // custom error on BE by StatusCodeGuard
+                } else if (responseData.ErrorMessage) {
+                    console.error('Register error:', error);
+                    form.setError('root', {
+                        type: 'manual',
+                        message: `${responseData.ErrorMessage}`,
+                    });
+                } else {
+                    console.error("Unknown register error:", error);
+                    form.setError('root', {
+                        type: 'manual',
+                        message: 'An error occurred. Please try again.',
+                    });
+                }
+            // TODO: make prettier so the code is not duplicated
             } else {
                 console.error("Unknown register error:", error);
                 form.setError('root', {
@@ -106,16 +114,8 @@ export default function Register() {
                     message: 'An error occurred. Please try again.',
                 });
             }
-        // TODO: make prettier so the code is not duplicated
-        } else {
-            console.error("Unknown register error:", error);
-            form.setError('root', {
-                type: 'manual',
-                message: 'An error occurred. Please try again.',
-            });
         }
     }
-  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
