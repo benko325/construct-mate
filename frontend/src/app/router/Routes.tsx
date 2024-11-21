@@ -5,6 +5,7 @@ import Login from "@/features/user/Login";
 import Register from "@/features/user/Register";
 import Dashboard from "@/features/construction/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
+import NotFound from "@/features/NotFound";
 
 export const router = createBrowserRouter([
     {
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
             // TODO: uncomment when protected routes are acting correctly
 
             { path: '*', element: <Navigate replace to='/not-found' /> },
+            { path: 'not-found', element: <NotFound/> },
         ]
     }
 ])
