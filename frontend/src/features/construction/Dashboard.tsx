@@ -78,7 +78,7 @@ export default function Dashboard() {
         },
     });
 
-    const [dialogOpen, setDialogOpen] = useState(false); 
+    const [dialogOpen, setDialogOpen] = useState(false);
 
     const onSubmit = async (data: NewConstructionFormData) => {
         try {
@@ -351,6 +351,7 @@ export default function Dashboard() {
                     ))}
                 </div>
             </div>
+            {/* TODO: Add diaries where I am the contributor */}
             <ToastContainer position="bottom-right" autoClose={1500} hideProgressBar={true} closeOnClick pauseOnHover/>
         </div>
     );

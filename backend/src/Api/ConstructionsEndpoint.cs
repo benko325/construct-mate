@@ -111,8 +111,8 @@ public class ConstructionsEndpoint
     [ProducesResponseType<ConstructionModified>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
     [Authorize]
     [WolverinePatch("/constructions/{id}")]
     public static async Task<ConstructionModified> ModifyConstructionAsync([FromRoute] Guid id, [FromBody] ModifyConstructionRequest request,

@@ -1,3 +1,5 @@
+import { UUID } from "crypto";
+
 export interface LoginUserRequest {
     email: string;
     password: string;
@@ -26,6 +28,18 @@ export interface ChangeUserPasswordRequest {
 export interface CreateConstructionRequest {
     name: string;
     description: string;
+    startDate: string;
+    endDate: string;
+}
+
+export interface UpdateConstructionNameAndDescriptionRequest {
+    id: UUID;
+    name: string;
+    description: string;
+}
+
+export interface UpdateConstructionStartEndDateRequest {
+    constructionId: UUID;
     startDate: string;
     endDate: string;
 }

@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { ChangeUserPasswordRequest, CreateConstructionRequest, LoginUserRequest, RegisterUserRequest, SetUserNameAndEmailRequest } from "./types/requestTypes";
+import { ChangeUserPasswordRequest, CreateConstructionRequest, LoginUserRequest, RegisterUserRequest, SetUserNameAndEmailRequest, UpdateConstructionNameAndDescriptionRequest, UpdateConstructionStartEndDateRequest } from "./types/requestTypes";
 import { UUID } from "crypto";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -78,6 +78,8 @@ const Construction = {
     getConstructionById: (id: UUID) => requests.get(`/constructions/${id}`),
     getAllUnfinished: () => requests.get(`/constructions`),
     getAllFinished: () => requests.get(`/finished-constructions`),
+    updateNameAndDescription: (id: UUID, values: UpdateConstructionNameAndDescriptionRequest) => requests.patch(`/constructions/${id}`, values),
+    updateStartEndDate: (id: UUID, values: UpdateConstructionStartEndDateRequest) => requests.patch(`/constructions/${id}/start-end-date`, values),
 };
 
 const agent = {

@@ -26,7 +26,7 @@ public class ModifyConstructionCommandHandler
         var construction = await session.LoadAsync<Construction>(constructionCommand.Id, cancellationToken);
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound, "Construction to be modified not found");
         StatusCodeGuard.IsEqualTo(constructionCommand.RequesterId, construction.OwnerId,
-            StatusCodes.Status401Unauthorized, "User can only modify his constructions");
+            StatusCodes.Status405MethodNotAllowed, "User can only modify his constructions");
 
         return construction;
     }
