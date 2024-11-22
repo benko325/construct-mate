@@ -57,15 +57,23 @@ export default function ConstructionData() {
 
     const onSubmitUpdateNameDescription = async (data: UpdateConstructionNameDescriptionFormData) => {
         try {
-            await agent.Construction.updateNameAndDescription(safeId, {
+            const updatedConstructionData = await agent.Construction.updateNameAndDescription(safeId, {
                 id: safeId,
                 name: data.name,
                 description: data.description,
             });
             toast.success("Stavba bola upravená.");
+
+            setConstructionData(prevData => ({
+                ...prevData!,
+                name: updatedConstructionData.name,
+                description: updatedConstructionData.description ?? '',
+            }));
+
+            updateConstructionNameDescriptionForm.reset({name: updatedConstructionData.name, description: updatedConstructionData.description});
+
             setTimeout(() => {
                 setEditNameDescriptionDialogOpen(false);
-                window.location.href = window.location.href;
             }, 2500);
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -122,15 +130,22 @@ export default function ConstructionData() {
 
     const onSubmitUpdateStartEndDate = async (data: UpdateStartEndDateFormData) => {
         try {
-            await agent.Construction.updateStartEndDate(safeId, {
+            const updatedConstructionData = await agent.Construction.updateStartEndDate(safeId, {
                 constructionId: safeId,
                 startDate: format(data.startDate, 'yyyy-MM-dd'),
                 endDate: format(data.endDate, 'yyyy-MM-dd'),
             });
             toast.success("Dátumy boli upravené.");
+
+            setConstructionData(prevData => ({
+                ...prevData!,
+                startDate: updatedConstructionData.newStartDate,
+                endDate: updatedConstructionData.newEndDate,
+            }));
+            updateStartEndDateForm.reset({startDate: new Date(updatedConstructionData.newStartDate ?? todayDateString), endDate: new Date(updatedConstructionData.newEndDate ?? todayDateString)});
+
             setTimeout(() => {
                 setEditStartEndDateDialogOpen(false);
-                window.location.href = window.location.href;
             }, 2500);
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -175,19 +190,20 @@ export default function ConstructionData() {
         }
     };
 
+    const fetchConstructionData = async () => {
+        try {
+            const response = await agent.Construction.getConstructionById(safeId);
+            setConstructionData(response);
+            updateConstructionNameDescriptionForm.reset({name: constructionData?.name, description: constructionData?.description ?? ''});
+            updateStartEndDateForm.reset({startDate: new Date(constructionData?.startDate ?? todayDateString), endDate: new Date(constructionData?.endDate ?? todayDateString)});
+            setLoading(false);
+        } catch (error) {
+            console.error("Failed to fetch construction data:", error);
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchConstructionData = async () => {
-            try {
-                const response = await agent.Construction.getConstructionById(safeId);
-                setConstructionData(response);
-                updateConstructionNameDescriptionForm.reset({name: constructionData?.name, description: constructionData?.description ?? ''});
-                updateStartEndDateForm.reset({startDate: new Date(constructionData?.startDate ?? todayDateString), endDate: new Date(constructionData?.endDate ?? todayDateString)});
-                setLoading(false);
-            } catch (error) {
-                console.error("Failed to fetch construction data:", error);
-                setLoading(false);
-            }
-        };
         fetchConstructionData();
     }, [id]);
 
@@ -205,86 +221,96 @@ export default function ConstructionData() {
             <div className="flex justify-center items-start p-6 bg-gray-100 min-h-screen">
                 <Card className="max-w-4xl w-full p-6">
                     <CardHeader className="flex items-center justify-between">
-                        <div className="flex items-center">
+                        <div className="flex items-center w-full">
                             <Avatar className="w-24 h-24 mr-6">
                                 <AvatarImage src={apiUrl + constructionData.profilePictureUrl} alt={constructionData.id} />
                                 <AvatarFallback>{constructionData.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                             </Avatar>
-                            <div>
+
+                            <div className="flex flex-col">
                                 <CardTitle className="text-2xl font-bold">
                                     {constructionData.name}
                                 </CardTitle>
                                 <p className="text-gray-700 mt-1">{constructionData.description}</p>
                             </div>
                         </div>
-                        <Dialog open={editNameDescriptionDialogOpen} onOpenChange={setEditNameDescriptionDialogOpen}>
-                            <DialogTrigger asChild className="mb-2">
-                                <Button variant="outline" size="sm" className="bg-blue-100 hover:bg-blue-50">
-                                    Upraviť názov a opis
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                    <DialogTitle>Upravte názov a opis stavby</DialogTitle>
-                                    <DialogDescription>
-                                        Upravte názov a opis stavby vyplnením potrebných údajov. <br />
-                                        Kliknite "Upraviť názov a opis stavby" pre upravenie.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-2 py-2">
-                                    <Form {...updateConstructionNameDescriptionForm}>
-                                        <form onSubmit={updateConstructionNameDescriptionForm.handleSubmit(onSubmitUpdateNameDescription)} className="space-y-6">
-                                            <FormField
-                                                control={updateConstructionNameDescriptionForm.control}
-                                                name="name"
-                                                render={({ field }) => (
-                                                <FormItem className="flex-1">
-                                                    <FormLabel>Názov</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Novostavba Myjava" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
+                        <div className="flex w-full">
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm" className="bg-orange-100 hover:bg-orange-50">
+                                        Nová fotka
+                                    </Button>
+                                </DialogTrigger>
+                            </Dialog>
+                            <Dialog open={editNameDescriptionDialogOpen} onOpenChange={setEditNameDescriptionDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm" className="bg-blue-100 hover:bg-blue-50 ml-6">
+                                        Upraviť názov a opis
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                        <DialogTitle>Upravte názov a opis stavby</DialogTitle>
+                                        <DialogDescription>
+                                            Upravte názov a opis stavby vyplnením potrebných údajov. <br />
+                                            Kliknite "Upraviť názov a opis stavby" pre upravenie.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="grid gap-2 py-2">
+                                        <Form {...updateConstructionNameDescriptionForm}>
+                                            <form onSubmit={updateConstructionNameDescriptionForm.handleSubmit(onSubmitUpdateNameDescription)} className="space-y-6">
+                                                <FormField
+                                                    control={updateConstructionNameDescriptionForm.control}
+                                                    name="name"
+                                                    render={({ field }) => (
+                                                    <FormItem className="flex-1">
+                                                        <FormLabel>Názov</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="Novostavba Myjava" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={updateConstructionNameDescriptionForm.control}
+                                                    name="description"
+                                                    render={({ field }) => (
+                                                    <FormItem className="flex-1">
+                                                        <FormLabel>Opis (nepovinný)</FormLabel>
+                                                        <FormControl>
+                                                            <Textarea
+                                                                placeholder="Novostavba na Staromyjavskej ulici, ..."
+                                                                {...field}
+                                                                className=""
+                                                                rows={1}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                    )}
+                                                />
+                                                {updateConstructionNameDescriptionForm.formState.errors.root && (
+                                                <div className="text-red-500 text-sm mt-2">
+                                                    {updateConstructionNameDescriptionForm.formState.errors.root.message}
+                                                </div>
                                                 )}
-                                            />
-                                            <FormField
-                                                control={updateConstructionNameDescriptionForm.control}
-                                                name="description"
-                                                render={({ field }) => (
-                                                <FormItem className="flex-1">
-                                                    <FormLabel>Opis (nepovinný)</FormLabel>
-                                                    <FormControl>
-                                                        <Textarea
-                                                            placeholder="Novostavba na Staromyjavskej ulici, ..."
-                                                            {...field}
-                                                            className=""
-                                                            rows={1}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                                )}
-                                            />
-                                            {updateConstructionNameDescriptionForm.formState.errors.root && (
-                                            <div className="text-red-500 text-sm mt-2">
-                                                {updateConstructionNameDescriptionForm.formState.errors.root.message}
-                                            </div>
-                                            )}
-                                            <Button type="submit" className="w-full" disabled={updateConstructionNameDescriptionForm.formState.isSubmitting}>
-                                                {updateConstructionNameDescriptionForm.formState.isSubmitting ? (
-                                                    <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Prosím počkajte...
-                                                    </>
-                                                ) : (
-                                                    'Upraviť názov a opis stavby'
-                                                )}
-                                            </Button>
-                                        </form>
-                                    </Form>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
+                                                <Button type="submit" className="w-full" disabled={updateConstructionNameDescriptionForm.formState.isSubmitting}>
+                                                    {updateConstructionNameDescriptionForm.formState.isSubmitting ? (
+                                                        <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Prosím počkajte...
+                                                        </>
+                                                    ) : (
+                                                        'Upraviť názov a opis stavby'
+                                                    )}
+                                                </Button>
+                                            </form>
+                                        </Form>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </CardHeader>
 
                     <CardContent className="mt-4">
@@ -302,7 +328,7 @@ export default function ConstructionData() {
                                 </p>
                             </div>
                             <Dialog open={editStartEndDateDialogOpen} onOpenChange={setEditStartEndDateDialogOpen}>
-                                <DialogTrigger asChild className="mb-2">
+                                <DialogTrigger asChild>
                                     <Button variant="outline" size="sm" className="bg-blue-100 hover:bg-blue-50">
                                         Upraviť dátum začiatku a konca
                                     </Button>

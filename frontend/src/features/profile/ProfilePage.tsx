@@ -114,7 +114,7 @@ export default function ProfilePage() {
                 const responseData = error.response?.data || {};
                 let messages = "";
     
-                // valdation error - should not happen because of same setting of validator as in BE
+                // valodation error - should not happen because of same setting of validator as in BE
                 if (responseData.status === 400 &&
                     responseData.errors) {
                     const validationErrors = responseData.errors;
