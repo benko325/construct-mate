@@ -19,7 +19,7 @@ import {
 import { Input } from '@/components/ui/input.tsx';
 import { Loader2 } from "lucide-react";
 import { useForm } from 'react-hook-form';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { AxiosError } from 'axios';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -352,7 +352,6 @@ export default function Dashboard() {
                 </div>
             </div>
             {/* TODO: Add diaries where I am the contributor */}
-            <ToastContainer position="bottom-right" autoClose={1500} hideProgressBar={true} closeOnClick pauseOnHover/>
         </div>
     );
 }

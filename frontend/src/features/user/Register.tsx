@@ -19,7 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Link, useNavigate } from 'react-router-dom'
 import agent from '@/app/api/agent'
 import { AxiosError } from 'axios'
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // validations match one's on BE
@@ -79,7 +79,7 @@ export default function Register() {
                 const responseData = error.response?.data || {};
                 let messages = "";
 
-                // valdation error - should not happen because of same setting of validator as in BE
+                // validation error - should not happen because of same setting of validator as in BE
                 if (responseData.status === 400 &&
                     responseData.errors) {
                     const validationErrors = responseData.errors;
@@ -220,7 +220,6 @@ export default function Register() {
                 </div>
             </CardContent>
         </Card>
-        <ToastContainer position="bottom-right" autoClose={1500} hideProgressBar={true} closeOnClick pauseOnHover/>
     </div>
   )
 }

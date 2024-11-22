@@ -20,7 +20,7 @@ import {
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import agent from "@/app/api/agent";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -357,7 +357,6 @@ export default function ProfilePage() {
                     </TabsContent>
                 </Tabs>
             </div>
-            <ToastContainer position="bottom-right" autoClose={1500} hideProgressBar={true} closeOnClick pauseOnHover/>
         </div>
     )
 }
