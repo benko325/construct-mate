@@ -16,8 +16,9 @@ import { Loader2 } from "lucide-react";
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from "react-hook-form";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { AxiosError } from "axios";
+import FileUploadForm from "../FileUploadForm";
 
 const apiUrl = import.meta.env.VITE_API_URL + "/" || 'http://localhost:5000/';
 
@@ -190,6 +191,15 @@ export default function ConstructionData() {
         }
     };
 
+    const [uploadProfilePictureDialogOpen, setUploadProfilePictureDialogOpen] = useState(false);
+
+    const updateField = (field: string, value: string) => {
+        setConstructionData((prevData) => ({
+            ...prevData!,
+            [field]: value,
+        }));
+    };
+
     const fetchConstructionData = async () => {
         try {
             const response = await agent.Construction.getConstructionById(safeId);
@@ -226,7 +236,6 @@ export default function ConstructionData() {
                                 <AvatarImage src={apiUrl + constructionData.profilePictureUrl} alt={constructionData.id} />
                                 <AvatarFallback>{constructionData.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                             </Avatar>
-
                             <div className="flex flex-col">
                                 <CardTitle className="text-2xl font-bold">
                                     {constructionData.name}
@@ -235,12 +244,24 @@ export default function ConstructionData() {
                             </div>
                         </div>
                         <div className="flex w-full">
-                            <Dialog>
+                            <Dialog open={uploadProfilePictureDialogOpen} onOpenChange={setUploadProfilePictureDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button variant="outline" size="sm" className="bg-orange-100 hover:bg-orange-50">
                                         Nová fotka
                                     </Button>
                                 </DialogTrigger>
+                                <DialogContent className="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                        <DialogTitle>Nahrajte novú profilovú fotku pre stavbu</DialogTitle>
+                                    </DialogHeader>
+                                    <FileUploadForm
+                                        uploadFunction={agent.Construction.uploadProfilePicture}
+                                        id={safeId}
+                                        setDialogOpen={setUploadProfilePictureDialogOpen}
+                                        responseFieldValue="newProfilePictureUrl"
+                                        updateField={(value) => updateField('profilePictureUrl', value)}
+                                    />
+                                </DialogContent>
                             </Dialog>
                             <Dialog open={editNameDescriptionDialogOpen} onOpenChange={setEditNameDescriptionDialogOpen}>
                                 <DialogTrigger asChild>
@@ -404,7 +425,6 @@ export default function ConstructionData() {
                     </CardContent>
                 </Card>
             </div>
-            <ToastContainer position="bottom-right" autoClose={1500} hideProgressBar={true} closeOnClick pauseOnHover/>
         </div>
     );
 }
