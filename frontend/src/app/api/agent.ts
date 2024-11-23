@@ -81,6 +81,7 @@ const Construction = {
     updateNameAndDescription: (id: UUID, values: UpdateConstructionNameAndDescriptionRequest) => requests.patch(`/constructions/${id}`, values),
     updateStartEndDate: (id: UUID, values: UpdateConstructionStartEndDateRequest) => requests.patch(`/constructions/${id}/start-end-date`, values),
     uploadProfilePicture: (id: UUID, data: FormData) => requests.postForm(`/constructions/${id}/profile-picture`, data),
+    uploadBuildingPermit: (id: UUID, data: FormData) => requests.postForm(`/constructions/${id}/building-permit`, data),
 };
 
 const agent = {

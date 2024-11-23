@@ -10,11 +10,12 @@ type FileUploadComponentProps = {
     uploadFunction: (id: UUID, data: FormData) => Promise<any>;
     id: UUID;
     setDialogOpen?: (open: boolean) => void; // Optional prop to control dialog state
-    responseFieldValue: string;
+    responseFieldValue: string; // value of field in response object that contains updated value 
     updateField: (value: string) => void;
+    fileFormats: string; // formats that are accepted by file upload component
 };
 
-const FileUploadForm = ({ uploadFunction, id, setDialogOpen, updateField, responseFieldValue }: FileUploadComponentProps) => {
+const FileUploadForm = ({ uploadFunction, id, setDialogOpen, updateField, responseFieldValue, fileFormats }: FileUploadComponentProps) => {
     const [file, setFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -67,7 +68,7 @@ const FileUploadForm = ({ uploadFunction, id, setDialogOpen, updateField, respon
                         id="file"
                         name="file"
                         onChange={handleFileChange}
-                        accept="*/*" // Modify this to match accepted file types
+                        accept={fileFormats}
                     />
                 </FormItem>
 

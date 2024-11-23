@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import FileUploadForm from "../FileUploadForm";
+import FileViewer from "../FileViewer";
 
 const apiUrl = import.meta.env.VITE_API_URL + "/" || 'http://localhost:5000/';
 
@@ -213,6 +214,10 @@ export default function ConstructionData() {
         }
     };
 
+    const [uploadBuildingPermitDialogOpen, setUploadBuildingPermitDialogOpen] = useState(false);
+
+    const [isViewerOpen, setIsViewerOpen] = useState(false);
+
     useEffect(() => {
         fetchConstructionData();
     }, [id]);
@@ -260,6 +265,7 @@ export default function ConstructionData() {
                                         setDialogOpen={setUploadProfilePictureDialogOpen}
                                         responseFieldValue="newProfilePictureUrl"
                                         updateField={(value) => updateField('profilePictureUrl', value)}
+                                        fileFormats="image/jpeg, image/png, image/svg"
                                     />
                                 </DialogContent>
                             </Dialog>
@@ -421,6 +427,74 @@ export default function ConstructionData() {
                                     </div>
                                 </DialogContent>
                             </Dialog>
+                        </div>
+                        <h2 className="mt-10 text-1xl font-semibold text-blue-800">
+                            Dôležité súbory k stavbe:
+                        </h2>
+                        <div className="flex justify-between items-start mt-4">
+                            <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
+                                <span className="font-medium text-gray-600">Stavebné povolenie:</span>
+                                <Dialog open={uploadBuildingPermitDialogOpen} onOpenChange={setUploadBuildingPermitDialogOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-orange-50">
+                                            Nahrať povolenie
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                            <DialogTitle>Nahrajte nové stavebné povolenie</DialogTitle>
+                                        </DialogHeader>
+                                        <FileUploadForm
+                                            uploadFunction={agent.Construction.uploadBuildingPermit}
+                                            id={safeId}
+                                            setDialogOpen={setUploadBuildingPermitDialogOpen}
+                                            responseFieldValue="buildingPermitPath"
+                                            updateField={(value) => updateField('buildingPermitFileUrl', value)}
+                                            fileFormats="application/pdf"
+                                        />
+                                    </DialogContent>
+                                </Dialog>
+                                <Button onClick={() => setIsViewerOpen(true)}>Otvoriť povolenie</Button>
+                                <FileViewer
+                                    fileUrl={apiUrl + constructionData.buildingPermitFileUrl}
+                                    fileType="pdf"
+                                    fileName="Stavebné povolenie"
+                                    open={isViewerOpen}
+                                    onClose={() => setIsViewerOpen(false)}
+                                />
+                            </div>
+                            <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
+                                <span className="font-medium text-gray-600">Kolaudácia:</span>
+                                <p className="text-gray-800">
+                                    {/* Other content */}
+                                    Some other info here
+                                </p>
+                                {/* <Button onClick={() => setIsViewerOpen(true)}>Open File Viewer</Button>
+
+                                <FileViewer
+                                    fileUrl={apiUrl + constructionData.profilePictureUrl}
+                                    fileType={fileType}
+                                    fileName={fileName}
+                                    open={isViewerOpen}
+                                    onClose={() => setIsViewerOpen(false)}
+                                /> */}
+                            </div>
+                            <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
+                                <span className="font-medium text-gray-600">Odovzdanie stavby:</span>
+                                <p className="text-gray-800">
+                                    {/* Other content */}
+                                    Some other info here
+                                </p>
+                                {/* <Button onClick={() => setIsViewerOpen(true)}>Open File Viewer</Button>
+
+                                <FileViewer
+                                    fileUrl={apiUrl + constructionData.profilePictureUrl}
+                                    fileType={fileType}
+                                    fileName={fileName}
+                                    open={isViewerOpen}
+                                    onClose={() => setIsViewerOpen(false)}
+                                /> */}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
