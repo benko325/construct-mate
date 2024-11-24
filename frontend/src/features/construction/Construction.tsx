@@ -459,7 +459,12 @@ export default function ConstructionData() {
                                         />
                                     </DialogContent>
                                 </Dialog>
-                                <Button onClick={() => setIsBuildingPermitViewerOpen(true)}>Otvoriť povolenie</Button>
+                                <Button
+                                    disabled={constructionData.buildingPermitFileUrl == null}
+                                    onClick={() => setIsBuildingPermitViewerOpen(true)}
+                                >
+                                    Otvoriť povolenie
+                                </Button>
                                 <FileViewer
                                     fileUrl={apiUrl + constructionData.buildingPermitFileUrl}
                                     fileType="pdf"
@@ -490,7 +495,12 @@ export default function ConstructionData() {
                                         />
                                     </DialogContent>
                                 </Dialog>
-                                <Button onClick={() => setIsConstructionApprovalViewerOpen(true)}>Otvoriť kolaudáciu</Button>
+                                <Button
+                                    disabled={constructionData.constructionApprovalFileUrl == null}
+                                    onClick={() => setIsConstructionApprovalViewerOpen(true)}
+                                >
+                                    Otvoriť kolaudáciu
+                                </Button>
                                 <FileViewer
                                     fileUrl={apiUrl + constructionData.constructionApprovalFileUrl}
                                     fileType="pdf"
@@ -521,8 +531,12 @@ export default function ConstructionData() {
                                         />
                                     </DialogContent>
                                 </Dialog>
-                                <Button onClick={() => setIsConstructionHandoverViewerOpen(true)}>Otvoriť odovzdanie stavby</Button>
-
+                                <Button
+                                    disabled={constructionData.constructionHandoverFileUrl == null}
+                                    onClick={() => setIsConstructionHandoverViewerOpen(true)}
+                                >
+                                    Otvoriť odovzdanie stavby
+                                </Button>
                                 <FileViewer
                                     fileUrl={apiUrl + constructionData.constructionHandoverFileUrl}
                                     fileType="pdf"
