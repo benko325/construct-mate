@@ -170,8 +170,6 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <TopBar />
-
             <div className="p-6">
                 <div className="flex justify-between items-center">
                     <h2 className="text-2xl font-semibold mb-2">Moje aktuálne stavby</h2>

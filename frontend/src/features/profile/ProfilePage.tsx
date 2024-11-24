@@ -210,7 +210,6 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
-            <TopBar />
             <div className="flex-grow flex items-center justify-center">
                 <Tabs defaultValue="name-email" className="w-[400px]">
                     <TabsList>

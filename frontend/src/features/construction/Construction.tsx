@@ -230,14 +230,12 @@ export default function ConstructionData() {
     if (loading) return <div className="text-center">Načítavam údaje o stavbe...</div>;
     if (!constructionData) return (
         <div className="min-h-screen bg-gray-100">
-            <TopBar />
             <div className="text-center">Dáta o danej stavbe neboli nájdené</div>
         </div>
     );
     
     return (
         <div className="min-h-screen bg-gray-100">
-            <TopBar />
             <div className="flex justify-center items-start p-6 bg-gray-100 min-h-screen">
                 <Card className="max-w-4xl w-full p-6">
                     <CardHeader className="flex items-center justify-between">
