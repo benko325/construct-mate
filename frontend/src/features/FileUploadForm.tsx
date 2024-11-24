@@ -11,7 +11,7 @@ type FileUploadComponentProps = {
     id: UUID;
     setDialogOpen?: (open: boolean) => void; // Optional prop to control dialog state
     responseFieldValue: string; // value of field in response object that contains updated value 
-    updateField: (value: string) => void;
+    updateField: (value: string) => void; // function that updates a field in the showed object, so the new file is showed 
     fileFormats: string; // formats that are accepted by file upload component
 };
 
@@ -27,7 +27,6 @@ const FileUploadForm = ({ uploadFunction, id, setDialogOpen, updateField, respon
         }
     };
 
-    // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 

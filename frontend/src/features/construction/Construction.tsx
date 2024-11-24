@@ -214,13 +214,18 @@ export default function ConstructionData() {
         }
     };
 
-    const [uploadBuildingPermitDialogOpen, setUploadBuildingPermitDialogOpen] = useState(false);
-
-    const [isViewerOpen, setIsViewerOpen] = useState(false);
-
     useEffect(() => {
         fetchConstructionData();
     }, [id]);
+
+    const [uploadBuildingPermitDialogOpen, setUploadBuildingPermitDialogOpen] = useState(false);
+    const [isBuildingPermitViewerOpen, setIsBuildingPermitViewerOpen] = useState(false);
+
+    const [uploadConstructionApprovalDialogOpen, setUploadConstructionApprovalDialogOpen] = useState(false);
+    const [isConstructionApprovalViewerOpen, setIsConstructionApprovalViewerOpen] = useState(false);
+
+    const [uploadConstructionHandoverDialogOpen, setUploadConstructionHandoverDialogOpen] = useState(false);
+    const [isConstructionHandoverViewerOpen, setIsConstructionHandoverViewerOpen] = useState(false);
 
     if (loading) return <div className="text-center">Načítavam údaje o stavbe...</div>;
     if (!constructionData) return (
@@ -454,46 +459,77 @@ export default function ConstructionData() {
                                         />
                                     </DialogContent>
                                 </Dialog>
-                                <Button onClick={() => setIsViewerOpen(true)}>Otvoriť povolenie</Button>
+                                <Button onClick={() => setIsBuildingPermitViewerOpen(true)}>Otvoriť povolenie</Button>
                                 <FileViewer
                                     fileUrl={apiUrl + constructionData.buildingPermitFileUrl}
                                     fileType="pdf"
                                     fileName="Stavebné povolenie"
-                                    open={isViewerOpen}
-                                    onClose={() => setIsViewerOpen(false)}
+                                    open={isBuildingPermitViewerOpen}
+                                    onClose={() => setIsBuildingPermitViewerOpen(false)}
                                 />
                             </div>
                             <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
                                 <span className="font-medium text-gray-600">Kolaudácia:</span>
-                                <p className="text-gray-800">
-                                    {/* Other content */}
-                                    Some other info here
-                                </p>
-                                {/* <Button onClick={() => setIsViewerOpen(true)}>Open File Viewer</Button>
-
+                                <Dialog open={uploadConstructionApprovalDialogOpen} onOpenChange={setUploadConstructionApprovalDialogOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-orange-50">
+                                            Nahrať dokumenty
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                            <DialogTitle>Nahrajte nové dokumenty ku kolaudácii</DialogTitle>
+                                        </DialogHeader>
+                                        <FileUploadForm
+                                            uploadFunction={agent.Construction.uploadConstructionApproval}
+                                            id={safeId}
+                                            setDialogOpen={setUploadConstructionApprovalDialogOpen}
+                                            responseFieldValue="constructionApprovalPath"
+                                            updateField={(value) => updateField('constructionApprovalFileUrl', value)}
+                                            fileFormats="application/pdf"
+                                        />
+                                    </DialogContent>
+                                </Dialog>
+                                <Button onClick={() => setIsConstructionApprovalViewerOpen(true)}>Otvoriť kolaudáciu</Button>
                                 <FileViewer
-                                    fileUrl={apiUrl + constructionData.profilePictureUrl}
-                                    fileType={fileType}
-                                    fileName={fileName}
-                                    open={isViewerOpen}
-                                    onClose={() => setIsViewerOpen(false)}
-                                /> */}
+                                    fileUrl={apiUrl + constructionData.constructionApprovalFileUrl}
+                                    fileType="pdf"
+                                    fileName="Kolaudácia"
+                                    open={isConstructionApprovalViewerOpen}
+                                    onClose={() => setIsConstructionApprovalViewerOpen(false)}
+                                />
                             </div>
                             <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
                                 <span className="font-medium text-gray-600">Odovzdanie stavby:</span>
-                                <p className="text-gray-800">
-                                    {/* Other content */}
-                                    Some other info here
-                                </p>
-                                {/* <Button onClick={() => setIsViewerOpen(true)}>Open File Viewer</Button>
+                                <Dialog open={uploadConstructionHandoverDialogOpen} onOpenChange={setUploadConstructionHandoverDialogOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-orange-50">
+                                            Nahrať dokumenty
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                            <DialogTitle>Nahrajte nové dokumenty k odovzdaniu stavby</DialogTitle>
+                                        </DialogHeader>
+                                        <FileUploadForm
+                                            uploadFunction={agent.Construction.uploadConstructionHandover}
+                                            id={safeId}
+                                            setDialogOpen={setUploadConstructionHandoverDialogOpen}
+                                            responseFieldValue="constructionHandoverPath"
+                                            updateField={(value) => updateField('constructionHandoverFileUrl', value)}
+                                            fileFormats="application/pdf"
+                                        />
+                                    </DialogContent>
+                                </Dialog>
+                                <Button onClick={() => setIsConstructionHandoverViewerOpen(true)}>Otvoriť odovzdanie stavby</Button>
 
                                 <FileViewer
-                                    fileUrl={apiUrl + constructionData.profilePictureUrl}
-                                    fileType={fileType}
-                                    fileName={fileName}
-                                    open={isViewerOpen}
-                                    onClose={() => setIsViewerOpen(false)}
-                                /> */}
+                                    fileUrl={apiUrl + constructionData.constructionHandoverFileUrl}
+                                    fileType="pdf"
+                                    fileName="Odovzdanie stavby"
+                                    open={isConstructionHandoverViewerOpen}
+                                    onClose={() => setIsConstructionHandoverViewerOpen(false)}
+                                />
                             </div>
                         </div>
                     </CardContent>
