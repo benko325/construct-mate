@@ -82,8 +82,11 @@ const Construction = {
     updateStartEndDate: (id: UUID, values: UpdateConstructionStartEndDateRequest) => requests.patch(`/constructions/${id}/start-end-date`, values),
     uploadProfilePicture: (id: UUID, data: FormData) => requests.postForm(`/constructions/${id}/profile-picture`, data),
     uploadBuildingPermit: (id: UUID, data: FormData) => requests.postForm(`/constructions/${id}/building-permit`, data),
+    deleteBuildingPermit: (id: UUID) => requests.del(`/constructions/${id}/building-permit`),
     uploadConstructionApproval: (id: UUID, data: FormData) => requests.postForm(`/constructions/${id}/construction-approval`, data),
+    deleteConstructionApproval: (id: UUID) => requests.del(`/constructions/${id}/construction-approval`),
     uploadConstructionHandover: (id: UUID, data: FormData) => requests.postForm(`/constructions/${id}/construction-handover`, data),
+    deleteConstructionHandover: (id: UUID) => requests.del(`/constructions/${id}/construction-handover`),
 };
 
 const agent = {

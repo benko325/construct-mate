@@ -20,6 +20,7 @@ import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import FileUploadForm from "../FileUploadForm";
 import FileViewer from "../FileViewer";
+import ConfirmationDialog from "../ConfirmationDialog";
 
 const apiUrl = import.meta.env.VITE_API_URL + "/" || 'http://localhost:5000/';
 
@@ -192,15 +193,6 @@ export default function ConstructionData() {
         }
     };
 
-    const [uploadProfilePictureDialogOpen, setUploadProfilePictureDialogOpen] = useState(false);
-
-    const updateField = (field: string, value: string) => {
-        setConstructionData((prevData) => ({
-            ...prevData!,
-            [field]: value,
-        }));
-    };
-
     const fetchConstructionData = async () => {
         try {
             const response = await agent.Construction.getConstructionById(safeId);
@@ -217,6 +209,114 @@ export default function ConstructionData() {
     useEffect(() => {
         fetchConstructionData();
     }, [id]);
+
+    const [isDeletePermitConfirmationOpen, setIsDeletePermitConfirmationOpen] = useState(false);
+    const onDeleteBuildingPermit = async () => {
+        try {
+            if (constructionData) {
+                await agent.Construction.deleteBuildingPermit(constructionData.id);
+                setConstructionData((prevState) => ({
+                    ...prevState!,
+                    buildingPermitFileUrl: null
+                }));
+                toast.success("Stavebné povolenie úspešne vymazané.");
+                setTimeout(() => {
+                    setIsDeletePermitConfirmationOpen(false);
+                }, 2500);
+            } else {
+                toast.error("Nepodarilo sa načítať dáta o stavbe.");
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                const responseData = error.response?.data || {};
+                if (responseData.ErrorMessage) {
+                    console.error('Delete building permit error:', error);
+                    toast.error(`${responseData.ErrorMessage}`);
+                } else {
+                    console.error('Delete building permit error:', error);
+                    toast.error("Nastala chyba pri mazaní stavebného povolenia");
+                }
+            } else {
+                console.error('Delete building permit error:', error);
+                toast.error("Nastala neočakávaná chyba pri mazaní stavebného povolenia");
+            }
+        }
+    }
+
+    const [isDeleteConstructionApprovalConfirmationOpen, setIsDeleteConstructionApprovalConfirmationOpen] = useState(false);
+    const onDeleteConstructionApproval = async () => {
+        try {
+            if (constructionData) {
+                await agent.Construction.deleteConstructionApproval(constructionData.id);
+                setConstructionData((prevState) => ({
+                    ...prevState!,
+                    constructionApprovalFileUrl: null
+                }));
+                toast.success("Kolaudácia úspešne vymazaná.");
+                setTimeout(() => {
+                    setIsDeleteConstructionApprovalConfirmationOpen(false);
+                }, 2500);
+            } else {
+                toast.error("Nepodarilo sa načítať dáta o stavbe.");
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                const responseData = error.response?.data || {};
+                if (responseData.ErrorMessage) {
+                    console.error('Delete construction approval error:', error);
+                    toast.error(`${responseData.ErrorMessage}`);
+                } else {
+                    console.error('Delete construction approval error:', error);
+                    toast.error("Nastala chyba pri mazaní kolaudácie");
+                }
+            } else {
+                console.error('Delete construction approval error:', error);
+                toast.error("Nastala neočakávaná chyba pri mazaní kolaudácie");
+            }
+        }
+    }
+
+    const [isDeleteConstructionHandoverConfirmationOpen, setIsDeleteConstructionHandoverConfirmationOpen] = useState(false);
+    const onDeleteConstructionHandover = async () => {
+        try {
+            if (constructionData) {
+                await agent.Construction.deleteConstructionHandover(constructionData.id);
+                setConstructionData((prevState) => ({
+                    ...prevState!,
+                    constructionHandoverFileUrl: null
+                }));
+                toast.success("Odovzdanie stavby úspešne vymazané.");
+                setTimeout(() => {
+                    setIsDeleteConstructionHandoverConfirmationOpen(false);
+                }, 2500);
+            } else {
+                toast.error("Nepodarilo sa načítať dáta o stavbe.");
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                const responseData = error.response?.data || {};
+                if (responseData.ErrorMessage) {
+                    console.error('Delete construction handover error:', error);
+                    toast.error(`${responseData.ErrorMessage}`);
+                } else {
+                    console.error('Delete construction handover error:', error);
+                    toast.error("Nastala chyba pri mazaní odovzdania");
+                }
+            } else {
+                console.error('Delete building permit error:', error);
+                toast.error("Nastala neočakávaná chyba pri mazaní odovzdania");
+            }
+        }
+    }
+
+    const [uploadProfilePictureDialogOpen, setUploadProfilePictureDialogOpen] = useState(false);
+
+    const updateField = (field: string, value: string) => {
+        setConstructionData((prevData) => ({
+            ...prevData!,
+            [field]: value,
+        }));
+    };
 
     const [uploadBuildingPermitDialogOpen, setUploadBuildingPermitDialogOpen] = useState(false);
     const [isBuildingPermitViewerOpen, setIsBuildingPermitViewerOpen] = useState(false);
@@ -282,8 +382,7 @@ export default function ConstructionData() {
                                     <DialogHeader>
                                         <DialogTitle>Upravte názov a opis stavby</DialogTitle>
                                         <DialogDescription>
-                                            Upravte názov a opis stavby vyplnením potrebných údajov. <br />
-                                            Kliknite "Upraviť názov a opis stavby" pre upravenie.
+                                            Upravte názov a opis stavby vyplnením potrebných údajov.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="grid gap-2 py-2">
@@ -367,8 +466,7 @@ export default function ConstructionData() {
                                     <DialogHeader>
                                         <DialogTitle>Upravte dátum začiatku a konca stavby</DialogTitle>
                                         <DialogDescription>
-                                            Upravte dátum začiatku a konca stavby vyplnením potrebných údajov. <br />
-                                            Kliknite "Upraviť dátum začiatku a konca stavby" pre upravenie.
+                                            Upravte dátum začiatku a konca stavby vyplnením potrebných údajov.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="grid gap-2 py-2">
@@ -439,7 +537,7 @@ export default function ConstructionData() {
                                 <span className="font-medium text-gray-600">Stavebné povolenie:</span>
                                 <Dialog open={uploadBuildingPermitDialogOpen} onOpenChange={setUploadBuildingPermitDialogOpen}>
                                     <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-orange-50">
+                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-purple-50">
                                             Nahrať povolenie
                                         </Button>
                                     </DialogTrigger>
@@ -458,6 +556,7 @@ export default function ConstructionData() {
                                     </DialogContent>
                                 </Dialog>
                                 <Button
+                                    className="bg-black hover:bg-gray-700"
                                     disabled={constructionData.buildingPermitFileUrl == null}
                                     onClick={() => setIsBuildingPermitViewerOpen(true)}
                                 >
@@ -470,12 +569,26 @@ export default function ConstructionData() {
                                     open={isBuildingPermitViewerOpen}
                                     onClose={() => setIsBuildingPermitViewerOpen(false)}
                                 />
+                                <Button
+                                    disabled={constructionData.buildingPermitFileUrl == null}
+                                    className="bg-red-600 hover:bg-red-400"
+                                    onClick={() => setIsDeletePermitConfirmationOpen(true)}
+                                >
+                                    Zmazať povolenie
+                                </Button>
+                                <ConfirmationDialog
+                                    isOpen={isDeletePermitConfirmationOpen}
+                                    onClose={() => setIsDeletePermitConfirmationOpen(false)}
+                                    onConfirm={onDeleteBuildingPermit}
+                                    message="Ste si istý, že chcete vymazať stavebné povolenie?"
+                                >
+                                </ConfirmationDialog>
                             </div>
                             <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
                                 <span className="font-medium text-gray-600">Kolaudácia:</span>
                                 <Dialog open={uploadConstructionApprovalDialogOpen} onOpenChange={setUploadConstructionApprovalDialogOpen}>
                                     <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-orange-50">
+                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-purple-50">
                                             Nahrať dokumenty
                                         </Button>
                                     </DialogTrigger>
@@ -494,6 +607,7 @@ export default function ConstructionData() {
                                     </DialogContent>
                                 </Dialog>
                                 <Button
+                                    className="bg-black hover:bg-gray-700"
                                     disabled={constructionData.constructionApprovalFileUrl == null}
                                     onClick={() => setIsConstructionApprovalViewerOpen(true)}
                                 >
@@ -506,12 +620,26 @@ export default function ConstructionData() {
                                     open={isConstructionApprovalViewerOpen}
                                     onClose={() => setIsConstructionApprovalViewerOpen(false)}
                                 />
+                                <Button
+                                    disabled={constructionData.constructionApprovalFileUrl == null}
+                                    className="bg-red-600 hover:bg-red-400"
+                                    onClick={() => setIsDeleteConstructionApprovalConfirmationOpen(true)}
+                                >
+                                    Zmazať kolaudáciu
+                                </Button>
+                                <ConfirmationDialog
+                                    isOpen={isDeleteConstructionApprovalConfirmationOpen}
+                                    onClose={() => setIsDeleteConstructionApprovalConfirmationOpen(false)}
+                                    onConfirm={onDeleteConstructionApproval}
+                                    message="Ste si istý, že chcete vymazať kolaudáciu?"
+                                >
+                                </ConfirmationDialog>
                             </div>
                             <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
                                 <span className="font-medium text-gray-600">Odovzdanie stavby:</span>
                                 <Dialog open={uploadConstructionHandoverDialogOpen} onOpenChange={setUploadConstructionHandoverDialogOpen}>
                                     <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-orange-50">
+                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-purple-50">
                                             Nahrať dokumenty
                                         </Button>
                                     </DialogTrigger>
@@ -530,6 +658,7 @@ export default function ConstructionData() {
                                     </DialogContent>
                                 </Dialog>
                                 <Button
+                                    className="bg-black hover:bg-gray-700"
                                     disabled={constructionData.constructionHandoverFileUrl == null}
                                     onClick={() => setIsConstructionHandoverViewerOpen(true)}
                                 >
@@ -542,6 +671,20 @@ export default function ConstructionData() {
                                     open={isConstructionHandoverViewerOpen}
                                     onClose={() => setIsConstructionHandoverViewerOpen(false)}
                                 />
+                                <Button
+                                    disabled={constructionData.constructionHandoverFileUrl == null}
+                                    className="bg-red-600 hover:bg-red-400"
+                                    onClick={() => setIsDeleteConstructionHandoverConfirmationOpen(true)}
+                                >
+                                    Zmazať odovzdanie stavby
+                                </Button>
+                                <ConfirmationDialog
+                                    isOpen={isDeleteConstructionHandoverConfirmationOpen}
+                                    onClose={() => setIsDeleteConstructionHandoverConfirmationOpen(false)}
+                                    onConfirm={onDeleteConstructionHandover}
+                                    message="Ste si istý, že chcete vymazať odovzdanie stavby?"
+                                >
+                                </ConfirmationDialog>
                             </div>
                         </div>
                     </CardContent>
