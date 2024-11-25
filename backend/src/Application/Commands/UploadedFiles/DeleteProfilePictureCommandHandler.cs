@@ -23,7 +23,7 @@ public class DeleteProfilePictureCommandHandler
         var construction = await session.LoadAsync<Construction>(profilePictureCommand.ConstructionId, cancellationToken);
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
             "Construction from which the profile picture has to be deleted not found");
-        StatusCodeGuard.IsEqualTo(profilePictureCommand.RequesterId, construction.OwnerId, StatusCodes.Status401Unauthorized,
+        StatusCodeGuard.IsEqualTo(profilePictureCommand.RequesterId, construction.OwnerId, StatusCodes.Status403Forbidden,
             "User can only manipulate with his constructions");
         StatusCodeGuard.IsFalse(construction.ProfilePictureUrl == Constants.DefaultConstructionProfilePictureUrl,
             StatusCodes.Status405MethodNotAllowed, "No profile picture to be deleted");

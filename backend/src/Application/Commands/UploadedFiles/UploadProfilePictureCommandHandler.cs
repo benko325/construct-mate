@@ -25,12 +25,14 @@ public class UploadProfilePictureCommandHandler
         var allowedExtensions = new List<string>() { ".jpg", ".jpeg", ".png", ".svg" };
         StatusCodeGuard.IsTrue(allowedExtensions.Contains(Path.GetExtension(fileCommand.File.FileName)), StatusCodes.Status400BadRequest,
             "File has bad format (jpg, jpeg, png and svg are only allowed)");
+        StatusCodeGuard.IsLessThanOrEqualTo(fileCommand.File.Length, Constants.MaxFileSize,
+            StatusCodes.Status400BadRequest, "File is too big");
 
         var construction = await session.LoadAsync<Construction>(fileCommand.ConstructionId, cancellationToken);
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
             "Construction for which a profile picture has to be uploaded not found");
 
-        StatusCodeGuard.IsEqualTo(construction.OwnerId, fileCommand.RequesterId, StatusCodes.Status401Unauthorized,
+        StatusCodeGuard.IsEqualTo(construction.OwnerId, fileCommand.RequesterId, StatusCodes.Status403Forbidden,
             "User can only manipulate his constructions");
 
         return construction;

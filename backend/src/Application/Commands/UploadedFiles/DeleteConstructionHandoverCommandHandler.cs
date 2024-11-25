@@ -23,7 +23,7 @@ public class DeleteConstructionHandoverCommandHandler
         var construction = await session.LoadAsync<Construction>(fileCommand.ConstructionId, cancellationToken);
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
             "Construction from which the construction handover has to be deleted not found");
-        StatusCodeGuard.IsEqualTo(fileCommand.RequesterId, construction.OwnerId, StatusCodes.Status401Unauthorized,
+        StatusCodeGuard.IsEqualTo(fileCommand.RequesterId, construction.OwnerId, StatusCodes.Status403Forbidden,
             "User can only manipulate with his constructions");
         StatusCodeGuard.IsNotNull(construction.ConstructionHandoverFileUrl,
             StatusCodes.Status405MethodNotAllowed, "No construction handover to be deleted");
@@ -35,7 +35,7 @@ public class DeleteConstructionHandoverCommandHandler
         IDocumentSession session, CancellationToken cancellationToken)
     {
         // can not be null as it is checked in LoadAsync
-        File.Delete(construction.ConstructionHandoverFileUrl);
+        File.Delete(construction.ConstructionHandoverFileUrl!);
         construction.ConstructionHandoverFileUrl = null;
 
         session.Update(construction);

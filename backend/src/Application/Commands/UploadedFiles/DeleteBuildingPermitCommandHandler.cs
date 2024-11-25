@@ -23,7 +23,7 @@ public class DeleteBuildingPermitCommandHandler
         var construction = await session.LoadAsync<Construction>(fileCommand.ConstructionId, cancellationToken);
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
             "Construction from which the building permit has to be deleted not found");
-        StatusCodeGuard.IsEqualTo(fileCommand.RequesterId, construction.OwnerId, StatusCodes.Status401Unauthorized,
+        StatusCodeGuard.IsEqualTo(fileCommand.RequesterId, construction.OwnerId, StatusCodes.Status403Forbidden,
             "User can only manipulate with his constructions");
         StatusCodeGuard.IsNotNull(construction.BuildingPermitFileUrl,
             StatusCodes.Status405MethodNotAllowed, "No building permit to be deleted");
@@ -35,7 +35,7 @@ public class DeleteBuildingPermitCommandHandler
         IDocumentSession session, CancellationToken cancellationToken)
     {
         // can not be null as it is checked in LoadAsync
-        File.Delete(construction.BuildingPermitFileUrl);
+        File.Delete(construction.BuildingPermitFileUrl!);
         construction.BuildingPermitFileUrl = null;
 
         session.Update(construction);
