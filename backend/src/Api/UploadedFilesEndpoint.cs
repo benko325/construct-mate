@@ -275,6 +275,7 @@ public class UploadedFilesEndpoint
     /// </summary>
     /// <param name="id">Id of construction for which a new file has to be uploaded</param>
     /// <param name="file">File to be uploaded</param>
+    /// <param name="fileName">Name of the file (will be showed on frontend)</param>
     /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns><see cref="FileUploadedToConstruction"/></returns>
@@ -285,9 +286,9 @@ public class UploadedFilesEndpoint
     [Authorize]
     [WolverinePost("/constructions/{id}/file")]
     public static async Task<FileUploadedToConstruction> UploadFileToConstructionAsync([FromRoute] Guid id,
-        [FromForm] IFormFile file, IApplicationUserContext userContext, IMessageBus bus)
+        [FromForm] IFormFile file, [FromQuery] string? fileName, IApplicationUserContext userContext, IMessageBus bus)
     {
-        var command = new UploadFileToConstructionCommand(id, file, userContext.UserId);
+        var command = new UploadFileToConstructionCommand(id, file, fileName, userContext.UserId);
         var result = await bus.InvokeAsync<FileUploadedToConstruction>(command);
         return result;
     }

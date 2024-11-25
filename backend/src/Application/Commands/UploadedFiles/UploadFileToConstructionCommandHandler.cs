@@ -11,8 +11,9 @@ namespace ConstructMate.Application.Commands.UploadedFiles;
 /// </summary>
 /// <param name="ConstructionId">Id of construction for which a new file has to be uploaded</param>
 /// <param name="File">File to be uploaded</param>
+/// <param name="FileName">Name of the file (will be shown on frontend)</param>
 /// <param name="RequesterId">Id of user who sent the request</param>
-public record UploadFileToConstructionCommand(Guid ConstructionId, IFormFile File, Guid RequesterId);
+public record UploadFileToConstructionCommand(Guid ConstructionId, IFormFile File, string? FileName, Guid RequesterId);
 
 /// <summary>
 /// Upload file to construction (only pictures and PDFs)
@@ -57,7 +58,7 @@ public class UploadFileToConstructionCommandHandler
 
         var newUploadedFile = new UploadedFile()
         {
-            Id = Guid.NewGuid(), FilePath = filePath, FileSize = fileCommand.File.Length
+            Id = Guid.NewGuid(), FilePath = filePath, FileSize = fileCommand.File.Length, Name = fileCommand.FileName ?? fileCommand.File.FileName
         };
         construction.Files.Add(newUploadedFile);
         session.Update(construction);
