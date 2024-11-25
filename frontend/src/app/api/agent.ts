@@ -87,6 +87,7 @@ const Construction = {
     deleteConstructionApproval: (id: UUID) => requests.del(`/constructions/${id}/construction-approval`),
     uploadConstructionHandover: (id: UUID, data: FormData) => requests.postForm(`/constructions/${id}/construction-handover`, data),
     deleteConstructionHandover: (id: UUID) => requests.del(`/constructions/${id}/construction-handover`),
+    deleteGeneralFile: (constructionId: UUID, fileId: UUID) => requests.del(`/constructions/${constructionId}/file/${fileId}`),
 };
 
 const agent = {

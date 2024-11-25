@@ -6,9 +6,15 @@ import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import agent from "@/app/api/agent";
 import { UUID } from "crypto";
-import { Construction } from "@/app/api/types/responseTypes";
+import { Construction, UploadedFile } from "@/app/api/types/responseTypes";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+  } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
@@ -20,6 +26,7 @@ import { AxiosError } from "axios";
 import FileUploadForm from "../FileUploadForm";
 import FileViewer from "../FileViewer";
 import ConfirmationDialog from "../ConfirmationDialog";
+import { FaFilePdf } from "react-icons/fa";
 
 const apiUrl = import.meta.env.VITE_API_URL + "/" || 'http://localhost:5000/';
 
@@ -41,8 +48,6 @@ export default function ConstructionData() {
     // id of a construction from the url
     const {id} = useParams<{id: UUID}>();
     const safeId = id ?? "00000000-0000-0000-0000-000000000000";
-
-    const todayDateString = new Date().toLocaleDateString('en-CA');
 
     const [constructionData, setConstructionData] = useState<Construction>();
     const [loading, setLoading] = useState(true);
@@ -225,10 +230,7 @@ export default function ConstructionData() {
         try {
             if (constructionData) {
                 await agent.Construction.deleteBuildingPermit(constructionData.id);
-                setConstructionData((prevState) => ({
-                    ...prevState!,
-                    buildingPermitFileUrl: null
-                }));
+                updateField("buildingPermitFileUrl", null);
                 toast.success("Stavebné povolenie úspešne vymazané.");
                 setTimeout(() => {
                     setIsDeletePermitConfirmationOpen(false);
@@ -244,11 +246,11 @@ export default function ConstructionData() {
                     toast.error(`${responseData.ErrorMessage}`);
                 } else {
                     console.error('Delete building permit error:', error);
-                    toast.error("Nastala chyba pri mazaní stavebného povolenia");
+                    toast.error("Nastala chyba pri mazaní stavebného povolenia.");
                 }
             } else {
                 console.error('Delete building permit error:', error);
-                toast.error("Nastala neočakávaná chyba pri mazaní stavebného povolenia");
+                toast.error("Nastala neočakávaná chyba pri mazaní stavebného povolenia.");
             }
         }
     }
@@ -258,10 +260,7 @@ export default function ConstructionData() {
         try {
             if (constructionData) {
                 await agent.Construction.deleteConstructionApproval(constructionData.id);
-                setConstructionData((prevState) => ({
-                    ...prevState!,
-                    constructionApprovalFileUrl: null
-                }));
+                updateField("constructionApprovalFileUrl", null);
                 toast.success("Kolaudácia úspešne vymazaná.");
                 setTimeout(() => {
                     setIsDeleteConstructionApprovalConfirmationOpen(false);
@@ -277,11 +276,11 @@ export default function ConstructionData() {
                     toast.error(`${responseData.ErrorMessage}`);
                 } else {
                     console.error('Delete construction approval error:', error);
-                    toast.error("Nastala chyba pri mazaní kolaudácie");
+                    toast.error("Nastala chyba pri mazaní kolaudácie.");
                 }
             } else {
                 console.error('Delete construction approval error:', error);
-                toast.error("Nastala neočakávaná chyba pri mazaní kolaudácie");
+                toast.error("Nastala neočakávaná chyba pri mazaní kolaudácie.");
             }
         }
     }
@@ -291,10 +290,7 @@ export default function ConstructionData() {
         try {
             if (constructionData) {
                 await agent.Construction.deleteConstructionHandover(constructionData.id);
-                setConstructionData((prevState) => ({
-                    ...prevState!,
-                    constructionHandoverFileUrl: null
-                }));
+                updateField("constructionHandoverFileUrl", null);
                 toast.success("Odovzdanie stavby úspešne vymazané.");
                 setTimeout(() => {
                     setIsDeleteConstructionHandoverConfirmationOpen(false);
@@ -310,20 +306,20 @@ export default function ConstructionData() {
                     toast.error(`${responseData.ErrorMessage}`);
                 } else {
                     console.error('Delete construction handover error:', error);
-                    toast.error("Nastala chyba pri mazaní odovzdania");
+                    toast.error("Nastala chyba pri mazaní odovzdania.");
                 }
             } else {
-                console.error('Delete building permit error:', error);
-                toast.error("Nastala neočakávaná chyba pri mazaní odovzdania");
+                console.error('Delete construction handover error:', error);
+                toast.error("Nastala neočakávaná chyba pri mazaní odovzdania.");
             }
         }
     }
 
     const [uploadProfilePictureDialogOpen, setUploadProfilePictureDialogOpen] = useState(false);
 
-    const updateField = (field: string, value: string) => {
-        setConstructionData((prevData) => ({
-            ...prevData!,
+    const updateField = (field: string, value: string | null) => {
+        setConstructionData((prevState) => ({
+            ...prevState!,
             [field]: value,
         }));
     };
@@ -336,6 +332,41 @@ export default function ConstructionData() {
 
     const [uploadConstructionHandoverDialogOpen, setUploadConstructionHandoverDialogOpen] = useState(false);
     const [isConstructionHandoverViewerOpen, setIsConstructionHandoverViewerOpen] = useState(false);
+
+    const [activeGeneralFile, setActiveGeneralFile] = useState<UploadedFile | null>(null);
+    const [activeDeleteGeneralFile, setActiveDeleteGeneralFile] = useState<UploadedFile | null>(null);
+    const handleConfirmDeleteGeneralFile = async (fileId: UUID) => {
+        if (activeDeleteGeneralFile) {
+            try {
+                await agent.Construction.deleteGeneralFile(safeId, fileId);
+                setConstructionData((prevState) => ({
+                    ...prevState!,
+                    files: prevState!.files.filter((file) => file.id !== fileId)
+                }));
+                toast.success("Súbor úspešne vymazaný.");
+                setTimeout(() => {
+                    setActiveDeleteGeneralFile(null);
+                }, 2500);
+            } catch (error) {
+                if (error instanceof AxiosError) {
+                    const responseData = error.response?.data || {};
+                    if (responseData.ErrorMessage) {
+                        console.error('Delete file error:', error);
+                        toast.error(`${responseData.ErrorMessage}`);
+                    } else {
+                        console.error('Delete file error:', error);
+                        toast.error("Nastala chyba pri mazaní súboru.");
+                    }
+                } else {
+                    console.error('Delete file error:', error);
+                    toast.error("Nastala neočakávaná chyba pri mazaní súboru.");
+                }
+            }
+        } else {
+            console.error('Delete file error - file not selected');
+            toast.error("Nastala neočakávaná chyba pri mazaní súboru.");
+        }
+    };
 
     if (loading) return <div className="text-center">Načítavam údaje o stavbe...</div>;
     if (!constructionData) return (
@@ -598,12 +629,12 @@ export default function ConstructionData() {
                                 <Dialog open={uploadConstructionApprovalDialogOpen} onOpenChange={setUploadConstructionApprovalDialogOpen}>
                                     <DialogTrigger asChild>
                                         <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-purple-50">
-                                            Nahrať dokumenty
+                                            Nahrať dokument
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-[425px]">
                                         <DialogHeader>
-                                            <DialogTitle>Nahrajte nové dokumenty ku kolaudácii</DialogTitle>
+                                            <DialogTitle>Nahrajte nový dokument ku kolaudácii</DialogTitle>
                                         </DialogHeader>
                                         <FileUploadForm
                                             uploadFunction={agent.Construction.uploadConstructionApproval}
@@ -649,12 +680,12 @@ export default function ConstructionData() {
                                 <Dialog open={uploadConstructionHandoverDialogOpen} onOpenChange={setUploadConstructionHandoverDialogOpen}>
                                     <DialogTrigger asChild>
                                         <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-purple-50">
-                                            Nahrať dokumenty
+                                            Nahrať dokument
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-[425px]">
                                         <DialogHeader>
-                                            <DialogTitle>Nahrajte nové dokumenty k odovzdaniu stavby</DialogTitle>
+                                            <DialogTitle>Nahrajte nový dokument k odovzdaniu stavby</DialogTitle>
                                         </DialogHeader>
                                         <FileUploadForm
                                             uploadFunction={agent.Construction.uploadConstructionHandover}
@@ -696,6 +727,71 @@ export default function ConstructionData() {
                                 </ConfirmationDialog>
                             </div>
                         </div>
+                        <Accordion type="single" collapsible className="mt-6">
+                            <AccordionItem value="item-1">
+                                <AccordionTrigger>Ostatné súbory k stavbe</AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="flex flex-wrap gap-4">
+                                        {constructionData.files.map((file) => {
+                                            const fileExtension = file.filePath.split('.').pop()?.toLowerCase();
+                                            const isPDF = fileExtension === "pdf";
+                                            const icon = isPDF
+                                            ?
+                                            <FaFilePdf className="text-red-500 text-4xl" />
+                                            :
+                                            <Avatar className="text-gray-500 text-4xl">
+                                                <img src={apiUrl + file.filePath} alt={file.name} className="object-cover w-full h-full rounded-lg" />
+                                            </Avatar>;
+
+                                            return (
+                                                <Card key={file.id} className="min-w-[150px] max-w-[200px] flex flex-col items-center">
+                                                    <CardHeader>
+                                                        <div className="flex flex-col items-center">
+                                                            {icon}
+                                                            <CardTitle className="mt-2 text-lg font-medium">{file.name}</CardTitle>
+                                                        </div>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <Button 
+                                                            variant="outline"
+                                                            className="w-full m-1"
+                                                            onClick={() => setActiveGeneralFile(file)}
+                                                        >
+                                                            Zobraziť súbor
+                                                        </Button>
+                                                        {activeGeneralFile?.id === file.id && (
+                                                            <FileViewer
+                                                                fileUrl={apiUrl + file.filePath}
+                                                                fileType={isPDF ? "pdf" : "image"}
+                                                                fileName={file.name}
+                                                                open={Boolean(activeGeneralFile)}
+                                                                onClose={() => setActiveGeneralFile(null)}
+                                                            />
+                                                        )}
+
+                                                        <Button
+                                                            className="bg-red-600 hover:bg-red-400 w-full m-1"
+                                                            onClick={() => setActiveDeleteGeneralFile(file)}
+                                                        >
+                                                            Zmazať súbor
+                                                        </Button>
+
+                                                        {activeDeleteGeneralFile?.id === file.id && (
+                                                            <ConfirmationDialog
+                                                                isOpen={Boolean(activeDeleteGeneralFile)}
+                                                                onClose={() => setActiveDeleteGeneralFile(null)}
+                                                                onConfirm={() => handleConfirmDeleteGeneralFile(file.id)}
+                                                                message={`Ste si istý, že chcete vymazať súbor ${file.name}?`}
+                                                            />
+                                                        )}
+                                                    </CardContent>
+                                                </Card>
+                                            )
+                                        })}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
                     </CardContent>
                 </Card>
             </div>

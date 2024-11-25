@@ -28,7 +28,7 @@ export interface Construction {
 export interface UploadedFile {
     id: UUID;
     filePath: string;
-    filePurpose: number; //enum ??
+    name: string;
     fileSize: number;
     createdAt: string;
 }
