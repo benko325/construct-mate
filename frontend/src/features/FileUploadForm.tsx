@@ -20,9 +20,18 @@ const FileUploadForm = ({ uploadFunction, id, setDialogOpen, updateField, respon
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const MAX_FILE_SIZE_MB = 50; // Set the maximum file size in MB
+
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files ? event.target.files[0] : null;
         if (selectedFile) {
+            const fileSizeInMB = selectedFile.size / (1024 * 1024);
+            if (fileSizeInMB > MAX_FILE_SIZE_MB) {
+                setError(`Súbor je príliš veľký. Maximálna povolená veľkosť je ${MAX_FILE_SIZE_MB}MB.`);
+                setFile(null);
+                return;
+            }
+
             setFile(selectedFile);
         }
     };
