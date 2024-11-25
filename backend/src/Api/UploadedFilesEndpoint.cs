@@ -24,8 +24,8 @@ public class UploadedFilesEndpoint
     /// <returns>ProfilePictureUploaded - info about uploaded profile picture</returns>
     [ProducesResponseType<ProfilePictureUploaded>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePost("constructions/{id}/profile-picture")]
@@ -50,7 +50,7 @@ public class UploadedFilesEndpoint
     public static string GetProfilePictureForConstruction([Document] Construction construction)
     {
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
-            "Construction for wich a profile picture url has to be returned not found");
+            "Construction for which a profile picture url has to be returned not found");
         return construction.ProfilePictureUrl;
     }
 
@@ -63,7 +63,7 @@ public class UploadedFilesEndpoint
     /// <returns>ProfilePictureDeleted - Id of construction and new profile picture Url</returns>
     [ProducesResponseType<ProfilePictureDeleted>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
     [Authorize]
@@ -87,7 +87,7 @@ public class UploadedFilesEndpoint
     [ProducesResponseType<BuildingPermitUploaded>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePost("/constructions/{id}/building-permit")]
@@ -114,7 +114,8 @@ public class UploadedFilesEndpoint
     {
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
             "Construction for wich a building permit url has to be returned not found");
-        StatusCodeGuard.IsNotNull(construction.BuildingPermitFileUrl, StatusCodes.Status404NotFound, "Building permit not found");
+        StatusCodeGuard.IsNotNull(construction.BuildingPermitFileUrl, StatusCodes.Status404NotFound,
+            "Building permit not found");
         return construction.BuildingPermitFileUrl;
     }
 
@@ -127,7 +128,7 @@ public class UploadedFilesEndpoint
     /// <returns>BuildingPermitDeleted - Id of construction</returns>
     [ProducesResponseType<BuildingPermitDeleted>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
     [Authorize]
@@ -151,7 +152,7 @@ public class UploadedFilesEndpoint
     [ProducesResponseType<ConstructionApprovalUploaded>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePost("/constructions/{id}/construction-approval")]
@@ -177,8 +178,9 @@ public class UploadedFilesEndpoint
     public static string GetConstructionApprovalForConstruction([Document] Construction construction)
     {
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
-            "Construction for wich a construction approval url has to be returned not found");
-        StatusCodeGuard.IsNotNull(construction.ConstructionApprovalFileUrl, StatusCodes.Status404NotFound, "Construction approval not found");
+            "Construction for which a construction approval url has to be returned not found");
+        StatusCodeGuard.IsNotNull(construction.ConstructionApprovalFileUrl, StatusCodes.Status404NotFound,
+            "Construction approval not found");
         return construction.ConstructionApprovalFileUrl;
     }
 
@@ -191,7 +193,7 @@ public class UploadedFilesEndpoint
     /// <returns>ConstructionApprovalDeleted - Id of construction</returns>
     [ProducesResponseType<ConstructionApprovalDeleted>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
     [Authorize]
@@ -215,7 +217,7 @@ public class UploadedFilesEndpoint
     [ProducesResponseType<ConstructionHandoverUploaded>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePost("/constructions/{id}/construction-handover")]
@@ -255,7 +257,7 @@ public class UploadedFilesEndpoint
     /// <returns>ConstructionHandoverDeleted - Id of construction</returns>
     [ProducesResponseType<ConstructionHandoverDeleted>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
     [Authorize]
@@ -268,5 +270,47 @@ public class UploadedFilesEndpoint
         return result;
     }
 
-    // TODO: upload, get, delete for default files (or just photos, pdfs??) - nice to have
+    /// <summary>
+    /// Upload a file to a construction
+    /// </summary>
+    /// <param name="id">Id of construction for which a new file has to be uploaded</param>
+    /// <param name="file">File to be uploaded</param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns><see cref="FileUploadedToConstruction"/></returns>
+    [ProducesResponseType<FileUploadedToConstruction>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [Authorize]
+    [WolverinePost("/constructions/{id}/file")]
+    public static async Task<FileUploadedToConstruction> UploadFileToConstructionAsync([FromRoute] Guid id,
+        [FromForm] IFormFile file, IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var command = new UploadFileToConstructionCommand(id, file, userContext.UserId);
+        var result = await bus.InvokeAsync<FileUploadedToConstruction>(command);
+        return result;
+    }
+
+    /// <summary>
+    /// Delete file from a construction
+    /// </summary>
+    /// <param name="id">Id of a construction from where a file has to be deleted</param>
+    /// <param name="fileId">Id of file that has to be deleted</param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns><see cref="FileDeletedFromConstruction"/></returns>
+    [ProducesResponseType<FileDeletedFromConstruction>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [Authorize]
+    [WolverineDelete("/constructions/{id}/file/{fileId}")]
+    public static async Task<FileDeletedFromConstruction> DeleteFileFromConstructionAsync([FromRoute] Guid id,
+        [FromRoute] Guid fileId, IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var command = new DeleteFileFromConstructionCommand(id, fileId, userContext.UserId);
+        var result = await bus.InvokeAsync<FileDeletedFromConstruction>(command);
+        return result;
+    }
 }
