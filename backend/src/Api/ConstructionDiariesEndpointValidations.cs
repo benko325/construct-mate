@@ -18,7 +18,7 @@ public class ConstructionDiariesEndpointValidations
             RuleFor(r => r.ConstructionApproval).NotNull().NotEmpty();
             RuleFor(r => r.Investor).NotNull().NotEmpty();
             RuleFor(r => r.Implementer).NotNull().NotEmpty();
-            RuleFor(r => r.UpdateConstructionDates).NotNull().NotEmpty();
+            RuleFor(r => r.UpdateConstructionDates).NotNull();
         }
     }
     

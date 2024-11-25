@@ -33,7 +33,7 @@ public class ModifyDiaryFromToDatesCommandHandler
             .FirstOrDefaultAsync(cancellationToken);
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
             "Construction for diary not found");
-        StatusCodeGuard.IsEqualTo(construction.OwnerId, diaryCommand.RequesterId, StatusCodes.Status401Unauthorized,
+        StatusCodeGuard.IsEqualTo(construction.OwnerId, diaryCommand.RequesterId, StatusCodes.Status403Forbidden,
             "Dates can be only modified by construction owner");
         
         var diary = construction.ConstructionDiary;

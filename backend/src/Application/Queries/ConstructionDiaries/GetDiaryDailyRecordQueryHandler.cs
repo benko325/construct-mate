@@ -32,7 +32,7 @@ public class GetDiaryDailyRecordQueryHandler
         var diary = construction.ConstructionDiary;
         var contributorIds = diary.DiaryContributors.Select(c => c.ContributorId);
         StatusCodeGuard.IsTrue(construction.OwnerId == diaryQuery.RequesterId || contributorIds.Contains(diaryQuery.RequesterId),
-            StatusCodes.Status401Unauthorized, "User needs to be construction owner or contributor to the diary");
+            StatusCodes.Status403Forbidden, "User needs to be construction owner or contributor to the diary");
         StatusCodeGuard.IsTrue(diary.DiaryDateFrom <= diaryQuery.Date && diary.DiaryDateTo >= diaryQuery.Date,
             StatusCodes.Status400BadRequest, "Date is out of range of diary from and to dates");
 

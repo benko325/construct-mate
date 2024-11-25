@@ -34,7 +34,7 @@ public class AddNewDiaryPictureRecordCommandHandler
             .Select(d => d.ContributorId)
             .ToList();
         StatusCodeGuard.IsTrue(diaryCommand.RequesterId == construction.OwnerId || contributorIds.Contains(diaryCommand.RequesterId),
-            StatusCodes.Status401Unauthorized, "User can not contribute to this diary, add him asd a contributor first");
+            StatusCodes.Status403Forbidden, "User can not contribute to this diary, add him asd a contributor first");
         
         var allowedExtensions = new List<string>() { ".jpg", ".jpeg", ".png", ".svg" };
         StatusCodeGuard.IsTrue(allowedExtensions.Contains(Path.GetExtension(diaryCommand.File.FileName)), StatusCodes.Status400BadRequest,

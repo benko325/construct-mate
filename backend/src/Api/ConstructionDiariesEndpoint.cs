@@ -83,7 +83,7 @@ public class ConstructionDiariesEndpoint
     [ProducesResponseType<ConstructionDiaryCreated>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePost("/constructions/{id}/diary")]
@@ -102,8 +102,8 @@ public class ConstructionDiariesEndpoint
     /// <param name="userContext">Injected custom user context</param>
     /// <returns>ConstructionDiary</returns>
     [ProducesResponseType<ConstructionDiary>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverineGet("/constructions/{id}/diary")]
@@ -116,7 +116,7 @@ public class ConstructionDiariesEndpoint
             "Construction does not have diary created");
         var contributorIds = construction.ConstructionDiary.DiaryContributors.Select(c => c.ContributorId);
         StatusCodeGuard.IsTrue(construction.OwnerId == userContext.UserId || contributorIds.Contains(userContext.UserId),
-            StatusCodes.Status401Unauthorized,
+            StatusCodes.Status403Forbidden,
             "User can see only diaries made by him or where he is allowed to contribute");
 
         return construction.ConstructionDiary;
@@ -130,8 +130,8 @@ public class ConstructionDiariesEndpoint
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>ConstructionDiary</returns>
     [ProducesResponseType<ConstructionDiary>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverineGet("/construction-diaries/{id}")]
@@ -195,8 +195,8 @@ public class ConstructionDiariesEndpoint
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>DailyRecord of the diary</returns>
     [ProducesResponseType<DiaryRecord>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverineGet("/construction-diaries/{id}/daily-records")]
@@ -218,7 +218,6 @@ public class ConstructionDiariesEndpoint
     /// <returns>DiaryFromToDatesModified - id of the diary and new dates</returns>
     [ProducesResponseType<DiaryFromToDatesModified>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
@@ -269,7 +268,7 @@ public class ConstructionDiariesEndpoint
     /// <returns>NewDiaryRecordAdded</returns>
     [ProducesResponseType<NewDiaryTextRecordAdded>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status500InternalServerError)]
     [Authorize]
@@ -299,7 +298,7 @@ public class ConstructionDiariesEndpoint
     [ProducesResponseType<NewDiaryPictureRecordAdded>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverinePost("/construction-diaries/{id}/diary-picture")]

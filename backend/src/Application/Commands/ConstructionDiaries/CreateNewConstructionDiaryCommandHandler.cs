@@ -48,7 +48,7 @@ public class CreateNewConstructionDiaryCommandHandler
         var construction = await session.LoadAsync<Construction>(diaryCommand.ConstructionId, cancellationToken);
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
             "Construction where a new diary has to be created not found");
-        StatusCodeGuard.IsEqualTo(construction.OwnerId, diaryCommand.RequesterId, StatusCodes.Status401Unauthorized,
+        StatusCodeGuard.IsEqualTo(construction.OwnerId, diaryCommand.RequesterId, StatusCodes.Status403Forbidden,
             "User can only create diary in his constructions");
         StatusCodeGuard.IsNull(construction.ConstructionDiary, StatusCodes.Status400BadRequest,
             "Diary was already created for this construction");

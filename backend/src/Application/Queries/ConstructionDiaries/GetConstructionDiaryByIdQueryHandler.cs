@@ -21,7 +21,7 @@ public class GetConstructionDiaryByIdQueryHandler
         
         var contributorIds = construction.ConstructionDiary.DiaryContributors.Select(c => c.ContributorId);
         StatusCodeGuard.IsTrue(construction.OwnerId == diaryQuery.RequesterId || contributorIds.Contains(diaryQuery.RequesterId),
-            StatusCodes.Status401Unauthorized,
+            StatusCodes.Status403Forbidden,
             "User can see only diaries made by him or where he is allowed to contribute");
 
         return construction;

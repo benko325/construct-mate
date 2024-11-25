@@ -34,7 +34,7 @@ public class AddNewDiaryTextRecordCommandHandler
             .Select(d => d.ContributorId)
             .ToList();
         StatusCodeGuard.IsTrue(diaryCommand.RequesterId == construction.OwnerId || contributorIds.Contains(diaryCommand.RequesterId),
-            StatusCodes.Status401Unauthorized, "User can not contribute to this diary, add him asd a contributor first");
+            StatusCodes.Status403Forbidden, "User can not contribute to this diary, add him asd a contributor first");
 
         return construction;
     }
