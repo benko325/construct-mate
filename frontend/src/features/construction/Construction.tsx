@@ -1,9 +1,8 @@
 import { useParams } from "react-router-dom";
-import TopBar from "../TopBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import agent from "@/app/api/agent";
 import { UUID } from "crypto";
@@ -126,8 +125,8 @@ export default function ConstructionData() {
     const updateStartEndDateForm = useForm<UpdateStartEndDateFormData>({
         resolver: zodResolver(updateStartEndDateFormSchema),
         defaultValues: {
-            startDate: new Date(constructionData?.startDate ?? todayDateString) ?? new Date(),
-            endDate: new Date(constructionData?.endDate ?? todayDateString) ?? new Date(),
+            startDate: new Date(),
+            endDate: new Date(),
         },
     });
 
@@ -145,7 +144,7 @@ export default function ConstructionData() {
                 startDate: updatedConstructionData.newStartDate,
                 endDate: updatedConstructionData.newEndDate,
             }));
-            updateStartEndDateForm.reset({startDate: new Date(updatedConstructionData.newStartDate ?? todayDateString), endDate: new Date(updatedConstructionData.newEndDate ?? todayDateString)});
+            updateStartEndDateForm.reset({startDate: new Date(updatedConstructionData.newStartDate), endDate: new Date(updatedConstructionData.newEndDate)});
 
             setTimeout(() => {
                 setEditStartEndDateDialogOpen(false);
@@ -193,22 +192,33 @@ export default function ConstructionData() {
         }
     };
 
-    const fetchConstructionData = async () => {
-        try {
-            const response = await agent.Construction.getConstructionById(safeId);
-            setConstructionData(response);
-            updateConstructionNameDescriptionForm.reset({name: constructionData?.name, description: constructionData?.description ?? ''});
-            updateStartEndDateForm.reset({startDate: new Date(constructionData?.startDate ?? todayDateString), endDate: new Date(constructionData?.endDate ?? todayDateString)});
-            setLoading(false);
-        } catch (error) {
-            console.error("Failed to fetch construction data:", error);
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchConstructionData = async () => {
+            try {
+                const response = await agent.Construction.getConstructionById(safeId);
+                setConstructionData(response);
+                setLoading(false);
+            } catch (error) {
+                console.error("Failed to fetch construction data:", error);
+                setLoading(false);
+            }
+        };
         fetchConstructionData();
     }, [id]);
+
+    useEffect(() => {
+        if (constructionData) {
+            updateConstructionNameDescriptionForm.reset({
+                name: constructionData.name,
+                description: constructionData.description ?? '',
+            });
+
+            updateStartEndDateForm.reset({
+                startDate: new Date(constructionData.startDate),
+                endDate: new Date(constructionData.endDate),
+            });
+        }
+    }, [constructionData, updateConstructionNameDescriptionForm, updateStartEndDateForm]);
 
     const [isDeletePermitConfirmationOpen, setIsDeletePermitConfirmationOpen] = useState(false);
     const onDeleteBuildingPermit = async () => {
@@ -411,7 +421,6 @@ export default function ConstructionData() {
                                                             <Textarea
                                                                 placeholder="Novostavba na Staromyjavskej ulici, ..."
                                                                 {...field}
-                                                                className=""
                                                                 rows={1}
                                                             />
                                                         </FormControl>
