@@ -368,6 +368,14 @@ export default function ConstructionData() {
         }
     };
 
+    const [isUploadGeneralFileDialogOpen, setIsUploadGeneralFileDialogOpen] = useState(false);
+    const handleAddGeneralFileToList = (newFile: UploadedFile) => {
+        setConstructionData((prevState) => ({
+            ...prevState!,
+            files: [...prevState!.files, newFile]
+        }));
+    };
+
     if (loading) return <div className="text-center">Načítavam údaje o stavbe...</div>;
     if (!constructionData) return (
         <div className="min-h-screen bg-gray-100">
@@ -731,63 +739,89 @@ export default function ConstructionData() {
                             <AccordionItem value="item-1">
                                 <AccordionTrigger>Ostatné súbory k stavbe</AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="flex flex-wrap gap-4">
-                                        {constructionData.files.map((file) => {
-                                            const fileExtension = file.filePath.split('.').pop()?.toLowerCase();
-                                            const isPDF = fileExtension === "pdf";
-                                            const icon = isPDF
-                                            ?
-                                            <FaFilePdf className="text-red-500 text-4xl" />
-                                            :
-                                            <Avatar className="text-gray-500 text-4xl">
-                                                <img src={apiUrl + file.filePath} alt={file.name} className="object-cover w-full h-full rounded-lg" />
-                                            </Avatar>;
+                                    <div className="flex flex-col gap-4">
+                                        <Dialog open={isUploadGeneralFileDialogOpen} onOpenChange={setIsUploadGeneralFileDialogOpen}>
+                                            <DialogTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    className="bg-purple-100 hover:bg-purple-50"
+                                                    onClick={() => setIsUploadGeneralFileDialogOpen(true)}
+                                                >
+                                                    Nahrať nový súbor
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="sm:max-w-[425px]">
+                                                <DialogHeader>
+                                                    <DialogTitle>Nahrajte nový súbor k stavbe</DialogTitle>
+                                                </DialogHeader>
+                                                <FileUploadForm
+                                                    uploadFunction={agent.Construction.uploadGeneralFile}
+                                                    id={safeId}
+                                                    setDialogOpen={setIsUploadGeneralFileDialogOpen}
+                                                    addUploadedFileToList={handleAddGeneralFileToList}
+                                                    fileFormats=".pdf,.png,.jpg,.jpeg,.svg"
+                                                />
+                                            </DialogContent>
+                                        </Dialog>
 
-                                            return (
-                                                <Card key={file.id} className="min-w-[150px] max-w-[200px] flex flex-col items-center">
-                                                    <CardHeader>
-                                                        <div className="flex flex-col items-center">
-                                                            {icon}
-                                                            <CardTitle className="mt-2 text-lg font-medium">{file.name}</CardTitle>
-                                                        </div>
-                                                    </CardHeader>
-                                                    <CardContent>
-                                                        <Button 
-                                                            variant="outline"
-                                                            className="w-full m-1"
-                                                            onClick={() => setActiveGeneralFile(file)}
-                                                        >
-                                                            Zobraziť súbor
-                                                        </Button>
-                                                        {activeGeneralFile?.id === file.id && (
-                                                            <FileViewer
-                                                                fileUrl={apiUrl + file.filePath}
-                                                                fileType={isPDF ? "pdf" : "image"}
-                                                                fileName={file.name}
-                                                                open={Boolean(activeGeneralFile)}
-                                                                onClose={() => setActiveGeneralFile(null)}
-                                                            />
-                                                        )}
+                                        <div className="flex flex-wrap gap-4">
+                                            {constructionData.files.map((file) => {
+                                                const fileExtension = file.filePath.split('.').pop()?.toLowerCase();
+                                                const isPDF = fileExtension === "pdf";
+                                                const icon = isPDF
+                                                ?
+                                                <FaFilePdf className="text-red-500 text-4xl" />
+                                                :
+                                                <Avatar className="text-gray-500 text-4xl">
+                                                    <img src={apiUrl + file.filePath} alt={file.name} className="object-cover w-full h-full rounded-lg" />
+                                                </Avatar>;
 
-                                                        <Button
-                                                            className="bg-red-600 hover:bg-red-400 w-full m-1"
-                                                            onClick={() => setActiveDeleteGeneralFile(file)}
-                                                        >
-                                                            Zmazať súbor
-                                                        </Button>
+                                                return (
+                                                    <Card key={file.id} className="min-w-[150px] max-w-[200px] flex flex-col items-center">
+                                                        <CardHeader>
+                                                            <div className="flex flex-col items-center">
+                                                                {icon}
+                                                                <CardTitle className="mt-2 text-lg font-medium">{file.name}</CardTitle>
+                                                            </div>
+                                                        </CardHeader>
+                                                        <CardContent>
+                                                            <Button 
+                                                                variant="outline"
+                                                                className="w-full m-1"
+                                                                onClick={() => setActiveGeneralFile(file)}
+                                                            >
+                                                                Zobraziť súbor
+                                                            </Button>
+                                                            {activeGeneralFile?.id === file.id && (
+                                                                <FileViewer
+                                                                    fileUrl={apiUrl + file.filePath}
+                                                                    fileType={isPDF ? "pdf" : "image"}
+                                                                    fileName={file.name}
+                                                                    open={Boolean(activeGeneralFile)}
+                                                                    onClose={() => setActiveGeneralFile(null)}
+                                                                />
+                                                            )}
 
-                                                        {activeDeleteGeneralFile?.id === file.id && (
-                                                            <ConfirmationDialog
-                                                                isOpen={Boolean(activeDeleteGeneralFile)}
-                                                                onClose={() => setActiveDeleteGeneralFile(null)}
-                                                                onConfirm={() => handleConfirmDeleteGeneralFile(file.id)}
-                                                                message={`Ste si istý, že chcete vymazať súbor ${file.name}?`}
-                                                            />
-                                                        )}
-                                                    </CardContent>
-                                                </Card>
-                                            )
-                                        })}
+                                                            <Button
+                                                                className="bg-red-600 hover:bg-red-400 w-full m-1"
+                                                                onClick={() => setActiveDeleteGeneralFile(file)}
+                                                            >
+                                                                Zmazať súbor
+                                                            </Button>
+
+                                                            {activeDeleteGeneralFile?.id === file.id && (
+                                                                <ConfirmationDialog
+                                                                    isOpen={Boolean(activeDeleteGeneralFile)}
+                                                                    onClose={() => setActiveDeleteGeneralFile(null)}
+                                                                    onConfirm={() => handleConfirmDeleteGeneralFile(file.id)}
+                                                                    message={`Ste si istý, že chcete vymazať súbor ${file.name}?`}
+                                                                />
+                                                            )}
+                                                        </CardContent>
+                                                    </Card>
+                                                )
+                                            })}
+                                        </div>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>

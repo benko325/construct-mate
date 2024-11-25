@@ -284,7 +284,7 @@ public class UploadedFilesEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
-    [WolverinePost("/constructions/{id}/file")]
+    [WolverinePost("/constructions/{id}/files")]
     public static async Task<FileUploadedToConstruction> UploadFileToConstructionAsync([FromRoute] Guid id,
         [FromForm] IFormFile file, [FromQuery] string? fileName, IApplicationUserContext userContext, IMessageBus bus)
     {
@@ -306,7 +306,7 @@ public class UploadedFilesEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
-    [WolverineDelete("/constructions/{id}/file/{fileId}")]
+    [WolverineDelete("/constructions/{id}/files/{fileId}")]
     public static async Task<FileDeletedFromConstruction> DeleteFileFromConstructionAsync([FromRoute] Guid id,
         [FromRoute] Guid fileId, IApplicationUserContext userContext, IMessageBus bus)
     {
