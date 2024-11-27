@@ -1,7 +1,6 @@
 import { Button } from '../../components/ui/button.tsx';
 import { Link } from 'react-router-dom';
 import agent from '@/app/api/agent.ts';
-import TopBar from '../TopBar.tsx';
 import { useQuery } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
@@ -33,6 +32,7 @@ import {
 } from '@/components/ui/form';
 import { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea.tsx';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 
 const apiUrl = import.meta.env.VITE_API_URL + "/" || 'http://localhost:5000/';
 
@@ -153,7 +153,6 @@ export default function Dashboard() {
     if (unfinishedIsLoading || finishedIsLoading) {
         return (
             <div className="min-h-screen bg-gray-100">
-                <TopBar />
                 <p>Načítavam stavby...</p>
             </div>
         );
@@ -162,7 +161,6 @@ export default function Dashboard() {
     if (unfinishedError || finishedError) {
         return (
             <div className="min-h-screen bg-gray-100">
-                <TopBar />
                 <p>Chyba pri načítavaní stavieb.</p>
             </div>
         );
@@ -313,41 +311,49 @@ export default function Dashboard() {
                 </div>
             </div>
             <div className="p-6">
-                <h2 className="text-2xl font-semibold mb-6">Moje dokončené stavby</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {finishedConstructions?.map((construction) => (
-                    <Card key={construction.id} className="w-full">
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4">
-                                    <Avatar>
-                                        {/* Images and other static files are served in the <apiUrl>/data - configured in BE */}
-                                        <AvatarImage src={apiUrl + construction.profilePictureUrl} alt={construction.id} />
-                                        <AvatarFallback>SBA</AvatarFallback>
-                                    </Avatar>
-                                    <CardTitle>{construction.name}</CardTitle>
-                                </div>
-                                <Link 
-                                    to={`/construction/${construction.id}`}
-                                    className="ml-auto text-sm"
-                                >
-                                    <Button variant="outline" size="sm" className="bg-blue-100 hover:bg-blue-50">
-                                        Otvoriť
-                                    </Button>
-                                </Link>
+                <Accordion type="single" collapsible>
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger>
+                            <h2 className="text-2xl font-semibold">Moje dokončené stavby</h2>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {finishedConstructions?.map((construction) => (
+                                <Card key={construction.id} className="w-full">
+                                    <CardHeader>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-4">
+                                                <Avatar>
+                                                    {/* Images and other static files are served in the <apiUrl>/data - configured in BE */}
+                                                    <AvatarImage src={apiUrl + construction.profilePictureUrl} alt={construction.id} />
+                                                    <AvatarFallback>SBA</AvatarFallback>
+                                                </Avatar>
+                                                <CardTitle>{construction.name}</CardTitle>
+                                            </div>
+                                            <Link 
+                                                to={`/construction/${construction.id}`}
+                                                className="ml-auto text-sm"
+                                            >
+                                                <Button variant="outline" size="sm" className="bg-blue-100 hover:bg-blue-50">
+                                                    Otvoriť
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {/* <p className="text-sm text-muted-foreground mb-2">{construction.description}</p> */}
+                                        <div className="flex justify-between text-sm text-muted-foreground mb-2">
+                                            <span>{format(parseISO(construction.startDate), 'dd.MM.yyyy')}</span>
+                                            <span>{format(parseISO(construction.endDate), 'dd.MM.yyyy')}</span>
+                                        </div>
+                                        <Progress value={calculateProgress(construction.startDate, construction.endDate)} />
+                                    </CardContent>
+                                </Card>
+                                ))}
                             </div>
-                        </CardHeader>
-                        <CardContent>
-                            {/* <p className="text-sm text-muted-foreground mb-2">{construction.description}</p> */}
-                            <div className="flex justify-between text-sm text-muted-foreground mb-2">
-                                <span>{format(parseISO(construction.startDate), 'dd.MM.yyyy')}</span>
-                                <span>{format(parseISO(construction.endDate), 'dd.MM.yyyy')}</span>
-                            </div>
-                            <Progress value={calculateProgress(construction.startDate, construction.endDate)} />
-                        </CardContent>
-                    </Card>
-                    ))}
-                </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
             </div>
             {/* TODO: Add diaries where I am the contributor */}
         </div>
