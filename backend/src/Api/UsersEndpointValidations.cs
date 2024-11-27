@@ -33,7 +33,8 @@ public class UsersEndpointValidations
         {
             RuleFor(r => r.OldPassword).NotNull().NotEmpty();
             RuleFor(r => r.NewPassword).NotNull().NotEmpty().Custom(PasswordValidator.Validate);
-            RuleFor(r => r.NewPasswordAgain).NotNull().NotEmpty().Equal(r => r.NewPassword);
+            RuleFor(r => r.NewPasswordAgain).NotNull().NotEmpty()
+                .Equal(r => r.NewPassword).WithMessage("New passwords are not matching");
         }
     }
 

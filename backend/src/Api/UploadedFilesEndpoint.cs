@@ -275,7 +275,7 @@ public class UploadedFilesEndpoint
     /// </summary>
     /// <param name="id">Id of construction for which a new file has to be uploaded</param>
     /// <param name="file">File to be uploaded</param>
-    /// <param name="fileName">Name of the file (will be showed on frontend)</param>
+    /// <param name="fileName">Name of the file (will be shown on frontend)</param>
     /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns><see cref="FileUploadedToConstruction"/></returns>
