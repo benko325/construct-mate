@@ -43,3 +43,16 @@ export interface UpdateConstructionStartEndDateRequest {
     startDate: string;
     endDate: string;
 }
+
+export interface CreateNewConstructionDiaryRequest {
+    diaryDateFrom: string,
+    diaryDateTo: string,
+    constructionManager: string,
+    constructionSupervisor: string,
+    name: string,
+    address: string,
+    constructionApproval: string,
+    investor: string,
+    implementer: string,
+    updateConstructionDates: boolean
+}

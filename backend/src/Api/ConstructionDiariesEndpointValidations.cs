@@ -11,13 +11,20 @@ public class ConstructionDiariesEndpointValidations
         {
             RuleFor(r => r.DiaryDateFrom).NotNull().NotEmpty();
             RuleFor(r => r.DiaryDateTo).NotNull().NotEmpty();
-            RuleFor(r => r.Name).NotNull().NotEmpty();
-            RuleFor(r => r.ConstructionManager).NotNull().NotEmpty();
-            RuleFor(r => r.ConstructionSupervisor).NotNull().NotEmpty();
-            RuleFor(r => r.Address).NotNull().NotEmpty();
-            RuleFor(r => r.ConstructionApproval).NotNull().NotEmpty();
-            RuleFor(r => r.Investor).NotNull().NotEmpty();
-            RuleFor(r => r.Implementer).NotNull().NotEmpty();
+            RuleFor(r => r.Name).NotNull().NotEmpty()
+                .MinimumLength(1).MaximumLength(50);
+            RuleFor(r => r.ConstructionManager).NotNull().NotEmpty()
+                .MinimumLength(1).MaximumLength(50);
+            RuleFor(r => r.ConstructionSupervisor).NotNull().NotEmpty()
+                .MinimumLength(1).MaximumLength(50);
+            RuleFor(r => r.Address).NotNull().NotEmpty()
+                .MinimumLength(1).MaximumLength(50);
+            RuleFor(r => r.ConstructionApproval).NotNull().NotEmpty()
+                .MinimumLength(1).MaximumLength(50);
+            RuleFor(r => r.Investor).NotNull().NotEmpty()
+                .MinimumLength(1).MaximumLength(50);
+            RuleFor(r => r.Implementer).NotNull().NotEmpty()
+                .MinimumLength(1).MaximumLength(50);
             RuleFor(r => r.UpdateConstructionDates).NotNull();
         }
     }

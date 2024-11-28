@@ -76,6 +76,6 @@ public class CreateNewConstructionDiaryCommandHandler
         session.Update(construction);
         await session.SaveChangesAsync(cancellationToken);
 
-        return new ConstructionDiaryCreated(diary.Id, construction.Id);
+        return diary.Adapt<ConstructionDiaryCreated>() with { ConstructionId = diaryCommand.ConstructionId };
     }
 }

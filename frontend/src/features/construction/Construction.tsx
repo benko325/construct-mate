@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import FileUploadForm from "../FileUploadForm";
 import FileViewer from "../FileViewer";
 import ConfirmationDialog from "../ConfirmationDialog";
 import { FaFilePdf } from "react-icons/fa";
+import StatusIndicator from "../StatusIndicator";
 
 const apiUrl = import.meta.env.VITE_API_URL + "/" || 'http://localhost:5000/';
 
@@ -43,6 +44,21 @@ const updateStartEndDateFormSchema = z.object({
 });
 
 type UpdateStartEndDateFormData = z.infer<typeof updateStartEndDateFormSchema>;
+
+const createNewDiaryFormSchema = z.object({
+    diaryDateFrom: z.date(),
+    diaryDateTo: z.date(),
+    constructionManager: z.string().min(1, { message: 'Meno stavbyvedúceho musí mať aspoň 1 znak' }).max(50, { message: 'Meno stavbyvedúceho musí mať maximálne 50 znakov' }),
+    constructionSupervisor: z.string().min(1, { message: 'Meno stavebného dozoru musí mať aspoň 1 znak' }).max(50, { message: 'Meno stavebného dozoru musí mať maximálne 50 znakov' }),
+    name: z.string().min(1, { message: 'Názov stavby musí mať aspoň 1 znak' }).max(50, { message: 'Názov stavby musí mať maximálne 50 znakov' }),
+    address: z.string().min(1, { message: 'Adresa stavby musí mať aspoň 1 znak' }).max(50, { message: 'Adresa stavby musí mať maximálne 50 znakov' }),
+    constructionApproval: z.string().min(1, { message: 'Stavebné povolenie musí mať aspoň 1 znak' }).max(50, { message: 'Stavebné povolenie musí mať maximálne 50 znakov' }),
+    investor: z.string().min(1, { message: 'Meno investora musí mať aspoň 1 znak' }).max(50, { message: 'Meno investora musí mať maximálne 50 znakov' }),
+    implementer: z.string().min(1, { message: 'Meno realizátora musí mať aspoň 1 znak' }).max(50, { message: 'Meno realizátora musí mať maximálne 50 znakov' }),
+    updateConstructionDates: z.boolean().default(false),
+});
+
+type CreateNewDiaryFormData = z.infer<typeof createNewDiaryFormSchema>;
 
 export default function ConstructionData() {
     // id of a construction from the url
@@ -222,6 +238,11 @@ export default function ConstructionData() {
                 startDate: new Date(constructionData.startDate),
                 endDate: new Date(constructionData.endDate),
             });
+
+            createNewDiaryForm.reset({
+                diaryDateFrom: new Date(constructionData.startDate),
+                diaryDateTo: new Date(constructionData.endDate),
+            });
         }
     }, [constructionData, updateConstructionNameDescriptionForm, updateStartEndDateForm]);
 
@@ -317,7 +338,7 @@ export default function ConstructionData() {
 
     const [uploadProfilePictureDialogOpen, setUploadProfilePictureDialogOpen] = useState(false);
 
-    const updateField = (field: string, value: string | null) => {
+    const updateField = (field: string, value: object | string | null) => {
         setConstructionData((prevState) => ({
             ...prevState!,
             [field]: value,
@@ -374,6 +395,75 @@ export default function ConstructionData() {
             ...prevState!,
             files: [...prevState!.files, newFile]
         }));
+    };
+
+    const navigate = useNavigate();
+
+    const handleOpenDiaryButtonClick = () => {
+        navigate(`/construction/${constructionData?.id}/diary/${constructionData?.constructionDiary?.id}`);
+    };
+
+    const handleCreateDiaryButtonClick = () => {
+        setCreateDiaryDialogOpen(true);
+    };
+
+    const [createDiaryDialogOpen, setCreateDiaryDialogOpen] = useState(false);
+    const createNewDiaryForm = useForm<CreateNewDiaryFormData>({
+        resolver: zodResolver(createNewDiaryFormSchema),
+        defaultValues: {
+            diaryDateFrom: new Date(),
+            diaryDateTo: new Date(),
+            constructionManager: "",
+            constructionSupervisor: "",
+            name: "",
+            address: "",
+            constructionApproval: "",
+            investor: "",
+            implementer: "",
+            updateConstructionDates: false,
+        },
+    });
+
+    const onSubmitCreateNewDiary = async (data: CreateNewDiaryFormData) => {
+        try {
+            const result = await agent.ConstructionDiary.createNew(safeId, {
+                diaryDateFrom: format(data.diaryDateFrom, 'yyyy-MM-dd'),
+                diaryDateTo: format(data.diaryDateTo, 'yyyy-MM-dd'),
+                name: data.name,
+                address: data.address,
+                constructionManager: data.constructionManager,
+                constructionSupervisor: data.constructionSupervisor,
+                constructionApproval: data.constructionApproval,
+                updateConstructionDates: data.updateConstructionDates,
+                investor: data.investor,
+                implementer: data.implementer
+            });
+            updateField("constructionDiary", {
+                id: result.id,
+                diaryDateFrom: result.diaryDateFrom,
+                diaryDateTo: result.diaryDateTo,
+                name: result.name,
+                address: result.address,
+                constructionManager: result.constructionManager,
+                constructionSupervisor: result.constructionSupervisor,
+                constructionApproval: result.constructionApproval,
+                updateConstructionDates: result.updateConstructionDates,
+                investor: result.investor,
+                implementer: result.implementer,
+                diaryContributors: result.diaryContributors,
+                dailyRecords: result.dailyRecords
+            });
+            if (data.updateConstructionDates) {
+                updateField("startDate", data.diaryDateFrom);
+                updateField("endDate", data.diaryDateTo);
+            }
+            toast.success("Nový denník bol úspešne vytvorený.");
+            setTimeout(() => {
+                setCreateDiaryDialogOpen(false);
+            }, 2500);
+        } catch (error) {
+            
+        }
     };
 
     if (loading) return <div className="text-center">Načítavam údaje o stavbe...</div>;
@@ -577,162 +667,375 @@ export default function ConstructionData() {
                                 </DialogContent>
                             </Dialog>
                         </div>
-                        <h2 className="mt-10 text-1xl font-semibold text-blue-800">
-                            Dôležité súbory k stavbe:
-                        </h2>
-                        <div className="flex justify-between items-start mt-4">
-                            <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
-                                <span className="font-medium text-gray-600">Stavebné povolenie:</span>
-                                <Dialog open={uploadBuildingPermitDialogOpen} onOpenChange={setUploadBuildingPermitDialogOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-purple-50">
-                                            Nahrať povolenie
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[425px]">
-                                        <DialogHeader>
-                                            <DialogTitle>Nahrajte nové stavebné povolenie</DialogTitle>
-                                        </DialogHeader>
-                                        <FileUploadForm
-                                            uploadFunction={agent.Construction.uploadBuildingPermit}
-                                            id={safeId}
-                                            setDialogOpen={setUploadBuildingPermitDialogOpen}
-                                            responseFieldValue="buildingPermitPath"
-                                            updateField={(value) => updateField('buildingPermitFileUrl', value)}
-                                            fileFormats="application/pdf"
-                                        />
-                                    </DialogContent>
-                                </Dialog>
-                                <Button
-                                    className="bg-black hover:bg-gray-700"
-                                    disabled={constructionData.buildingPermitFileUrl == null}
-                                    onClick={() => setIsBuildingPermitViewerOpen(true)}
-                                >
-                                    Otvoriť povolenie
-                                </Button>
-                                <FileViewer
-                                    fileUrl={apiUrl + constructionData.buildingPermitFileUrl}
-                                    fileType="pdf"
-                                    fileName="Stavebné povolenie"
-                                    open={isBuildingPermitViewerOpen}
-                                    onClose={() => setIsBuildingPermitViewerOpen(false)}
-                                />
-                                <Button
-                                    disabled={constructionData.buildingPermitFileUrl == null}
-                                    className="bg-red-600 hover:bg-red-400"
-                                    onClick={() => setIsDeletePermitConfirmationOpen(true)}
-                                >
-                                    Zmazať povolenie
-                                </Button>
-                                <ConfirmationDialog
-                                    isOpen={isDeletePermitConfirmationOpen}
-                                    onClose={() => setIsDeletePermitConfirmationOpen(false)}
-                                    onConfirm={onDeleteBuildingPermit}
-                                    message="Ste si istý, že chcete vymazať stavebné povolenie?"
-                                >
-                                </ConfirmationDialog>
-                            </div>
-                            <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
-                                <span className="font-medium text-gray-600">Kolaudácia:</span>
-                                <Dialog open={uploadConstructionApprovalDialogOpen} onOpenChange={setUploadConstructionApprovalDialogOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-purple-50">
-                                            Nahrať dokument
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[425px]">
-                                        <DialogHeader>
-                                            <DialogTitle>Nahrajte nový dokument ku kolaudácii</DialogTitle>
-                                        </DialogHeader>
-                                        <FileUploadForm
-                                            uploadFunction={agent.Construction.uploadConstructionApproval}
-                                            id={safeId}
-                                            setDialogOpen={setUploadConstructionApprovalDialogOpen}
-                                            responseFieldValue="constructionApprovalPath"
-                                            updateField={(value) => updateField('constructionApprovalFileUrl', value)}
-                                            fileFormats="application/pdf"
-                                        />
-                                    </DialogContent>
-                                </Dialog>
-                                <Button
-                                    className="bg-black hover:bg-gray-700"
-                                    disabled={constructionData.constructionApprovalFileUrl == null}
-                                    onClick={() => setIsConstructionApprovalViewerOpen(true)}
-                                >
-                                    Otvoriť kolaudáciu
-                                </Button>
-                                <FileViewer
-                                    fileUrl={apiUrl + constructionData.constructionApprovalFileUrl}
-                                    fileType="pdf"
-                                    fileName="Kolaudácia"
-                                    open={isConstructionApprovalViewerOpen}
-                                    onClose={() => setIsConstructionApprovalViewerOpen(false)}
-                                />
-                                <Button
-                                    disabled={constructionData.constructionApprovalFileUrl == null}
-                                    className="bg-red-600 hover:bg-red-400"
-                                    onClick={() => setIsDeleteConstructionApprovalConfirmationOpen(true)}
-                                >
-                                    Zmazať kolaudáciu
-                                </Button>
-                                <ConfirmationDialog
-                                    isOpen={isDeleteConstructionApprovalConfirmationOpen}
-                                    onClose={() => setIsDeleteConstructionApprovalConfirmationOpen(false)}
-                                    onConfirm={onDeleteConstructionApproval}
-                                    message="Ste si istý, že chcete vymazať kolaudáciu?"
-                                >
-                                </ConfirmationDialog>
-                            </div>
-                            <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
-                                <span className="font-medium text-gray-600">Odovzdanie stavby:</span>
-                                <Dialog open={uploadConstructionHandoverDialogOpen} onOpenChange={setUploadConstructionHandoverDialogOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-purple-50">
-                                            Nahrať dokument
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[425px]">
-                                        <DialogHeader>
-                                            <DialogTitle>Nahrajte nový dokument k odovzdaniu stavby</DialogTitle>
-                                        </DialogHeader>
-                                        <FileUploadForm
-                                            uploadFunction={agent.Construction.uploadConstructionHandover}
-                                            id={safeId}
-                                            setDialogOpen={setUploadConstructionHandoverDialogOpen}
-                                            responseFieldValue="constructionHandoverPath"
-                                            updateField={(value) => updateField('constructionHandoverFileUrl', value)}
-                                            fileFormats="application/pdf"
-                                        />
-                                    </DialogContent>
-                                </Dialog>
-                                <Button
-                                    className="bg-black hover:bg-gray-700"
-                                    disabled={constructionData.constructionHandoverFileUrl == null}
-                                    onClick={() => setIsConstructionHandoverViewerOpen(true)}
-                                >
-                                    Otvoriť odovzdanie stavby
-                                </Button>
-                                <FileViewer
-                                    fileUrl={apiUrl + constructionData.constructionHandoverFileUrl}
-                                    fileType="pdf"
-                                    fileName="Odovzdanie stavby"
-                                    open={isConstructionHandoverViewerOpen}
-                                    onClose={() => setIsConstructionHandoverViewerOpen(false)}
-                                />
-                                <Button
-                                    disabled={constructionData.constructionHandoverFileUrl == null}
-                                    className="bg-red-600 hover:bg-red-400"
-                                    onClick={() => setIsDeleteConstructionHandoverConfirmationOpen(true)}
-                                >
-                                    Zmazať odovzdanie stavby
-                                </Button>
-                                <ConfirmationDialog
-                                    isOpen={isDeleteConstructionHandoverConfirmationOpen}
-                                    onClose={() => setIsDeleteConstructionHandoverConfirmationOpen(false)}
-                                    onConfirm={onDeleteConstructionHandover}
-                                    message="Ste si istý, že chcete vymazať odovzdanie stavby?"
-                                >
-                                </ConfirmationDialog>
+                        <div className="py-8">
+                            <StatusIndicator
+                                fieldName="Stavebný denník"
+                                value={constructionData.constructionDiary}
+                                onOpenButtonClick={handleOpenDiaryButtonClick}
+                                onCreateButtonClick={handleCreateDiaryButtonClick}
+                                valuePresentButtonText="Otvoriť denník"
+                                valueNotPresentButtonText="Vytvoriť denník"
+                                valuePresentText="Denník bol vytvorený"
+                                valueNotPresentText="Denník nebol vytvorený"
+                            />
+                            <Dialog open={createDiaryDialogOpen} onOpenChange={setCreateDiaryDialogOpen}>
+                                <DialogContent className="sm:max-w-[850px]">
+                                    <DialogHeader>
+                                        <DialogTitle>Vytvorte nový denník</DialogTitle>
+                                        <DialogDescription>
+                                            Vytvorte nový denník vyplnením potrebných údajov. <br/>
+                                            <b>POZOR! Denník a zadané informácie (okrem dátumu začiatku a konca) nie je možné ďalej upraviť či vymazať.</b>
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="grid gap-1 py-1">
+                                        <Form {...createNewDiaryForm}>
+                                            <form onSubmit={createNewDiaryForm.handleSubmit(onSubmitCreateNewDiary)}>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <FormField
+                                                        control={createNewDiaryForm.control}
+                                                        name="diaryDateFrom"
+                                                        render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormLabel>Dátum začiatku</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    type="date"
+                                                                    {...field}
+                                                                    value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
+                                                                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={createNewDiaryForm.control}
+                                                        name="diaryDateTo"
+                                                        render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormLabel>Dátum konca</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    type="date"
+                                                                    {...field}
+                                                                    value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
+                                                                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={createNewDiaryForm.control}
+                                                        name="name"
+                                                        render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormLabel>Názov</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    {...field}
+                                                                    placeholder="Názov stavby"
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={createNewDiaryForm.control}
+                                                        name="address"
+                                                        render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormLabel>Adresa</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    {...field}
+                                                                    placeholder="Adresa stavby"
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={createNewDiaryForm.control}
+                                                        name="constructionManager"
+                                                        render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormLabel>Stavbyvedúci</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    {...field}
+                                                                    placeholder="Meno stavbyvedúceho"
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={createNewDiaryForm.control}
+                                                        name="constructionSupervisor"
+                                                        render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormLabel>Stavebný dozor</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    {...field}
+                                                                    placeholder="Meno stavebného dozoru"
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={createNewDiaryForm.control}
+                                                        name="constructionApproval"
+                                                        render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormLabel>Stavebné povolenie</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    {...field}
+                                                                    placeholder="Stavebné povolenie"
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={createNewDiaryForm.control}
+                                                        name="investor"
+                                                        render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormLabel>Investor</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    {...field}
+                                                                    placeholder="Meno (názov) investora"
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={createNewDiaryForm.control}
+                                                        name="implementer"
+                                                        render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormLabel>Realizátor</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    {...field}
+                                                                    placeholder="Meno (názov) realizátora"
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={createNewDiaryForm.control}
+                                                        name="updateConstructionDates"
+                                                        render={({ field }) => (
+                                                            <FormItem className="flex-1">
+                                                                <FormLabel>Aktualizovať dátumy stavby s dátumami denníka</FormLabel>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        type="checkbox"
+                                                                        checked={field.value || false}
+                                                                        onChange={(e) => field.onChange(e.target.checked)}
+                                                                        className="h-10 w-10 accent-blue-500"
+                                                                    />
+                                                                </FormControl>
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
+                                                {createNewDiaryForm.formState.errors.root && (
+                                                <div className="text-red-500 text-sm mt-2">
+                                                    {createNewDiaryForm.formState.errors.root.message}
+                                                </div>
+                                                )}
+                                                <Button type="submit" className="w-full mt-4" disabled={createNewDiaryForm.formState.isSubmitting}>
+                                                    {createNewDiaryForm.formState.isSubmitting ? (
+                                                        <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Prosím počkajte...
+                                                        </>
+                                                    ) : (
+                                                        'Vytvoriť nový denník'
+                                                    )}
+                                                </Button>
+                                            </form>
+                                        </Form>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+                        <div className="py-4">
+                            <h2 className="text-1xl font-semibold text-blue-800">
+                                Dôležité súbory k stavbe:
+                            </h2>
+                            <div className="flex justify-between items-start mt-4">
+                                <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
+                                    <span className="font-medium text-gray-600">Stavebné povolenie:</span>
+                                    <Dialog open={uploadBuildingPermitDialogOpen} onOpenChange={setUploadBuildingPermitDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-purple-50">
+                                                Nahrať povolenie
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="sm:max-w-[425px]">
+                                            <DialogHeader>
+                                                <DialogTitle>Nahrajte nové stavebné povolenie</DialogTitle>
+                                            </DialogHeader>
+                                            <FileUploadForm
+                                                uploadFunction={agent.Construction.uploadBuildingPermit}
+                                                id={safeId}
+                                                setDialogOpen={setUploadBuildingPermitDialogOpen}
+                                                responseFieldValue="buildingPermitPath"
+                                                updateField={(value) => updateField('buildingPermitFileUrl', value)}
+                                                fileFormats="application/pdf"
+                                            />
+                                        </DialogContent>
+                                    </Dialog>
+                                    <Button
+                                        className="bg-black hover:bg-gray-700"
+                                        disabled={constructionData.buildingPermitFileUrl == null}
+                                        onClick={() => setIsBuildingPermitViewerOpen(true)}
+                                    >
+                                        Otvoriť povolenie
+                                    </Button>
+                                    <FileViewer
+                                        fileUrl={apiUrl + constructionData.buildingPermitFileUrl}
+                                        fileType="pdf"
+                                        fileName="Stavebné povolenie"
+                                        open={isBuildingPermitViewerOpen}
+                                        onClose={() => setIsBuildingPermitViewerOpen(false)}
+                                    />
+                                    <Button
+                                        disabled={constructionData.buildingPermitFileUrl == null}
+                                        className="bg-red-600 hover:bg-red-400"
+                                        onClick={() => setIsDeletePermitConfirmationOpen(true)}
+                                    >
+                                        Zmazať povolenie
+                                    </Button>
+                                    <ConfirmationDialog
+                                        isOpen={isDeletePermitConfirmationOpen}
+                                        onClose={() => setIsDeletePermitConfirmationOpen(false)}
+                                        onConfirm={onDeleteBuildingPermit}
+                                        message="Ste si istý, že chcete vymazať stavebné povolenie?"
+                                    >
+                                    </ConfirmationDialog>
+                                </div>
+                                <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
+                                    <span className="font-medium text-gray-600">Kolaudácia:</span>
+                                    <Dialog open={uploadConstructionApprovalDialogOpen} onOpenChange={setUploadConstructionApprovalDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-purple-50">
+                                                Nahrať dokument
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="sm:max-w-[425px]">
+                                            <DialogHeader>
+                                                <DialogTitle>Nahrajte nový dokument ku kolaudácii</DialogTitle>
+                                            </DialogHeader>
+                                            <FileUploadForm
+                                                uploadFunction={agent.Construction.uploadConstructionApproval}
+                                                id={safeId}
+                                                setDialogOpen={setUploadConstructionApprovalDialogOpen}
+                                                responseFieldValue="constructionApprovalPath"
+                                                updateField={(value) => updateField('constructionApprovalFileUrl', value)}
+                                                fileFormats="application/pdf"
+                                            />
+                                        </DialogContent>
+                                    </Dialog>
+                                    <Button
+                                        className="bg-black hover:bg-gray-700"
+                                        disabled={constructionData.constructionApprovalFileUrl == null}
+                                        onClick={() => setIsConstructionApprovalViewerOpen(true)}
+                                    >
+                                        Otvoriť kolaudáciu
+                                    </Button>
+                                    <FileViewer
+                                        fileUrl={apiUrl + constructionData.constructionApprovalFileUrl}
+                                        fileType="pdf"
+                                        fileName="Kolaudácia"
+                                        open={isConstructionApprovalViewerOpen}
+                                        onClose={() => setIsConstructionApprovalViewerOpen(false)}
+                                    />
+                                    <Button
+                                        disabled={constructionData.constructionApprovalFileUrl == null}
+                                        className="bg-red-600 hover:bg-red-400"
+                                        onClick={() => setIsDeleteConstructionApprovalConfirmationOpen(true)}
+                                    >
+                                        Zmazať kolaudáciu
+                                    </Button>
+                                    <ConfirmationDialog
+                                        isOpen={isDeleteConstructionApprovalConfirmationOpen}
+                                        onClose={() => setIsDeleteConstructionApprovalConfirmationOpen(false)}
+                                        onConfirm={onDeleteConstructionApproval}
+                                        message="Ste si istý, že chcete vymazať kolaudáciu?"
+                                    >
+                                    </ConfirmationDialog>
+                                </div>
+                                <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
+                                    <span className="font-medium text-gray-600">Odovzdanie stavby:</span>
+                                    <Dialog open={uploadConstructionHandoverDialogOpen} onOpenChange={setUploadConstructionHandoverDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline" size="sm" className="bg-purple-100 hover:bg-purple-50">
+                                                Nahrať dokument
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="sm:max-w-[425px]">
+                                            <DialogHeader>
+                                                <DialogTitle>Nahrajte nový dokument k odovzdaniu stavby</DialogTitle>
+                                            </DialogHeader>
+                                            <FileUploadForm
+                                                uploadFunction={agent.Construction.uploadConstructionHandover}
+                                                id={safeId}
+                                                setDialogOpen={setUploadConstructionHandoverDialogOpen}
+                                                responseFieldValue="constructionHandoverPath"
+                                                updateField={(value) => updateField('constructionHandoverFileUrl', value)}
+                                                fileFormats="application/pdf"
+                                            />
+                                        </DialogContent>
+                                    </Dialog>
+                                    <Button
+                                        className="bg-black hover:bg-gray-700"
+                                        disabled={constructionData.constructionHandoverFileUrl == null}
+                                        onClick={() => setIsConstructionHandoverViewerOpen(true)}
+                                    >
+                                        Otvoriť odovzdanie stavby
+                                    </Button>
+                                    <FileViewer
+                                        fileUrl={apiUrl + constructionData.constructionHandoverFileUrl}
+                                        fileType="pdf"
+                                        fileName="Odovzdanie stavby"
+                                        open={isConstructionHandoverViewerOpen}
+                                        onClose={() => setIsConstructionHandoverViewerOpen(false)}
+                                    />
+                                    <Button
+                                        disabled={constructionData.constructionHandoverFileUrl == null}
+                                        className="bg-red-600 hover:bg-red-400"
+                                        onClick={() => setIsDeleteConstructionHandoverConfirmationOpen(true)}
+                                    >
+                                        Zmazať odovzdanie stavby
+                                    </Button>
+                                    <ConfirmationDialog
+                                        isOpen={isDeleteConstructionHandoverConfirmationOpen}
+                                        onClose={() => setIsDeleteConstructionHandoverConfirmationOpen(false)}
+                                        onConfirm={onDeleteConstructionHandover}
+                                        message="Ste si istý, že chcete vymazať odovzdanie stavby?"
+                                    >
+                                    </ConfirmationDialog>
+                                </div>
                             </div>
                         </div>
                         <Accordion type="single" collapsible className="mt-6">
@@ -752,7 +1055,7 @@ export default function ConstructionData() {
                                             </DialogTrigger>
                                             <DialogContent className="sm:max-w-[425px]">
                                                 <DialogHeader>
-                                                    <DialogTitle>Nahrajte nový súbor k stavbe</DialogTitle>
+                                                    <DialogTitle>Nahrajte nový súbor k stavbe (foto alebo pdf)</DialogTitle>
                                                 </DialogHeader>
                                                 <FileUploadForm
                                                     uploadFunction={agent.Construction.uploadGeneralFile}

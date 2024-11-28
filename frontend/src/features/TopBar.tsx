@@ -36,11 +36,11 @@ const TopBar: React.FC = () => {
     };
 
     if (isLoading) {
-        return <p>Loading user information...</p>;
+        return <p>Načítavam info o uživateľovi...</p>;
     }
 
     if (error) {
-        return <p>There was an error fetching user information.</p>;
+        return <p>Nastala chyba pri načítaní informácií o uživateľovi.</p>;
     }
 
     return (
