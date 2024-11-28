@@ -237,7 +237,7 @@ public class UsersEndpoint
     [ProducesResponseType<UserInfo>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [Authorize]
-    [WolverineGet("/users/me")]
+    [WolverineGet("/users/info")]
     public static UserInfo GetMyInfo(IApplicationUserContext userContext)
     {
         return new UserInfo(userContext.UserId, userContext.UserName, userContext.UserEmail);
