@@ -49,12 +49,12 @@ export interface ConstructionDiary {
     dailyRecords: DailyRecord[];
 }
 
-interface DiaryContributor {
+export interface DiaryContributor {
     contributorId: UUID;
-    contributorRole: number //enum
+    contributorRole: DiaryContributorRole;
 }
 
-interface DailyRecord {
+export interface DailyRecord {
     date: string;
     weather: DiaryRecord[];
     workers: DiaryRecord[];
@@ -63,10 +63,23 @@ interface DailyRecord {
     otherRecords: DiaryRecord[];
 }
 
-interface DiaryRecord {
+export interface DiaryRecord {
     content: string;
     createdAt: string;
     authorName: string;
-    authorRole: number; //enum
+    authorRole: DiaryContributorRole;
     picturePath: string | null; // for now no pictures in the diary, in future maybe
+}
+
+export enum DiaryContributorRole {
+    None = 0,
+    ConstructionManager = 1, // Stavbyvedúci
+    GovernmentalConstructionSupervisor = 2, // Štátny stavebný dozor
+    Cartographer = 3, // Geodet a kartograf
+    ConstructionOwner = 4, // Stavebník alebo vlastník stavby
+    Designer = 5, // Projektant
+    ConstructionSupplier = 6, // Zhotoviteľ stavby
+    ConstructionControl = 7, // Stavebný dozor
+    GovernmentalControl = 8, // Štátny dozor
+    ConstructionWorkSafetyCoordinator = 9, // Koordinátor bezpečnosti práce
 }

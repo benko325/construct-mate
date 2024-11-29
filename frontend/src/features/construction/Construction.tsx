@@ -400,7 +400,7 @@ export default function ConstructionData() {
     const navigate = useNavigate();
 
     const handleOpenDiaryButtonClick = () => {
-        navigate(`/construction/${constructionData?.id}/diary/${constructionData?.constructionDiary?.id}`);
+        navigate(`/construction/${constructionData?.id}/diary/${constructionData?.constructionDiary?.id}`, { state: { constructionDiary: constructionData?.constructionDiary } });
     };
 
     const handleCreateDiaryButtonClick = () => {
@@ -462,7 +462,19 @@ export default function ConstructionData() {
                 setCreateDiaryDialogOpen(false);
             }, 2500);
         } catch (error) {
-            
+            if (error instanceof AxiosError) {
+                const responseData = error.response?.data || {};
+                if (responseData.ErrorMessage) {
+                    console.error('Create new diary error:', error);
+                    toast.error(`${responseData.ErrorMessage}`);
+                } else {
+                    console.error('Create new diary error:', error);
+                    toast.error("Nastala chyba pri vytváraní denníka.");
+                }
+            } else {
+                console.error('Create new diary error:', error);
+                toast.error("Nastala neočakávaná chyba pri vytváraní denníka.");
+            }
         }
     };
 
