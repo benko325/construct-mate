@@ -18,11 +18,12 @@ public class GetAllContributionDiariesQueryHandler
     public static async Task<QueryCollectionResponse<ConstructionDiary>> Handle(GetAllContributionDiariesQuery diariesQuery,
         IQuerySession session, CancellationToken cancellationToken)
     {
-        var constructionDiaries = await session.Query<Construction>()
-            .Select(c => c.ConstructionDiary)
-            .Where(d => d != null && d.DiaryContributors.Select(c => c.ContributorId).Contains(diariesQuery.UserId))
-            .ToListAsync(token: cancellationToken);
+       var constructionDiaries = await session.Query<Construction>()
+           .Where(c => c.ConstructionDiary != null &&
+                       c.ConstructionDiary.DiaryContributors.Any(d => d.ContributorId == diariesQuery.UserId))
+           .Select(c => c.ConstructionDiary)
+           .ToListAsync(token: cancellationToken);
 
-        return new QueryCollectionResponse<ConstructionDiary>(constructionDiaries!);
+        return new QueryCollectionResponse<ConstructionDiary>(constructionDiaries);
     }
 }

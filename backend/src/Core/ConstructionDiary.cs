@@ -20,7 +20,6 @@ public class ConstructionDiary
 public class DiaryContributor
 {
     public Guid ContributorId { get; set; }
-    // if enum too hard on FE, change back to string
     public required DiaryContributorRole ContributorRole { get; set; }
 }
 
