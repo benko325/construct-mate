@@ -56,3 +56,17 @@ export interface CreateNewConstructionDiaryRequest {
     implementer: string,
     updateConstructionDates: boolean
 }
+
+export interface CreateNewDiaryRecordRequest {
+    content: string,
+    recordCategory: DiaryRecordCategory
+}
+
+export enum DiaryRecordCategory {
+    None,
+    Weather,
+    Workers,
+    Machines,
+    Work,
+    OtherRecords,
+}

@@ -57,7 +57,7 @@ public class ConstructionDiariesEndpointValidations
     {
         public AddNewDiaryRecordRequestValidator()
         {
-            RuleFor(r => r.Content).NotNull().NotEmpty();
+            RuleFor(r => r.Content).NotNull().NotEmpty().MinimumLength(10).MaximumLength(5000);
             RuleFor(r => r.RecordCategory)
                 .IsInEnum()
                 .Must(x => x != DiaryRecordCategory.None)

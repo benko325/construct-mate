@@ -90,6 +90,7 @@ export default function Dashboard() {
             });
             toast.success("Stavba bola vytvorená.");
             setTimeout(() => {
+                // TODO: add construction to the object instead of reloading the page - when there is too much time for that
                 setDialogOpen(false);
                 window.location.href = window.location.href;
             }, 2500);

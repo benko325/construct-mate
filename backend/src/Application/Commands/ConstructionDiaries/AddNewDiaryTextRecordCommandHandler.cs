@@ -34,7 +34,7 @@ public class AddNewDiaryTextRecordCommandHandler
             .Select(d => d.ContributorId)
             .ToList();
         StatusCodeGuard.IsTrue(diaryCommand.RequesterId == construction.OwnerId || contributorIds.Contains(diaryCommand.RequesterId),
-            StatusCodes.Status403Forbidden, "User can not contribute to this diary, add him asd a contributor first");
+            StatusCodes.Status403Forbidden, "User can not contribute to this diary, add him as a contributor first");
 
         return construction;
     }
@@ -99,6 +99,11 @@ public class AddNewDiaryTextRecordCommandHandler
         session.Update(construction);
         await session.SaveChangesAsync(cancellationToken);
 
-        return new NewDiaryTextRecordAdded(construction.ConstructionDiary.Id, diaryRecord.Content, contributorName, contributorRole);
+        return new NewDiaryTextRecordAdded(
+            construction.ConstructionDiary.Id,
+            diaryRecord.Content,
+            contributorName,
+            contributorRole,
+            diaryRecord.CreatedAt);
     }
 }
