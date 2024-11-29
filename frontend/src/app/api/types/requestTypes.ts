@@ -1,4 +1,5 @@
 import { UUID } from "crypto";
+import { DiaryContributorRole } from "./responseTypes";
 
 export interface LoginUserRequest {
     email: string;
@@ -55,6 +56,11 @@ export interface CreateNewConstructionDiaryRequest {
     investor: string,
     implementer: string,
     updateConstructionDates: boolean
+}
+
+export interface AddNewDiaryContributorRequest {
+    contributorEmail: string,
+    contributorRole: DiaryContributorRole
 }
 
 export interface CreateNewDiaryRecordRequest {

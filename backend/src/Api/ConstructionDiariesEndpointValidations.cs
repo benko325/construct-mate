@@ -33,7 +33,6 @@ public class ConstructionDiariesEndpointValidations
     {
         public AddNewDiaryContributorRequestValidator()
         {
-            RuleFor(r => r.ConstructionId).NotNull().NotEmpty();
             RuleFor(r => r.ContributorEmail).NotNull().NotEmpty().EmailAddress();
             RuleFor(r => r.ContributorRole)
                 .IsInEnum()

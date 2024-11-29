@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { ChangeUserPasswordRequest, CreateConstructionRequest, CreateNewConstructionDiaryRequest, CreateNewDiaryRecordRequest, LoginUserRequest, RegisterUserRequest, SetUserNameAndEmailRequest, UpdateConstructionNameAndDescriptionRequest, UpdateConstructionStartEndDateRequest } from "./types/requestTypes";
+import { AddNewDiaryContributorRequest, ChangeUserPasswordRequest, CreateConstructionRequest, CreateNewConstructionDiaryRequest, CreateNewDiaryRecordRequest, LoginUserRequest, RegisterUserRequest, SetUserNameAndEmailRequest, UpdateConstructionNameAndDescriptionRequest, UpdateConstructionStartEndDateRequest } from "./types/requestTypes";
 import { UUID } from "crypto";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -96,6 +96,7 @@ const Construction = {
 const ConstructionDiary = {
     createNew: (id: UUID, values: CreateNewConstructionDiaryRequest) => requests.post(`/constructions/${id}/diary`, values),
     addNewRecord: (id: UUID, values: CreateNewDiaryRecordRequest) => requests.post(`/construction-diaries/${id}/diary-text-records`, values),
+    addNewContributor: (id: UUID, values: AddNewDiaryContributorRequest) => requests.post(`/constructions/${id}/new-diary-contributor`, values),
 };
 
 const agent = {

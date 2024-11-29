@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import agent from "@/app/api/agent";
 import { UUID } from "crypto";
-import { Construction, UploadedFile } from "@/app/api/types/responseTypes";
+import { Construction, DiaryContributorRole, UploadedFile } from "@/app/api/types/responseTypes";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {
@@ -28,6 +28,7 @@ import FileViewer from "../FileViewer";
 import ConfirmationDialog from "../ConfirmationDialog";
 import { FaFilePdf } from "react-icons/fa";
 import StatusIndicator from "../StatusIndicator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const apiUrl = import.meta.env.VITE_API_URL + "/" || 'http://localhost:5000/';
 
@@ -42,7 +43,6 @@ const updateStartEndDateFormSchema = z.object({
     startDate: z.date(),
     endDate: z.date(),
 });
-
 type UpdateStartEndDateFormData = z.infer<typeof updateStartEndDateFormSchema>;
 
 const createNewDiaryFormSchema = z.object({
@@ -57,8 +57,29 @@ const createNewDiaryFormSchema = z.object({
     implementer: z.string().min(1, { message: 'Meno realizátora musí mať aspoň 1 znak' }).max(50, { message: 'Meno realizátora musí mať maximálne 50 znakov' }),
     updateConstructionDates: z.boolean().default(false),
 });
-
 type CreateNewDiaryFormData = z.infer<typeof createNewDiaryFormSchema>;
+
+const addNewDiaryContributorFormSchema = z.object({
+    contributorEmail: z.string().email({ message: "Email musí byť v správnom formáte" }),
+    contributorRole: z.nativeEnum(DiaryContributorRole)
+        .refine((val) => val !== DiaryContributorRole.None, {
+            message: "Rola prispievateľa musí byť vybraná",
+        }),
+});
+type AddNewDiaryContributorFormData = z.infer<typeof addNewDiaryContributorFormSchema>;
+
+const contributorRoleTranslations = {
+    [DiaryContributorRole.None]: "Žiadna rola",
+    [DiaryContributorRole.ConstructionManager]: "Stavbyvedúci",
+    [DiaryContributorRole.GovernmentalConstructionSupervisor]: "Štátny stavebný dozor",
+    [DiaryContributorRole.Cartographer]: "Geodet a kartograf",
+    [DiaryContributorRole.ConstructionOwner]: "Stavebník alebo vlastník stavby",
+    [DiaryContributorRole.Designer]: "Projektant",
+    [DiaryContributorRole.ConstructionSupplier]: "Zhotoviteľ stavby",
+    [DiaryContributorRole.ConstructionControl]: "Stavebný dozor",
+    [DiaryContributorRole.GovernmentalControl]: "Štátny dozor",
+    [DiaryContributorRole.ConstructionWorkSafetyCoordinator]: "Koordinátor bezpečnosti práce",
+};
 
 export default function ConstructionData() {
     // id of a construction from the url
@@ -403,6 +424,72 @@ export default function ConstructionData() {
         navigate(`/construction/${constructionData?.id}/diary/${constructionData?.constructionDiary?.id}`, { state: { constructionDiary: constructionData?.constructionDiary } });
     };
 
+    const handleAddDiaryContributorButtonClick = () => {
+        setAddNewDiaryContributorDialogOpen(true);
+    };
+    const [addNewDiaryContributorDialogOpen, setAddNewDiaryContributorDialogOpen] = useState(false);
+    const addNewDiaryContributorForm = useForm<AddNewDiaryContributorFormData>({
+        resolver: zodResolver(addNewDiaryContributorFormSchema),
+        defaultValues: {
+            contributorEmail: "",
+            contributorRole: DiaryContributorRole.None
+        }
+    });
+
+    const onSubmitAddNewDiaryContributor = async (data: AddNewDiaryContributorFormData) => {
+        console.log(data);
+        try {
+            await agent.ConstructionDiary.addNewContributor(safeId, {
+                contributorEmail: data.contributorEmail,
+                contributorRole: data.contributorRole
+            });
+            toast.success("Nový prispievateľ bol úspešne pridaný.");
+            setTimeout(() => {
+                setAddNewDiaryContributorDialogOpen(false);
+            }, 2500);
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                const responseData = error.response?.data || {};
+                let messages = "";
+    
+                // validation error - should not happen because of same setting of validator as in BE
+                if (responseData.status === 400 &&
+                    responseData.errors) {
+                    const validationErrors = responseData.errors;
+                    Object.keys(validationErrors).forEach((field) => {
+                        const message = validationErrors[field][0];
+                        messages = messages + "/n" + message;
+                    });
+                    console.error('Add new contributor error from BE validations:', error);
+                    addNewDiaryContributorForm.setError('root', {
+                        type: 'manual',
+                        message: `${messages}`,
+                    });
+                // custom error on BE by StatusCodeGuard
+                } else if (responseData.ErrorMessage) {
+                    console.error('Add new contributor error:', error);
+                    addNewDiaryContributorForm.setError('root', {
+                        type: 'manual',
+                        message: `${responseData.ErrorMessage}`,
+                    });
+                } else {
+                    console.error("Unknown add new contributor error:", error);
+                    addNewDiaryContributorForm.setError('root', {
+                        type: 'manual',
+                        message: 'Nastala chyba. Skúste prosím znova.',
+                    });
+                }
+            // TODO: make prettier so the code is not duplicated
+            } else {
+                console.error("Unknown add new contributor error:", error);
+                addNewDiaryContributorForm.setError('root', {
+                    type: 'manual',
+                    message: 'Nastala chyba. Skúste prosím znova.',
+                });
+            }
+        }
+    };
+
     const handleCreateDiaryButtonClick = () => {
         setCreateDiaryDialogOpen(true);
     };
@@ -689,7 +776,87 @@ export default function ConstructionData() {
                                 valueNotPresentButtonText="Vytvoriť denník"
                                 valuePresentText="Denník bol vytvorený"
                                 valueNotPresentText="Denník nebol vytvorený"
+                                onModifyValueButtonClick={handleAddDiaryContributorButtonClick}
+                                valuePresentModifyButtonText="Pridať nového prispievateľa"
                             />
+                            <Dialog open={addNewDiaryContributorDialogOpen} onOpenChange={setAddNewDiaryContributorDialogOpen}>
+                                <DialogContent className="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                        <DialogTitle>Pridajte nového prispievateľa do denníka</DialogTitle>
+                                        <DialogDescription>
+                                            Pridajte nového prispievateľa s jeho rolou.<br/>
+                                            <b>POZOR! Táto operácia je nevratná.</b>
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="grid gap-2 py-2">
+                                        <Form {...addNewDiaryContributorForm}>
+                                            <form onSubmit={addNewDiaryContributorForm.handleSubmit(onSubmitAddNewDiaryContributor)} className="space-y-6">
+                                                <FormField
+                                                    control={addNewDiaryContributorForm.control}
+                                                    name="contributorEmail"
+                                                    render={({ field }) => (
+                                                    <FormItem className="flex-1">
+                                                        <FormLabel>Email prispievateľa</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="jozko.mrkvicka@mail.com" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={addNewDiaryContributorForm.control}
+                                                    name="contributorRole"
+                                                    render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormLabel>Rola prispievateľa</FormLabel>
+                                                            <FormControl>
+                                                                <Select
+                                                                    value={field.value?.toString()} // Convert enum to string for Select component
+                                                                    onValueChange={(val) => field.onChange(Number(val))} // Convert string back to number
+                                                                >
+                                                                    <SelectTrigger>
+                                                                        <SelectValue placeholder="Vyberte rolu prispievateľa">
+                                                                            {field.value !== undefined
+                                                                                ? contributorRoleTranslations[field.value as DiaryContributorRole]
+                                                                                : "Vyberte rolu prispievateľa"}
+                                                                        </SelectValue>
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {Object.entries(contributorRoleTranslations)
+                                                                            .filter(([key]) => Number(key) !== DiaryContributorRole.None)
+                                                                            .map(([key, translation]) => (
+                                                                                <SelectItem key={key} value={key}>
+                                                                                    {translation}
+                                                                                </SelectItem>
+                                                                            ))}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                {addNewDiaryContributorForm.formState.errors.root && (
+                                                <div className="text-red-500 text-sm mt-2">
+                                                    {addNewDiaryContributorForm.formState.errors.root.message}
+                                                </div>
+                                                )}
+                                                <Button type="submit" className="w-full" disabled={addNewDiaryContributorForm.formState.isSubmitting}>
+                                                    {addNewDiaryContributorForm.formState.isSubmitting ? (
+                                                        <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Prosím počkajte...
+                                                        </>
+                                                    ) : (
+                                                        'Pridať prispievateľa'
+                                                    )}
+                                                </Button>
+                                            </form>
+                                        </Form>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
                             <Dialog open={createDiaryDialogOpen} onOpenChange={setCreateDiaryDialogOpen}>
                                 <DialogContent className="sm:max-w-[850px]">
                                     <DialogHeader>

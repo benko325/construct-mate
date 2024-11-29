@@ -47,16 +47,13 @@ public class AddNewDiaryContributorCommandHandler
     }
 
     public static async Task<ConstructionDiaryContributorAdded> Handle(AddNewDiaryContributorCommand constructionCommand,
-        (Construction, DiaryContributor) constructionContributor, IDocumentSession session, CancellationToken cancellationToken)
+        Construction construction, DiaryContributor diaryContributor, IDocumentSession session, CancellationToken cancellationToken)
     {
-        var construction = constructionContributor.Item1;
-        var contributor = constructionContributor.Item2;
-
         // nullability of diary checked in LoadAsync
-        construction.ConstructionDiary!.DiaryContributors.Add(contributor);
+        construction.ConstructionDiary!.DiaryContributors.Add(diaryContributor);
         session.Update(construction);
         await session.SaveChangesAsync(cancellationToken);
 
-        return new ConstructionDiaryContributorAdded(construction.Id, contributor.ContributorId, contributor.ContributorRole);
+        return new ConstructionDiaryContributorAdded(construction.Id, diaryContributor.ContributorId, diaryContributor.ContributorRole);
     }
 }

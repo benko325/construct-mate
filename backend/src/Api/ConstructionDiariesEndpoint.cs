@@ -42,11 +42,9 @@ public record CreateNewConstructionDiaryRequest(
 /// <summary>
 /// Add new contributor to the diary request
 /// </summary>
-/// <param name="ConstructionId">Id of construction where a new diary contributor has to be added</param>
 /// <param name="ContributorEmail">Email of new contributor to the diary</param>
 /// <param name="ContributorRole">Role of the contributor (for example designer (projektant), supervisor (dozor), ...)</param>
 public record AddNewDiaryContributorRequest(
-    Guid ConstructionId,
     string ContributorEmail,
     DiaryContributorRole ContributorRole);
 
@@ -178,10 +176,11 @@ public class ConstructionDiariesEndpoint
     public static async Task<ConstructionDiaryContributorAdded> AddNewContributorToTheConstructionDiary([FromRoute] Guid id,
         [FromBody] AddNewDiaryContributorRequest request, IMessageBus bus, IApplicationUserContext userContext)
     {
-        StatusCodeGuard.IsEqualTo(id, request.ConstructionId, StatusCodes.Status400BadRequest,
-            "Id from route and request must be equal");
-
-        var command = request.Adapt<AddNewDiaryContributorCommand>() with { RequesterId = userContext.UserId };
+        var command = request.Adapt<AddNewDiaryContributorCommand>() with
+        {
+            RequesterId = userContext.UserId,
+            ConstructionId = id
+        };
         var result = await bus.InvokeAsync<ConstructionDiaryContributorAdded>(command);
         return result;
     }

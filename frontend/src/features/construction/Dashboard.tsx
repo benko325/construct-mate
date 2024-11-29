@@ -107,31 +107,32 @@ export default function Dashboard() {
                         const message = validationErrors[field][0];
                         messages = messages + "/n" + message;
                     });
-                    console.error('Register error from BE validations:', error);
+                    console.error('Create construction error from BE validations:', error);
                     newConstructionForm.setError('root', {
                         type: 'manual',
                         message: `${messages}`,
                     });
                 // custom error on BE by StatusCodeGuard
                 } else if (responseData.ErrorMessage) {
-                    console.error('Register error:', error);
+                    // only ErrorMessage that can be sent by BE
+                    console.error('Create construction error:', error);
                     newConstructionForm.setError('root', {
                         type: 'manual',
                         message: `Dátum začiatku musí byť pred dátumom konca.`,
                     });
                 } else {
-                    console.error("Unknown register error:", error);
+                    console.error("Unknown create construction error:", error);
                     newConstructionForm.setError('root', {
                         type: 'manual',
-                        message: 'An error occurred. Please try again.',
+                        message: 'Nastala chyba. Skúste prosím znova.',
                     });
                 }
             // TODO: make prettier so the code is not duplicated
             } else {
-                console.error("Unknown register error:", error);
+                console.error("Unknown create construction error:", error);
                 newConstructionForm.setError('root', {
                     type: 'manual',
-                    message: 'An error occurred. Please try again.',
+                    message: 'Nastala chyba. Skúste prosím znova.',
                 });
             }
         }
