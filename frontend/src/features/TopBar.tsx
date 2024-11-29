@@ -44,7 +44,7 @@ const TopBar: React.FC = () => {
     }
 
     return (
-        <div className="flex items-center justify-between bg-gray-100 shadow-md px-4 py-2">
+        <div className="flex items-center justify-between shadow-md px-4 py-2">
             <div className="flex items-center space-x-4">
                 <h1 className="text-lg font-semibold">
                     Construct Mate

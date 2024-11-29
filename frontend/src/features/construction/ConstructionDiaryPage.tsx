@@ -206,7 +206,7 @@ export default function ConstructionDiaryPage() {
 
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-6 min-h-screen bg-gray-100">
             <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-4 w-auto">
