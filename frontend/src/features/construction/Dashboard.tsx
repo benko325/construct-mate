@@ -312,6 +312,7 @@ export default function Dashboard() {
                     ))}
                 </div>
             </div>
+            {/* TODO: Add diaries where I am the contributor */}
             <div className="p-6">
                 <Accordion type="single" collapsible>
                     <AccordionItem value="item-1">
@@ -357,7 +358,6 @@ export default function Dashboard() {
                     </AccordionItem>
                 </Accordion>
             </div>
-            {/* TODO: Add diaries where I am the contributor */}
         </div>
     );
 }
