@@ -31,7 +31,7 @@ export const router = createBrowserRouter([
                     { path: 'profile', element: <ProfilePage /> },
                     { path: 'construction/:id', element: <ConstructionData /> },
                     { path: 'construction/:constructionId/diary/:diaryId', element: <ConstructionDiaryPage /> },
-                    { path: 'diary/:id', element: <ConstructionDiaryPage /> }
+                    { path: 'diary/:diaryId', element: <ConstructionDiaryPage /> }
                 ],
             },
 

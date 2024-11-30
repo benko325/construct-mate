@@ -58,6 +58,12 @@ export interface CreateNewConstructionDiaryRequest {
     updateConstructionDates: boolean
 }
 
+export interface ModifyDiaryFromToDatesRequest {
+    newDateFrom: string,
+    newDateTo: string,
+    updateConstructionDates: boolean
+}
+
 export interface AddNewDiaryContributorRequest {
     contributorEmail: string,
     contributorRole: DiaryContributorRole

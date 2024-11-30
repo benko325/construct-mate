@@ -45,10 +45,9 @@ public class ConstructionDiariesEndpointValidations
     {
         public ModifyDiaryFromToDatesRequestValidator()
         {
-            RuleFor(r => r.DiaryId).NotNull().NotEmpty();
             RuleFor(r => r.NewDateFrom).NotNull().NotEmpty();
             RuleFor(r => r.NewDateTo).NotNull().NotEmpty();
-            RuleFor(r => r.UpdateConstructionDates).NotNull().NotEmpty();
+            RuleFor(r => r.UpdateConstructionDates).NotNull();
         }
     }
     

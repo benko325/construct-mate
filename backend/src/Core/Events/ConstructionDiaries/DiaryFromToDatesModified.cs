@@ -1,3 +1,7 @@
 namespace ConstructMate.Core.Events.ConstructionDiaries;
 
-public record DiaryFromToDatesModified(Guid DiaryId, DateOnly NewDateFrom, DateOnly NewDateTo);
+public record DiaryFromToDatesModified(
+    Guid DiaryId,
+    DateOnly NewDateFrom,
+    DateOnly NewDateTo,
+    List<DailyRecord> NewDailyRecords);

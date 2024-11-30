@@ -42,7 +42,7 @@ type UpdateConstructionNameDescriptionFormData = z.infer<typeof updateConstructi
 const updateStartEndDateFormSchema = z.object({
     startDate: z.date(),
     endDate: z.date(),
-});
+}).refine((data) => data.startDate < data.endDate, {message: "Dátum začiatku musí byť skôr ako dátum konca"});
 type UpdateStartEndDateFormData = z.infer<typeof updateStartEndDateFormSchema>;
 
 const createNewDiaryFormSchema = z.object({
@@ -56,7 +56,7 @@ const createNewDiaryFormSchema = z.object({
     investor: z.string().min(1, { message: 'Meno investora musí mať aspoň 1 znak' }).max(50, { message: 'Meno investora musí mať maximálne 50 znakov' }),
     implementer: z.string().min(1, { message: 'Meno realizátora musí mať aspoň 1 znak' }).max(50, { message: 'Meno realizátora musí mať maximálne 50 znakov' }),
     updateConstructionDates: z.boolean().default(false),
-});
+}).refine((data) => data.diaryDateFrom < data.diaryDateTo, {message: "Dátum Od musí byť skôr ako dátum Do"});
 type CreateNewDiaryFormData = z.infer<typeof createNewDiaryFormSchema>;
 
 const addNewDiaryContributorFormSchema = z.object({

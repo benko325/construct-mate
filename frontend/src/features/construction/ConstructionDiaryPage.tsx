@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { ConstructionDiary, DailyRecord, DiaryContributorRole } from "../../app/api/types/responseTypes.ts";
 import { Label } from "@/components/ui/label.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
@@ -16,6 +16,14 @@ import { DiaryRecordCategory } from "@/app/api/types/requestTypes.ts";
 import agent from "@/app/api/agent.ts";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
+import { Input } from "@/components/ui/input.tsx";
+import { format } from "date-fns";
+import { UUID } from "crypto";
+
+interface FirstAndLastDayWithRecord {
+    firstDay: string | null;
+    lastDay: string | null;
+};
 
 const getRoleName = (role: DiaryContributorRole): string => {
     switch (role) {
@@ -53,7 +61,6 @@ const newRecordFormSchema = z.object({
             message: "Kategória musí byť vybraná",
         }),
 });
-
 type NewRecordFormData = z.infer<typeof newRecordFormSchema>;
 
 const categoryTranslations = {
@@ -66,11 +73,79 @@ const categoryTranslations = {
 };
 
 export default function ConstructionDiaryPage() {
-    const [dialogOpen, setDialogOpen] = useState(false);
+    const [addNewRecordDialogOpen, setAddNewRecordDialogOpen] = useState(false);
+
+    const {diaryId} = useParams<{diaryId: UUID}>(); // diary Id always appears in the route
+    const safeDiaryId = diaryId ?? "00000000-0000-0000-0000-000000000000";
+
+    const {constructionId} = useParams<{constructionId: UUID}>(); // construction id is in route in case that the diary is opened by construction owner (construction manager)
+    const safeConstructionId = constructionId ?? "00000000-0000-0000-0000-000000000000";
 
     const location = useLocation();
     const diary : ConstructionDiary | null = location.state?.constructionDiary;
     const [updatedDiary, setUpdatedDiary] = useState<ConstructionDiary | null>(diary);
+
+    const createModifyFromToDatesFormSchema = (firstLastDayWithRecord: FirstAndLastDayWithRecord | null) => {
+        return z
+            .object({
+                newDateFrom: z
+                    .date()
+                    .refine(
+                        (date) =>
+                            !firstLastDayWithRecord?.firstDay ||
+                            date <= new Date(firstLastDayWithRecord.firstDay),
+                        {
+                            message: `Dátum "Od" nesmie byť neskôr ako ${
+                                firstLastDayWithRecord?.firstDay ?? "dnes"
+                            }`,
+                        }
+                    ),
+                newDateTo: z
+                    .date()
+                    .refine(
+                        (date) =>
+                            !firstLastDayWithRecord?.lastDay ||
+                            date >= new Date(firstLastDayWithRecord.lastDay),
+                        {
+                            message: `Dátum "Do" nesmie byť skôr ako ${
+                                firstLastDayWithRecord?.lastDay ?? "dnes"
+                            }`,
+                        }
+                    ),
+                updateConstructionDates: z.boolean().default(false),
+            })
+            .refine((data) => data.newDateFrom < data.newDateTo, {
+                message: "Dátum Od musí byť skôr ako dátum Do",
+            });
+    };
+    const [firstLastDayWithRecord, setFirstLastDayWithRecord] = useState<FirstAndLastDayWithRecord | null>(null);
+    const [modifyFromToDatesFormSchema, setModifyFromToDatesFormSchema] = useState(() => createModifyFromToDatesFormSchema(null)); // Default schema
+    useEffect(() => {
+        const loadDateRange = async () => {
+            try {
+                const result = await agent.ConstructionDiary.getFirstAndLastDayWithRecord(safeDiaryId);
+                setFirstLastDayWithRecord(result);
+                setModifyFromToDatesFormSchema(() => createModifyFromToDatesFormSchema(result));
+            } catch (error) {
+                console.error("There was an error fetching the data about the first and last day with the record in diary");
+            }
+        };
+
+        loadDateRange();
+    }, []);
+
+    // const modifyFromToDatesFormSchema = z.object({
+    //     newDateFrom: z.date()
+    //     .refine((date) => !firstLastDayWithRecord?.firstDay || date.getDate() <= new Date(firstLastDayWithRecord.firstDay).getDate(), {
+    //         message: `Dátum "Od" nesmie byť neskôr ako ${firstLastDayWithRecord?.firstDay}`,
+    //     }),
+    //     newDateTo: z.date()
+    //     .refine((date) => !firstLastDayWithRecord?.lastDay || date.getDate() >= new Date(firstLastDayWithRecord.lastDay).getDate(), {
+    //         message: `Dátum "Do" nesmie byť skôr ako ${firstLastDayWithRecord?.lastDay}`
+    //     }),
+    //     updateConstructionDates: z.boolean().default(false),
+    // }).refine((data) => data.newDateFrom < data.newDateTo, {message: "Dátum Od musí byť skôr ako dátum Do"});
+    type ModifyFromToDatesFormData = z.infer<typeof modifyFromToDatesFormSchema>;
 
     const [selectedDate, setSelectedDate] = useState<string>("");
     const [filteredRecord, setFilteredRecord] = useState<DailyRecord | null>(null);
@@ -101,6 +176,90 @@ export default function ConstructionDiaryPage() {
         }
     }, [updatedDiary]);
 
+    const [modifyFromToDatesDialogOpen, setModifyFromToDatesDialogOpen] = useState(false);
+    const modifyFromToDatesForm = useForm<ModifyFromToDatesFormData>({
+        resolver: zodResolver(modifyFromToDatesFormSchema),
+        defaultValues: {
+            newDateFrom: new Date(),
+            newDateTo: new Date(),
+            updateConstructionDates: false,
+        }
+    });
+
+    const onSubmitModifyFromToDates = async (data: ModifyFromToDatesFormData) => {
+        try {
+            const result = await agent.ConstructionDiary.modifyFromToDates(safeDiaryId, {
+                newDateFrom: format(data.newDateFrom, 'yyyy-MM-dd'),
+                newDateTo: format(data.newDateTo, 'yyyy-MM-dd'),
+                updateConstructionDates: data.updateConstructionDates
+            });
+
+            toast.success("Dátumy boli úspešne zmenené.");
+            setTimeout(() => {
+                setModifyFromToDatesDialogOpen(false);
+                modifyFromToDatesForm.reset({
+                    newDateFrom: new Date(result.newDateFrom),
+                    newDateTo: new Date(result.newDateTo),
+                });
+                setUpdatedDiary((prevData) => ({
+                    ...prevData!,
+                    dailyRecords: result.newDailyRecords,
+                    diaryDateFrom: result.newDateFrom,
+                    diaryDateTo: result.newDateTo
+                }));
+            }, 2500);
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                const responseData = error.response?.data || {};
+                let messages = "";
+    
+                // validation error - should not happen because of same setting of validator as in BE
+                if (responseData.status === 400 &&
+                    responseData.errors) {
+                    const validationErrors = responseData.errors;
+                    Object.keys(validationErrors).forEach((field) => {
+                        const message = validationErrors[field][0];
+                        messages = messages + "/n" + message;
+                    });
+                    console.error('Modify dates error from BE validations:', error);
+                    modifyFromToDatesForm.setError('root', {
+                        type: 'manual',
+                        message: `${messages}`,
+                    });
+                // custom error on BE by StatusCodeGuard
+                } else if (responseData.ErrorMessage) {
+                    console.error('Modify dates error:', error);
+                    modifyFromToDatesForm.setError('root', {
+                        type: 'manual',
+                        message: `${responseData.ErrorMessage}`,
+                    });
+                } else {
+                    console.error("Unknown modify dates error:", error);
+                    modifyFromToDatesForm.setError('root', {
+                        type: 'manual',
+                        message: 'Nastala chyba. Skúste prosím znova.',
+                    });
+                }
+            // TODO: make prettier so the code is not duplicated
+            } else {
+                console.error("Unknown modify dates error:", error);
+                modifyFromToDatesForm.setError('root', {
+                    type: 'manual',
+                    message: 'Nastala chyba. Skúste prosím znova.',
+                });
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (updatedDiary) {
+            modifyFromToDatesForm.reset({
+                newDateFrom: new Date(updatedDiary.diaryDateFrom),
+                newDateTo: new Date(updatedDiary.diaryDateTo),
+            });
+        }
+    }, [updatedDiary, modifyFromToDatesForm]);
+
     const newRecordForm = useForm<NewRecordFormData>({
         resolver: zodResolver(newRecordFormSchema),
         defaultValues: {
@@ -109,7 +268,7 @@ export default function ConstructionDiaryPage() {
         },
     });
 
-    const onSubmit = async (data: NewRecordFormData) => {
+    const onSubmitNewRecord = async (data: NewRecordFormData) => {
         try {
             const response = await agent.ConstructionDiary.addNewRecord(updatedDiary.id, data);
             const newRecord = {
@@ -156,10 +315,10 @@ export default function ConstructionDiaryPage() {
                 return record;
             });
             setUpdatedDiary({ ...updatedDiary, dailyRecords: updatedRecords });
-
             toast.success("Záznam bol pridaný.");
             setTimeout(() => {
-                setDialogOpen(false);
+                setAddNewRecordDialogOpen(false);
+                newRecordForm.reset();
             }, 2500);
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -238,91 +397,187 @@ export default function ConstructionDiaryPage() {
                         </div>
                     </div>
 
-                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" className="bg-green-300 hover:bg-green-100">
-                                Pridať nový záznam
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>Vytvorte nový záznam</DialogTitle>
-                                <DialogDescription></DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-2 py-2">
-                                <Form {...newRecordForm}>
-                                    <form onSubmit={newRecordForm.handleSubmit(onSubmit)} className="space-y-6">
-                                        <FormField
-                                            control={newRecordForm.control}
-                                            name="content"
-                                            render={({ field }) => (
-                                            <FormItem className="flex-1">
-                                                <FormLabel>Názov</FormLabel>
-                                                <FormControl>
-                                                    <Textarea
-                                                        placeholder="Vyzeralo to takto, dialo sa toto, ..."
-                                                        {...field}
-                                                        className=""
-                                                        rows={1}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
+                    <div>
+                        <Dialog open={modifyFromToDatesDialogOpen} onOpenChange={setModifyFromToDatesDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="bg-blue-100 hover:bg-blue-50 mx-2" disabled={safeConstructionId === "00000000-0000-0000-0000-000000000000"}>
+                                    Upraviť dátumy "Od" a "Do"
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>Upravte v denníku dátumy "Od" a "Do"</DialogTitle>
+                                    <DialogDescription>
+                                        Aktualizujú sa tým zároveň aj stránky denníka s dennými záznamami.<br/>
+                                        <b>Dátum "Od" nemôže byť neskôr ako je prvý záznam v denníku.<br/>
+                                        Dátum "Do" nemôže byť skôr ako je posledný záznam v denníku.</b><br/>
+                                        <i>Prvý dátum so záznamom: {firstLastDayWithRecord?.firstDay ?? "Žiadny záznam neexistuje"}</i><br/>
+                                        <i>Posledný dátum so záznamom: {firstLastDayWithRecord?.lastDay ?? "Žiadny záznam neexistuje"}</i>
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-2 py-2">
+                                    <Form {...modifyFromToDatesForm}>
+                                        <form onSubmit={modifyFromToDatesForm.handleSubmit(onSubmitModifyFromToDates)} className="space-y-6">
+                                            <FormField
+                                                control={modifyFromToDatesForm.control}
+                                                name="newDateFrom"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Nový dátum "Od"</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                type="date"
+                                                                {...field}
+                                                                value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
+                                                                onChange={(e) => field.onChange(new Date(e.target.value))}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={modifyFromToDatesForm.control}
+                                                name="newDateTo"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Nový dátum "Do"</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                type="date"
+                                                                {...field}
+                                                                value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
+                                                                onChange={(e) => field.onChange(new Date(e.target.value))}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={modifyFromToDatesForm.control}
+                                                name="updateConstructionDates"
+                                                render={({ field }) => (
+                                                    <FormItem className="flex-1">
+                                                        <FormLabel>Aktualizovať dátumy stavby s dátumami denníka</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                type="checkbox"
+                                                                checked={field.value || false}
+                                                                onChange={(e) => field.onChange(e.target.checked)}
+                                                                className="h-10 w-10 accent-blue-500"
+                                                            />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            {modifyFromToDatesForm.formState.errors.root && (
+                                            <div className="text-red-500 text-sm mt-2">
+                                                {modifyFromToDatesForm.formState.errors.root.message}
+                                            </div>
                                             )}
-                                        />
-                                        <FormField
-                                            control={newRecordForm.control}
-                                            name="recordCategory"
-                                            render={({ field }) => (
+                                            <Button type="submit" className="w-full" disabled={modifyFromToDatesForm.formState.isSubmitting}>
+                                                {modifyFromToDatesForm.formState.isSubmitting ? (
+                                                    <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Prosím počkajte...
+                                                    </>
+                                                ) : (
+                                                    'Upraviť dátumy'
+                                                )}
+                                            </Button>
+                                        </form>
+                                    </Form>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog open={addNewRecordDialogOpen} onOpenChange={setAddNewRecordDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="bg-green-300 hover:bg-green-100 mx-2">
+                                    Pridať nový záznam
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>Vytvorte nový záznam</DialogTitle>
+                                    <DialogDescription></DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-2 py-2">
+                                    <Form {...newRecordForm}>
+                                        <form onSubmit={newRecordForm.handleSubmit(onSubmitNewRecord)} className="space-y-6">
+                                            <FormField
+                                                control={newRecordForm.control}
+                                                name="content"
+                                                render={({ field }) => (
                                                 <FormItem className="flex-1">
-                                                    <FormLabel>Kategória záznamu</FormLabel>
+                                                    <FormLabel>Názov</FormLabel>
                                                     <FormControl>
-                                                        <Select
-                                                            value={field.value?.toString()} // Convert enum to string for Select component
-                                                            onValueChange={(val) => field.onChange(Number(val))} // Convert string back to number
-                                                        >
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Vyberte kategóriu">
-                                                                    {field.value !== undefined
-                                                                        ? categoryTranslations[field.value as DiaryRecordCategory]
-                                                                        : "Vyberte kategóriu"}
-                                                                </SelectValue>
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {Object.entries(categoryTranslations)
-                                                                    .filter(([key]) => Number(key) !== DiaryRecordCategory.None)
-                                                                    .map(([key, translation]) => (
-                                                                        <SelectItem key={key} value={key}>
-                                                                            {translation}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                            </SelectContent>
-                                                        </Select>
+                                                        <Textarea
+                                                            placeholder="Vyzeralo to takto, dialo sa toto, ..."
+                                                            {...field}
+                                                            className=""
+                                                            rows={1}
+                                                        />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={newRecordForm.control}
+                                                name="recordCategory"
+                                                render={({ field }) => (
+                                                    <FormItem className="flex-1">
+                                                        <FormLabel>Kategória záznamu</FormLabel>
+                                                        <FormControl>
+                                                            <Select
+                                                                value={field.value?.toString()} // Convert enum to string for Select component
+                                                                onValueChange={(val) => field.onChange(Number(val))} // Convert string back to number
+                                                            >
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Vyberte kategóriu">
+                                                                        {field.value !== undefined
+                                                                            ? categoryTranslations[field.value as DiaryRecordCategory]
+                                                                            : "Vyberte kategóriu"}
+                                                                    </SelectValue>
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {Object.entries(categoryTranslations)
+                                                                        .filter(([key]) => Number(key) !== DiaryRecordCategory.None)
+                                                                        .map(([key, translation]) => (
+                                                                            <SelectItem key={key} value={key}>
+                                                                                {translation}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            {newRecordForm.formState.errors.root && (
+                                            <div className="text-red-500 text-sm mt-2">
+                                                {newRecordForm.formState.errors.root.message}
+                                            </div>
                                             )}
-                                        />
-                                        {newRecordForm.formState.errors.root && (
-                                        <div className="text-red-500 text-sm mt-2">
-                                            {newRecordForm.formState.errors.root.message}
-                                        </div>
-                                        )}
-                                        <Button type="submit" className="w-full" disabled={newRecordForm.formState.isSubmitting}>
-                                            {newRecordForm.formState.isSubmitting ? (
-                                                <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Prosím počkajte...
-                                                </>
-                                            ) : (
-                                                'Vytvoriť záznam'
-                                            )}
-                                        </Button>
-                                    </form>
-                                </Form>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
+                                            <Button type="submit" className="w-full" disabled={newRecordForm.formState.isSubmitting}>
+                                                {newRecordForm.formState.isSubmitting ? (
+                                                    <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Prosím počkajte...
+                                                    </>
+                                                ) : (
+                                                    'Vytvoriť záznam'
+                                                )}
+                                            </Button>
+                                        </form>
+                                    </Form>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
 
                 {filteredRecord ? (

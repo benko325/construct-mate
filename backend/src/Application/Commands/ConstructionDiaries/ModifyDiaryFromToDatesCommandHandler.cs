@@ -101,7 +101,8 @@ public class ModifyDiaryFromToDatesCommandHandler
         await session.SaveChangesAsync(cancellationToken);
 
         return new DiaryFromToDatesModified(construction.ConstructionDiary.Id,
-            construction.ConstructionDiary.DiaryDateFrom, construction.ConstructionDiary.DiaryDateTo);
+            construction.ConstructionDiary.DiaryDateFrom, construction.ConstructionDiary.DiaryDateTo,
+            construction.ConstructionDiary.DailyRecords);
     }
 
     private static void UpdateDailyRecords(Construction construction, ModifyDiaryFromToDatesCommand diaryCommand)
@@ -113,11 +114,14 @@ public class ModifyDiaryFromToDatesCommandHandler
         // add new records for new period
         if (newDateFrom < oldDateFrom)
         {
+            var newDailyRecords = new List<DailyRecord>();
             for (var date = newDateFrom; date < oldDateFrom; date = date.AddDays(1))
             {
                 var dailyRecord = new DailyRecord() { Date = date };
-                construction.ConstructionDiary.DailyRecords.Add(dailyRecord);
+                newDailyRecords.Add(dailyRecord);
             }
+            newDailyRecords.AddRange(construction.ConstructionDiary.DailyRecords);
+            construction.ConstructionDiary.DailyRecords = newDailyRecords;
         }
         // remove old records that are out of new period
         else

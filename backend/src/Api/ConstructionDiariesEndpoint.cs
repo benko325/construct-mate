@@ -51,12 +51,10 @@ public record AddNewDiaryContributorRequest(
 /// <summary>
 /// Modify diary from and to dates
 /// </summary>
-/// <param name="DiaryId">Id of diary to be modified</param>
 /// <param name="NewDateFrom">New diary date from</param>
 /// <param name="NewDateTo">New diary date to</param>
 /// <param name="UpdateConstructionDates">If the construction dates have also to be updated</param>
 public record ModifyDiaryFromToDatesRequest(
-    Guid DiaryId,
     DateOnly NewDateFrom,
     DateOnly NewDateTo,
     bool UpdateConstructionDates);
@@ -88,6 +86,9 @@ public class ConstructionDiariesEndpoint
     public static async Task<ConstructionDiaryCreated> CreateNewDiary([FromRoute] Guid id,
         [FromBody] CreateNewConstructionDiaryRequest request, IMessageBus bus, IApplicationUserContext userContext)
     {
+        StatusCodeGuard.IsGreaterThan(request.DiaryDateTo, request.DiaryDateFrom, StatusCodes.Status400BadRequest,
+            "EndDate must be later than StartDate");
+        
         var command = request.Adapt<CreateNewConstructionDiaryCommand>() with { Id = Guid.NewGuid(), RequesterId = userContext.UserId, ConstructionId = id };
         var result = await bus.InvokeAsync<ConstructionDiaryCreated>(command);
         return result;
@@ -216,7 +217,6 @@ public class ConstructionDiariesEndpoint
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>DiaryFromToDatesModified - id of the diary and new dates</returns>
     [ProducesResponseType<DiaryFromToDatesModified>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
@@ -226,10 +226,14 @@ public class ConstructionDiariesEndpoint
         [FromBody] ModifyDiaryFromToDatesRequest request, IApplicationUserContext userContext,
         IMessageBus bus)
     {
-        StatusCodeGuard.IsEqualTo(id, request.DiaryId, StatusCodes.Status400BadRequest,
-            "Id from route and request must be equal");
-
-        var command = request.Adapt<ModifyDiaryFromToDatesCommand>() with { RequesterId = userContext.UserId };
+        StatusCodeGuard.IsGreaterThan(request.NewDateTo, request.NewDateFrom, StatusCodes.Status400BadRequest,
+            "EndDate must be later than StartDate");
+        
+        var command = request.Adapt<ModifyDiaryFromToDatesCommand>() with 
+        { 
+            RequesterId = userContext.UserId, 
+            DiaryId = id
+        };
         var result = await bus.InvokeAsync<DiaryFromToDatesModified>(command);
         return result;
     }
