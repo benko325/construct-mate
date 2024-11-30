@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import agent from "@/app/api/agent";
 import { UUID } from "crypto";
-import { Construction, DiaryContributorRole, UploadedFile } from "@/app/api/types/responseTypes";
+import { Construction, DiaryContributor, DiaryContributorRole, UploadedFile } from "@/app/api/types/responseTypes";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {
@@ -439,12 +439,33 @@ export default function ConstructionData() {
     const onSubmitAddNewDiaryContributor = async (data: AddNewDiaryContributorFormData) => {
         console.log(data);
         try {
-            await agent.ConstructionDiary.addNewContributor(safeId, {
+            const result = await agent.ConstructionDiary.addNewContributor(safeId, {
                 contributorEmail: data.contributorEmail,
                 contributorRole: data.contributorRole
             });
+            const newContributor: DiaryContributor = {
+                contributorId: result.contributorId,
+                contributorRole: result.contributorRole
+            };
+
             toast.success("Nový prispievateľ bol úspešne pridaný.");
             setTimeout(() => {
+                setConstructionData((prevData) => {
+                    if (!prevData || !prevData.constructionDiary) {
+                        console.error("ConstructionDiary is not available.");
+                        return prevData;
+                    }
+            
+                    const updatedDiary = {
+                        ...prevData.constructionDiary,
+                        diaryContributors: [...prevData.constructionDiary.diaryContributors, newContributor],
+                    };
+            
+                    return {
+                        ...prevData,
+                        constructionDiary: updatedDiary,
+                    };
+                });
                 setAddNewDiaryContributorDialogOpen(false);
             }, 2500);
         } catch (error) {
