@@ -390,6 +390,19 @@ export default function ConstructionDiaryPage() {
         }
     };
 
+    // not needed probably, it stays just in case...
+    const safeFormatDate = (dateString: string | null): string | null => {
+        if (!dateString) return null;
+
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            console.error("Invalid date string:", dateString);
+            return null;
+        }
+
+        return format(date, "MMMM dd, yyyy HH:mm:ss");
+    };
+
     if (!updatedDiary || !contributorInfos) return (
         <div>
             <p>Načítavam denník...</p>
@@ -407,7 +420,7 @@ export default function ConstructionDiaryPage() {
                         <AccordionContent>
                             <div className="flex justify-between items-center border p-6 rounded-md shadow-md">
                                 <h2 className="text-xl font-semibold">
-                                    <i>Názov:</i> {updatedDiary.name}, <i>Adresa:</i> {updatedDiary.address}, <i>Vytvorený:</i> {format(new Date(updatedDiary.createdAt), "dd MMMM yyyy, HH:mm")}
+                                    <i>Názov:</i> {updatedDiary.name}, <i>Adresa:</i> {updatedDiary.address}, <i>Vytvorený:</i> {safeFormatDate(updatedDiary.createdAt) || "N/A"}
                                 </h2>
    
                                 <Dialog>

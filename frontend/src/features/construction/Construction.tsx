@@ -555,11 +555,11 @@ export default function ConstructionData() {
                 constructionManager: result.constructionManager,
                 constructionSupervisor: result.constructionSupervisor,
                 constructionApproval: result.constructionApproval,
-                updateConstructionDates: result.updateConstructionDates,
                 investor: result.investor,
                 implementer: result.implementer,
                 diaryContributors: result.diaryContributors,
-                dailyRecords: result.dailyRecords
+                dailyRecords: result.dailyRecords,
+                createdAt: result.createdAt
             });
             if (data.updateConstructionDates) {
                 updateField("startDate", data.diaryDateFrom);
@@ -587,7 +587,7 @@ export default function ConstructionData() {
     };
 
     if (loading) return <div className="text-center">Načítavam údaje o stavbe...</div>;
-    
+
     if (!constructionData) return (
         <div className="min-h-screen bg-gray-100">
             <div className="text-center">Dáta o danej stavbe neboli nájdené</div>
