@@ -364,6 +364,12 @@ export default function ConstructionDiaryPage() {
         }
     };
 
+    if (!updatedDiary) return(
+        <div>
+            <p>Načítavam denník...</p>
+        </div>
+    );
+
     return (
         <div className="container mx-auto p-6 min-h-screen bg-gray-100">
             <div className="flex flex-col gap-4">
@@ -377,6 +383,7 @@ export default function ConstructionDiaryPage() {
                                 <h2 className="text-xl font-semibold">
                                     <i>Názov:</i> {updatedDiary.name}, <i>Adresa:</i> {updatedDiary.address}, <i>Vytvorený:</i> {format(new Date(updatedDiary.createdAt), "dd MMMM yyyy, HH:mm")}
                                 </h2>
+   
                                 <Dialog>
                                     <DialogTrigger asChild>
                                         <Button variant="outline">

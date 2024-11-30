@@ -587,6 +587,7 @@ export default function ConstructionData() {
     };
 
     if (loading) return <div className="text-center">Načítavam údaje o stavbe...</div>;
+    
     if (!constructionData) return (
         <div className="min-h-screen bg-gray-100">
             <div className="text-center">Dáta o danej stavbe neboli nájdené</div>
