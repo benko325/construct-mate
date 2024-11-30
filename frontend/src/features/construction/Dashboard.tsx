@@ -1,5 +1,5 @@
 import { Button } from '../../components/ui/button.tsx';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import agent from '@/app/api/agent.ts';
 import { useQuery } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
@@ -33,6 +33,8 @@ import {
 import { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
+import { ConstructionDiary } from '@/app/api/types/responseTypes.ts';
+import { Book } from "lucide-react";
 
 const apiUrl = import.meta.env.VITE_API_URL + "/" || 'http://localhost:5000/';
 
@@ -55,6 +57,11 @@ const fetchFinishedConstructions = async (): Promise<Construction[]> => {
     return result;
 };
 
+const fetchContributionDiaries = async (): Promise<ConstructionDiary[]> => {
+    const result = await agent.ConstructionDiary.getDiariesWhereIAmContributor();
+    return result;
+};
+
 const newConstructionFormSchema = z.object({
     name: z.string().min(1, { message: 'Názov musí obsahovať aspoň 1 znak' }).max(64, { message: 'Názov musí obsahovať maximálne 64 znakov' }),
     description: z.string().max(512, { message: 'Opis môže mať maximálne 512 znakov' }),
@@ -67,6 +74,12 @@ type NewConstructionFormData = z.infer<typeof newConstructionFormSchema>;
 export default function Dashboard() {
     const { data: unfinishedConstructions, isLoading: unfinishedIsLoading, error: unfinishedError } = useQuery<Construction[]>({queryKey: ["unfinishedConstructions"], queryFn: fetchUnfinishedConstructions});
     const { data: finishedConstructions, isLoading: finishedIsLoading, error: finishedError } = useQuery<Construction[]>({queryKey: ["finishedConstructions"], queryFn: fetchFinishedConstructions});
+    const { data: contributionDiaries, isLoading: contributionDiariesIsLoading, error: contributionDiariesError } = useQuery<ConstructionDiary[]>({queryKey: ["contributionDiaries"], queryFn: fetchContributionDiaries});
+
+    const navigate = useNavigate();
+    const handleOpenDiaryButtonClick = (diary: ConstructionDiary) => {
+        navigate(`/diary/${diary.id}`, { state: { constructionDiary: diary } });
+    };
 
     const newConstructionForm = useForm<NewConstructionFormData>({
         resolver: zodResolver(newConstructionFormSchema),
@@ -152,18 +165,18 @@ export default function Dashboard() {
         return Math.min((elapsed / totalDuration) * 100, 100);
     }
 
-    if (unfinishedIsLoading || finishedIsLoading) {
+    if (unfinishedIsLoading || finishedIsLoading || contributionDiariesIsLoading) {
         return (
             <div className="min-h-screen bg-gray-100">
-                <p>Načítavam stavby...</p>
+                <p>Načítavam stavby a denníky...</p>
             </div>
         );
     };
 
-    if (unfinishedError || finishedError) {
+    if (unfinishedError || finishedError || contributionDiariesError) {
         return (
             <div className="min-h-screen bg-gray-100">
-                <p>Chyba pri načítavaní stavieb.</p>
+                <p>Chyba pri načítavaní stavieb a denníkov.</p>
             </div>
         );
     };
@@ -301,7 +314,6 @@ export default function Dashboard() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            {/* <p className="text-sm text-muted-foreground mb-2">{construction.description}</p> */}
                             <div className="flex justify-between text-sm text-muted-foreground mb-2">
                                 <span>{format(parseISO(construction.startDate), 'dd.MM.yyyy')}</span>
                                 <span>{format(parseISO(construction.endDate), 'dd.MM.yyyy')}</span>
@@ -312,7 +324,43 @@ export default function Dashboard() {
                     ))}
                 </div>
             </div>
-            {/* TODO: Add diaries where I am the contributor */}
+            <div className="p-6">
+                <Accordion type="single" collapsible>
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger>
+                            <h2 className="text-2xl font-semibold">Denníky, v ktorých som prispievateľ</h2>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {contributionDiaries?.map((diary) => (
+                                    <Card key={diary.id} className="w-full">
+                                        <CardHeader>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-4">
+                                                    <Avatar>
+                                                        <AvatarFallback><Book /></AvatarFallback>
+                                                    </Avatar>
+                                                    <CardTitle>{diary.name}</CardTitle>
+                                                </div>
+                                                <Button variant="outline" size="sm" className="bg-blue-100 hover:bg-blue-50" onClick={() => handleOpenDiaryButtonClick(diary)}>
+                                                    Otvoriť
+                                                </Button>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="flex justify-between text-sm text-muted-foreground mb-2">
+                                                <span>{format(parseISO(diary.diaryDateFrom), 'dd.MM.yyyy')}</span>
+                                                <span>{format(parseISO(diary.diaryDateTo), 'dd.MM.yyyy')}</span>
+                                            </div>
+                                            <Progress value={calculateProgress(diary.diaryDateFrom, diary.diaryDateTo)} />
+                                        </CardContent>
+                                    </Card>
+                                    ))}
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+            </div>
             <div className="p-6">
                 <Accordion type="single" collapsible>
                     <AccordionItem value="item-1">
@@ -344,7 +392,6 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent>
-                                        {/* <p className="text-sm text-muted-foreground mb-2">{construction.description}</p> */}
                                         <div className="flex justify-between text-sm text-muted-foreground mb-2">
                                             <span>{format(parseISO(construction.startDate), 'dd.MM.yyyy')}</span>
                                             <span>{format(parseISO(construction.endDate), 'dd.MM.yyyy')}</span>

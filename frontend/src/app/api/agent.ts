@@ -97,6 +97,7 @@ const ConstructionDiary = {
     createNew: (id: UUID, values: CreateNewConstructionDiaryRequest) => requests.post(`/constructions/${id}/diary`, values),
     addNewRecord: (id: UUID, values: CreateNewDiaryRecordRequest) => requests.post(`/construction-diaries/${id}/diary-text-records`, values),
     addNewContributor: (id: UUID, values: AddNewDiaryContributorRequest) => requests.post(`/constructions/${id}/new-diary-contributor`, values),
+    getDiariesWhereIAmContributor: () => requests.get(`/my-contribution-diaries`),
 };
 
 const agent = {
