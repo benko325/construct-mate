@@ -19,6 +19,7 @@ import { AxiosError } from "axios";
 import { Input } from "@/components/ui/input.tsx";
 import { format } from "date-fns";
 import { UUID } from "crypto";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion.tsx";
 
 interface FirstAndLastDayWithRecord {
     firstDay: string | null;
@@ -363,10 +364,53 @@ export default function ConstructionDiaryPage() {
         }
     };
 
-
     return (
         <div className="container mx-auto p-6 min-h-screen bg-gray-100">
             <div className="flex flex-col gap-4">
+                <Accordion type="single" collapsible>
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger>
+                            <h1 className="text-2xl underline font-bold text-blue-900">Stavebný denník</h1>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="flex justify-between items-center border p-6 rounded-md shadow-md">
+                                <h2 className="text-xl font-semibold">
+                                    <i>Názov:</i> {updatedDiary.name}, <i>Adresa:</i> {updatedDiary.address}, <i>Vytvorený:</i> {format(new Date(updatedDiary.createdAt), "dd MMMM yyyy, HH:mm")}
+                                </h2>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline">
+                                            Zobraziť ďalšie informácie o denníku
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-lg">
+                                        <DialogHeader>
+                                            <DialogTitle className="text-xl font-bold text-blue-900">Ďalšie informácie o denníku</DialogTitle>
+                                        </DialogHeader>
+                                        <div className="p-4 space-y-4 text-gray-800">
+                                            <div>
+                                                <span className="font-semibold">Stavbyvedúci:</span> {updatedDiary.constructionManager}
+                                            </div>
+                                            <div>
+                                                <span className="font-semibold">Stavebný dozor:</span> {updatedDiary.constructionSupervisor}
+                                            </div>
+                                            <div>
+                                                <span className="font-semibold">Stavebné povolenie:</span> {updatedDiary.constructionApproval}
+                                            </div>
+                                            <div>
+                                                <span className="font-semibold">Investor:</span> {updatedDiary.investor}
+                                            </div>
+                                            <div>
+                                                <span className="font-semibold">Realizátor:</span> {updatedDiary.implementer}
+                                            </div>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+                
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-4 w-auto">
                         <div className="flex items-center space-x-4 w-auto">
