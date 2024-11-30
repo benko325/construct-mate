@@ -395,6 +395,9 @@ export default function ConstructionDiaryPage() {
                                 </p>
                             </div>
                         </div>
+                        <Button variant="outline" onClick={() => setSelectedDate(today)}>
+                            Dnešný deň
+                        </Button>
                     </div>
 
                     <div>
