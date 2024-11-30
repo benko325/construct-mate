@@ -313,8 +313,28 @@ public class ConstructionDiariesEndpoint
         var result = await bus.InvokeAsync<NewDiaryPictureRecordAdded>(command);
         return result;
     }
+
+    /// <summary>
+    /// Get info about all diary contributors
+    /// </summary>
+    /// <param name="id">Id of diary for which the contributors info have to be returned</param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>List of <see cref="DiaryContributorInfo"/></returns>
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    [Authorize]
+    [WolverineGet("/construction-diaries/{id}/contributors-info")]
+    public static async Task<IEnumerable<DiaryContributorInfo>> GetAllContributorsInfo([FromRoute] Guid id,
+        IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var query = new GetAllDiaryContributorsInfoQuery(id, userContext.UserId);
+        var result = await bus.InvokeAsync<QueryCollectionResponse<DiaryContributorInfo>>(query);
+        return result.QueryResponseItems;
+    }
     
     // TODO: export diary to PDF
     // TODO: contribute to diary for non-registered user (one time code usage) - if there is time left
-    // TODO: TEST IT ALL!!!
 }

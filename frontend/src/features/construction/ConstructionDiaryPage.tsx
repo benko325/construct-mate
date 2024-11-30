@@ -26,6 +26,13 @@ interface FirstAndLastDayWithRecord {
     lastDay: string | null;
 };
 
+interface ContributorInfo {
+    id: UUID;
+    role: DiaryContributorRole;
+    name: string;
+    email: string;
+};
+
 const getRoleName = (role: DiaryContributorRole): string => {
     switch (role) {
         case DiaryContributorRole.None:
@@ -85,6 +92,25 @@ export default function ConstructionDiaryPage() {
     const location = useLocation();
     const diary : ConstructionDiary | null = location.state?.constructionDiary;
     const [updatedDiary, setUpdatedDiary] = useState<ConstructionDiary | null>(diary);
+
+    const [contributorInfos, setContributorInfos] = useState<ContributorInfo[] | null>(null);
+    useEffect(() => {
+        const fetchContributors = async () => {
+            try {
+                const response = await agent.ConstructionDiary.getAllContributorsInfo(safeDiaryId);
+                const contributorsWithRoleNames = response.map((contributor: ContributorInfo) => ({
+                    ...contributor,
+                    role: contributor.role as DiaryContributorRole,
+                }));
+    
+                setContributorInfos(contributorsWithRoleNames);
+            } catch (error) {
+                console.error("Failed to fetch contributors", error);
+            }
+        };
+
+        fetchContributors();
+    }, [diaryId]);
 
     const createModifyFromToDatesFormSchema = (firstLastDayWithRecord: FirstAndLastDayWithRecord | null) => {
         return z
@@ -364,7 +390,7 @@ export default function ConstructionDiaryPage() {
         }
     };
 
-    if (!updatedDiary) return(
+    if (!updatedDiary || !contributorInfos) return (
         <div>
             <p>Načítavam denník...</p>
         </div>
@@ -410,6 +436,36 @@ export default function ConstructionDiaryPage() {
                                             <div>
                                                 <span className="font-semibold">Realizátor:</span> {updatedDiary.implementer}
                                             </div>
+
+                                            {safeConstructionId !== "00000000-0000-0000-0000-000000000000" ? (
+                                                <div className="pt-2">
+                                                    <h3 className="text-lg font-bold text-blue-900 underline">
+                                                        Prispievatelia
+                                                    </h3>
+                                                    {contributorInfos.length > 0 ? (
+                                                        <ul className="space-y-2">
+                                                            {contributorInfos.map((contributor) => (
+                                                                <li
+                                                                    key={contributor.id}
+                                                                    className="flex justify-between items-center border rounded-md p-2 bg-gray-50 shadow-sm"
+                                                                >
+                                                                    <div>
+                                                                        <span className="font-semibold">Meno:</span> {contributor.name}
+                                                                    </div>
+                                                                    <div>
+                                                                        <span className="font-semibold">Email:</span> {contributor.email}
+                                                                    </div>
+                                                                    <div>
+                                                                        <span className="font-semibold">Rola:</span> {getRoleName(contributor.role)}
+                                                                    </div>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    ) : (
+                                                        <div className="text-gray-500 italic">Žiadni prispievatelia nie sú dostupní.</div>
+                                                    )}
+                                                </div>
+                                            ) : (<></>)}
                                         </div>
                                     </DialogContent>
                                 </Dialog>

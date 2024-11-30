@@ -100,6 +100,7 @@ const ConstructionDiary = {
     getDiariesWhereIAmContributor: () => requests.get(`/my-contribution-diaries`),
     modifyFromToDates: (id: UUID, values: ModifyDiaryFromToDatesRequest) => requests.patch(`/construction-diaries/${id}/from-to-dates`, values),
     getFirstAndLastDayWithRecord: (id: UUID) => requests.get(`/construction-diaries/${id}/first-last-day-with-records`),
+    getAllContributorsInfo: (id: UUID) => requests.get(`/construction-diaries/${id}/contributors-info`),
 };
 
 const agent = {
