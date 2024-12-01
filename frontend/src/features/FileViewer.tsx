@@ -18,6 +18,7 @@ export default function FileViewer({ fileUrl, fileType, fileName, open, onClose 
                 </DialogHeader>
                 <div className="flex justify-center">
                     <Button asChild variant="outline" size="sm" className="w-auto p-1">
+                        {/* download because files as pictures and pdfs that are only allowed will be not downloaded, but just showed in big size (in all screen) */}
                         <a href={fileUrl} download>
                             Zobraziť v plnej veľkosti
                         </a>
