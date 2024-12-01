@@ -1,27 +1,12 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { AddNewDiaryContributorRequest, ChangeUserPasswordRequest, CreateConstructionRequest, CreateNewConstructionDiaryRequest, CreateNewDiaryRecordRequest, LoginUserRequest, ModifyDiaryFromToDatesRequest, RegisterUserRequest, SetUserNameAndEmailRequest, UpdateConstructionNameAndDescriptionRequest, UpdateConstructionStartEndDateRequest } from "./types/requestTypes";
 import { UUID } from "crypto";
-import { redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const responseBody = (response: AxiosResponse) => response.data;
 
-// axios.interceptors.response.use(async response => {
-//     return response
-// }, (error: AxiosError) => {
-//     const {data, status} = error.response as AxiosResponse;
-//     switch (status) {
-//         case 400:
-//             toast.error(data.title);
-//             break;
-//         case 401:
-//             toast.error(data.title);
-//             break;
-//     }
-// });
-
-// Create an Axios instance for API requests
 const apiClient = axios.create({
     baseURL: apiUrl,
     withCredentials: true, // Send cookies with each request
@@ -31,7 +16,8 @@ apiClient.interceptors.response.use(
     (response: any) => response,
     (error: AxiosError) => {
         if (error.response?.status === 401) {
-            redirect("/login")
+            const navigate = useNavigate();
+            navigate("/login");
         }
 
         return Promise.reject(error);

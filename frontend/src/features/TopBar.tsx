@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
-import { useAuth } from '../context/AuthContext';
 import agent from '@/app/api/agent';
 import { useQuery } from '@tanstack/react-query';
 
@@ -22,13 +21,11 @@ const TopBar: React.FC = () => {
         queryFn: fetchUserInfo
     });
 
-    // const { setIsAuthenticated } = useAuth(); // TODO: uncomment when useAuth is correctly resolved
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
             await agent.Account.logout();
-            // setIsAuthenticated(false); // TODO: uncomment when useAuth is correctly resolved
             navigate('/login');
         } catch (error) {
             console.error('Logout failed', error);
@@ -40,6 +37,7 @@ const TopBar: React.FC = () => {
     }
 
     if (error) {
+        navigate('/login');
         return <p>Nastala chyba pri načítaní informácií o uživateľovi.</p>;
     }
 

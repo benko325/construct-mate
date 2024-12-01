@@ -17,12 +17,6 @@ export const router = createBrowserRouter([
             { path: 'login', element: <Login /> },
             { path: 'register', element: <Register /> },
 
-            // { path: '', element: <Navigate replace to='/dashboard' /> },
-            // { path: 'dashboard', element: <Dashboard /> },
-            // { path: 'profile', element: <ProfilePage /> },
-            // { path: 'construction/:id', element: <ConstructionData /> },
-
-            // Protected routes
             {
                 element: <ProtectedRoute />,
                 children: [
