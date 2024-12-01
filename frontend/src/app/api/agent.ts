@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { AddNewDiaryContributorRequest, ChangeUserPasswordRequest, CreateConstructionRequest, CreateNewConstructionDiaryRequest, CreateNewDiaryRecordRequest, LoginUserRequest, ModifyDiaryFromToDatesRequest, RegisterUserRequest, SetUserNameAndEmailRequest, UpdateConstructionNameAndDescriptionRequest, UpdateConstructionStartEndDateRequest } from "./types/requestTypes";
 import { UUID } from "crypto";
+import { redirect } from "react-router-dom";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -20,37 +21,26 @@ const responseBody = (response: AxiosResponse) => response.data;
 //     }
 // });
 
-// axiosInstance.interceptors.response.use(
-//     (response: any) => response,
-//     (error: AxiosError) => {
-//         if (error.response) {
-//         // Server responded with a status other than 200 range
-//         console.error('Response error:', error.response.status, error.response.data);
-//         } else if (error.request) {
-//         // Request was made but no response was received
-//         console.error('Request error:', error.request);
-//         } else {
-//         // Something happened in setting up the request
-//         console.error('Error message:', error.message);
-//         }
-
-//         // Optionally, you can throw custom errors based on status
-//         if (error.response?.status === 401) {
-//         // Unauthorized error handling, e.g., redirect to login
-//         }
-
-//         return Promise.reject(error);
-//     }
-// );
-
 // Create an Axios instance for API requests
 const apiClient = axios.create({
     baseURL: apiUrl,
     withCredentials: true, // Send cookies with each request
 });
 
+apiClient.interceptors.response.use(
+    (response: any) => response,
+    (error: AxiosError) => {
+        if (error.response?.status === 401) {
+            redirect("/login")
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 const requests = {
     get: (url: string, params?: URLSearchParams) => apiClient.get(url, {params}).then(responseBody),
+    getFile: (url: string, params?: URLSearchParams) => apiClient.get(url, {params, responseType: 'blob'}).then(responseBody),
     post: (url: string, body: object) => apiClient.post(url, body).then(responseBody),
     patch: (url: string, body: object) => apiClient.patch(url, body).then(responseBody),
     put: (url: string, body: object) => apiClient.put(url, body).then(responseBody),
@@ -101,6 +91,7 @@ const ConstructionDiary = {
     modifyFromToDates: (id: UUID, values: ModifyDiaryFromToDatesRequest) => requests.patch(`/construction-diaries/${id}/from-to-dates`, values),
     getFirstAndLastDayWithRecord: (id: UUID) => requests.get(`/construction-diaries/${id}/first-last-day-with-records`),
     getAllContributorsInfo: (id: UUID) => requests.get(`/construction-diaries/${id}/contributors-info`),
+    exportToPdf: (id: UUID) => requests.getFile(`/construction-diaries/${id}/pdf-export`),
 };
 
 const agent = {

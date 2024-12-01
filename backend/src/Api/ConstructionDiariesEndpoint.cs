@@ -344,6 +344,7 @@ public class ConstructionDiariesEndpoint
     /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
     /// <returns>Pdf from the diary to download</returns>
+    [Produces("application/pdf")]
     [ProducesResponseType<FileContentResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [Authorize]
@@ -362,6 +363,4 @@ public class ConstructionDiariesEndpoint
 
         return Results.File(pdfStream, "application/pdf", "dennik-export.pdf");
     }
-    
-    // TODO: contribute to diary for non-registered user (one time code usage) - if there is time left
 }
