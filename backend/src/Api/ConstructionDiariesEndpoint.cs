@@ -143,7 +143,7 @@ public class ConstructionDiariesEndpoint
     }
     
     /// <summary>
-    /// Get all diaries where the logged-in user is added as a contributor
+    /// Get all diaries where the logged-in user is added as a contributor (without those that he created)
     /// </summary>
     /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
@@ -315,7 +315,7 @@ public class ConstructionDiariesEndpoint
     }
 
     /// <summary>
-    /// Get info about all diary contributors (without construction owner - construction manager)
+    /// Get info about all diary contributors
     /// </summary>
     /// <param name="id">Id of diary for which the contributors info have to be returned</param>
     /// <param name="userContext">Injected custom user context</param>

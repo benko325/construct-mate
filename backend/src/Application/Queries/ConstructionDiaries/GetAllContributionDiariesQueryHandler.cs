@@ -11,7 +11,7 @@ namespace ConstructMate.Application.Queries.ConstructionDiaries;
 public record GetAllContributionDiariesQuery(Guid UserId);
 
 /// <summary>
-/// Get all diaries where user is contributor
+/// Get all diaries where user is contributor (without those that he created)
 /// </summary>
 public class GetAllContributionDiariesQueryHandler
 {
@@ -19,7 +19,7 @@ public class GetAllContributionDiariesQueryHandler
         IQuerySession session, CancellationToken cancellationToken)
     {
        var constructionDiaries = await session.Query<Construction>()
-           .Where(c => c.ConstructionDiary != null &&
+           .Where(c => c.ConstructionDiary != null && c.OwnerId != diariesQuery.UserId &&
                        c.ConstructionDiary.DiaryContributors.Any(d => d.ContributorId == diariesQuery.UserId))
            .Select(c => c.ConstructionDiary)
            .ToListAsync(token: cancellationToken);

@@ -14,7 +14,7 @@ namespace ConstructMate.Application.Queries.ConstructionDiaries;
 public record GetAllDiaryContributorsInfoQuery(Guid DiaryId, Guid RequesterId);
 
 /// <summary>
-/// Get info about all diary contributors (without construction owner - construction manager)
+/// Get info about all diary contributors
 /// </summary>
 public class GetAllDiaryContributorsInfoQueryHandler
 {

@@ -72,6 +72,14 @@ public class CreateNewConstructionDiaryCommandHandler
             construction.EndDate = diary.DiaryDateTo;
         }
 
+        // add user as a diary contributor - construction manager
+        var contributor = new DiaryContributor()
+        {
+            ContributorId = diaryCommand.RequesterId,
+            ContributorRole = DiaryContributorRole.ConstructionManager
+        };
+        diary.DiaryContributors.Add(contributor);
+
         construction.ConstructionDiary = diary;
         session.Update(construction);
         await session.SaveChangesAsync(cancellationToken);
