@@ -72,14 +72,18 @@ type AddNewDiaryContributorFormData = z.infer<typeof addNewDiaryContributorFormS
 const contributorRoleTranslations = {
     [DiaryContributorRole.None]: "Žiadna rola",
     [DiaryContributorRole.ConstructionManager]: "Stavbyvedúci",
-    [DiaryContributorRole.GovernmentalConstructionSupervisor]: "Štátny stavebný dozor",
-    [DiaryContributorRole.Cartographer]: "Geodet a kartograf",
+    [DiaryContributorRole.ConstructionSupervisor]: "Štátny stavebný dohľad/kontrolná prehliadka stavby",
+    [DiaryContributorRole.Surveyor]: "Geodet",
     [DiaryContributorRole.ConstructionOwner]: "Stavebník alebo vlastník stavby",
-    [DiaryContributorRole.Designer]: "Projektant",
-    [DiaryContributorRole.ConstructionSupplier]: "Zhotoviteľ stavby",
+    [DiaryContributorRole.Designer]: "Generálny projektant/projektant častí projektovej dokumentácie",
     [DiaryContributorRole.ConstructionControl]: "Stavebný dozor",
-    [DiaryContributorRole.GovernmentalControl]: "Štátny dozor",
-    [DiaryContributorRole.ConstructionWorkSafetyCoordinator]: "Koordinátor bezpečnosti práce",
+    [DiaryContributorRole.GovernmentalControl]: "Štátny dohľad/dozor podľa osobitného predpisu",
+    [DiaryContributorRole.ConstructionWorkSafetyCoordinator]: "Koordinátor bezpečnosti na stavenisku/autorizovaný bezpečnostný technik/koordinátor projektovej dokumentácie",
+    [DiaryContributorRole.ArchitecturalWorkAuthor]: "Autor architektonického diela",
+    [DiaryContributorRole.Geologist]: "Geológ/geotechnik",
+    [DiaryContributorRole.PersonAuthorizedByAffectedLegalEntity]: "Osoba poverená dotknutou právnickou osobou",
+    [DiaryContributorRole.ApartmentBuildingManager]: "Správca bytového domu/Predseda spoločenstva vlastníkov bytov a nebytových priestorov",
+    [DiaryContributorRole.BuildingInspector]: "Stavebný inšpektor/iný zamestnanec stavebného úradu",
 };
 
 export default function ConstructionData() {

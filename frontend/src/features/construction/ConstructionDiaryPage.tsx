@@ -40,22 +40,30 @@ const getRoleName = (role: DiaryContributorRole): string => {
             return "Žiadna pozícia";
         case DiaryContributorRole.ConstructionManager:
             return "Stavbyvedúci";
-        case DiaryContributorRole.GovernmentalConstructionSupervisor:
-            return "Štátny stavebný dozor";
-        case DiaryContributorRole.Cartographer:
-            return "Geodet a kartograf";
+        case DiaryContributorRole.ConstructionSupervisor:
+            return "Štátny stavebný dohľad/kontrolná prehliadka stavby";
+        case DiaryContributorRole.Surveyor:
+            return "Geodet";
         case DiaryContributorRole.ConstructionOwner:
             return "Stavebník alebo vlastník stavby";
         case DiaryContributorRole.Designer:
-            return "Projektant";
-        case DiaryContributorRole.ConstructionSupplier:
-            return "Zhotoviteľ stavby";
+            return "Generálny projektant/projektant častí projektovej dokumentácie";
         case DiaryContributorRole.ConstructionControl:
             return "Stavebný dozor";
         case DiaryContributorRole.GovernmentalControl:
-            return "Štátny dozor";
+            return "Štátny dohľad/dozor podľa osobitného predpisu";
         case DiaryContributorRole.ConstructionWorkSafetyCoordinator:
-            return "Koordinátor bezpečnosti práce";
+            return "Koordinátor bezpečnosti na stavenisku/autorizovaný bezpečnostný technik/koordinátor projektovej dokumentácie";
+        case DiaryContributorRole.ArchitecturalWorkAuthor:
+            return "Autor architektonického diela";
+        case DiaryContributorRole.Geologist:
+            return "Geológ/geotechnik";
+        case DiaryContributorRole.PersonAuthorizedByAffectedLegalEntity:
+            return "Osoba poverená dotknutou právnickou osobou";
+        case DiaryContributorRole.ApartmentBuildingManager:
+            return "Správca bytového domu/Predseda spoločenstva vlastníkov bytov a nebytových priestorov";
+        case DiaryContributorRole.BuildingInspector:
+            return "Stavebný inšpektor/iný zamestnanec stavebného úradu";
         default:
             return "Neznáma pozícia";
     }
@@ -459,7 +467,7 @@ export default function ConstructionDiaryPage() {
                                                 Zobraziť ďalšie informácie o denníku
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="max-w-4xl w-auto">
+                                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                                             <DialogHeader>
                                                 <DialogTitle className="text-xl font-bold text-blue-900 text-center">
                                                     Ďalšie informácie o denníku

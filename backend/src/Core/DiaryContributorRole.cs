@@ -1,18 +1,22 @@
 namespace ConstructMate.Core;
 
-// this enum is created to reflect Slovak law §46d about who can contribute to the construction diary
+// this enum is created to reflect Slovak law 201/2022 Z. z. §28 about who can contribute to the construction diary
 public enum DiaryContributorRole
 {
     None,
     ConstructionManager, // stavbyveduci
-    GovernmentalConstructionSupervisor, // statny stavebny dohlad
-    Cartographer, // geodet a kartograf
-    ConstructionOwner, // stavebník alebo jeho splnomocnený zástupca a vlastník stavby, ak nie je stavebníkom, ??????? ask Brano
-    Designer, // projektant
-    ConstructionSupplier, // zhotovitel (dodavatel) stavby
-    ConstructionControl, // osoba vykonavajuca stavebny dozor
-    GovernmentalControl, // osoba vykonavajuca statny dozor
-    ConstructionWorkSafetyCoordinator // koordinator bezpecnosti prace na stavenisku
+    ConstructionSupervisor, // f) osoba vykonávajúca štátny stavebný dohľad alebo kontrolnú prehliadku stavby
+    Surveyor, // c) geodet
+    ConstructionOwner, // b) stavebník a vlastník stavby, ak nie je stavebníkom
+    Designer, // a) generálny projektant a projektant častí projektovej dokumentácie
+    BuildingInspector, // e) stavebny inšpektor alebo iny zamestnanec stavebného úradu
+    ConstructionControl, // d) osoba vykonavajuca stavebny dozor
+    GovernmentalControl, // l) oprávnena osoba orgánu vykonávajúceho štátny dohľad alebo dozor podľa osobitného predpisu
+    ConstructionWorkSafetyCoordinator, // g) koordinátor projektovej dokumentácie, autorizovany bezpečnostny technik a koordinátor bezpečnosti na stavenisku
+    ArchitecturalWorkAuthor, // h) autor architektonického diela pri výkone autorského dohľadu
+    Geologist, // i) geolog a geotechnik
+    PersonAuthorizedByAffectedLegalEntity, // k) osoba poverena dotknutou právnickou osobou
+    ApartmentBuildingManager, // j) správca bytového domu alebo predseda spoločenstva vlastníkov bytov a nebytových priestorov, ak ide o zmenu stavby, o stavebnú úpravu alebo o údržbu bytového domu
 }
 
 public static class DiaryContributorRoleExtensions
@@ -21,14 +25,18 @@ public static class DiaryContributorRoleExtensions
     {
         { DiaryContributorRole.None, "Žiadna" },
         { DiaryContributorRole.ConstructionManager, "Stavbyvedúci" },
-        { DiaryContributorRole.GovernmentalConstructionSupervisor, "Štátny stavebný dohľad" },
-        { DiaryContributorRole.Cartographer, "Geodet a kartograf" },
-        { DiaryContributorRole.ConstructionOwner, "Stavebník alebo jeho splnomocnený zástupca a vlastník stavby, ak nie je stavebníkom" },
-        { DiaryContributorRole.Designer, "Projektant" },
-        { DiaryContributorRole.ConstructionSupplier, "Zhotoviteľ (dodávateľ) stavby" },
-        { DiaryContributorRole.ConstructionControl, "Osoba vykonávajúca stavebný dozor" },
-        { DiaryContributorRole.GovernmentalControl, "Osoba vykonávajúca štátny dozor" },
-        { DiaryContributorRole.ConstructionWorkSafetyCoordinator, "Koordinátor bezpečnosti práce na stavenisku" }
+        { DiaryContributorRole.ConstructionSupervisor, "Štátny stavebný dohľad/kontrolná prehliadka stavby" },
+        { DiaryContributorRole.Surveyor, "Geodet" },
+        { DiaryContributorRole.ConstructionOwner, "Stavebník alebo vlastník stavby" },
+        { DiaryContributorRole.Designer, "Generálny projektant/projektant častí projektovej dokumentácie" },
+        { DiaryContributorRole.ConstructionControl, "Stavebný dozor" },
+        { DiaryContributorRole.GovernmentalControl, "Štátny dohľad/dozor podľa osobitného predpisu" },
+        { DiaryContributorRole.ConstructionWorkSafetyCoordinator, "Koordinátor bezpečnosti na stavenisku/autorizovaný bezpečnostný technik/koordinátor projektovej dokumentácie" },
+        { DiaryContributorRole.ArchitecturalWorkAuthor, "Autor architektonického diela" },
+        { DiaryContributorRole.Geologist, "Geológ/geotechnik" },
+        { DiaryContributorRole.PersonAuthorizedByAffectedLegalEntity, "Osoba poverená dotknutou právnickou osobou"},
+        { DiaryContributorRole.ApartmentBuildingManager, "Správca bytového domu/Predseda spoločenstva vlastníkov bytov a nebytových priestorov" },
+        { DiaryContributorRole.BuildingInspector, "Stavebný inšpektor/iný zamestnanec stavebného úradu" }
     };
 
     public static string GetTranslation(this DiaryContributorRole role)

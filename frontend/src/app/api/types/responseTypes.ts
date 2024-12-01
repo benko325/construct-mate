@@ -72,14 +72,18 @@ export interface DiaryRecord {
 }
 
 export enum DiaryContributorRole {
-    None = 0,
-    ConstructionManager = 1, // Stavbyvedúci
-    GovernmentalConstructionSupervisor = 2, // Štátny stavebný dozor
-    Cartographer = 3, // Geodet a kartograf
-    ConstructionOwner = 4, // Stavebník alebo vlastník stavby
-    Designer = 5, // Projektant
-    ConstructionSupplier = 6, // Zhotoviteľ stavby
-    ConstructionControl = 7, // Stavebný dozor
-    GovernmentalControl = 8, // Štátny dozor
-    ConstructionWorkSafetyCoordinator = 9, // Koordinátor bezpečnosti práce
+    None,
+    ConstructionManager, // stavbyveduci
+    ConstructionSupervisor, // f) osoba vykonávajúca štátny stavebný dohľad alebo kontrolnú prehliadku stavby
+    Surveyor, // c) geodet
+    ConstructionOwner, // b) stavebník a vlastník stavby, ak nie je stavebníkom
+    Designer, // a) generálny projektant a projektant častí projektovej dokumentácie
+    BuildingInspector, // e) stavebny inšpektor alebo iny zamestnanec stavebného úradu
+    ConstructionControl, // d) osoba vykonavajuca stavebny dozor
+    GovernmentalControl, // l) oprávnena osoba orgánu vykonávajúceho štátny dohľad alebo dozor podľa osobitného predpisu
+    ConstructionWorkSafetyCoordinator, // g) koordinátor projektovej dokumentácie, autorizovany bezpečnostny technik a koordinátor bezpečnosti na stavenisku
+    ArchitecturalWorkAuthor, // h) autor architektonického diela pri výkone autorského dohľadu
+    Geologist, // i) geolog a geotechnik
+    PersonAuthorizedByAffectedLegalEntity, // k) osoba poverena dotknutou právnickou osobou
+    ApartmentBuildingManager, // j) správca bytového domu alebo predseda spoločenstva vlastníkov bytov a nebytových priestorov, ak ide o zmenu stavby, o stavebnú úpravu alebo o údržbu bytového domu
 }
