@@ -457,7 +457,7 @@ export default function ConstructionDiaryPage() {
                                 </h2>
    
                                 <div>
-                                    <Button variant="outline" className="mr-2 bg-black hover:bg-gray-700 text-white" onClick={handleExportAndDownload}>
+                                    <Button className="mr-2 bg-black hover:bg-gray-600 text-white" onClick={handleExportAndDownload}>
                                         Stiahnuť PDF
                                     </Button>
 

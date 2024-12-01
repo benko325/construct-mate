@@ -9,6 +9,7 @@ import agent from "@/app/api/agent"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Loader2 } from "lucide-react"
 import { AxiosError } from "axios"
+import { useUser } from '../../context/UserContext.tsx'
 
 const formSchema = z.object({
     email: z.string().email({ message: 'Neplatný tvar emailovej adresy' }),
@@ -27,6 +28,7 @@ const formSchema = z.object({
 });
 
 export default function Login() {
+    const { fetchUser } = useUser();
     const navigate = useNavigate();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -46,6 +48,7 @@ export default function Login() {
 
         try {
             await agent.Account.login({email: values.email, password: values.password});
+            await fetchUser();
             navigate('/dashboard');
         } catch (error) {
             if (error instanceof AxiosError) {

@@ -23,6 +23,7 @@ import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { useUser } from "@/context/UserContext";
 
 
 const newNameEmailFormSchema = z.object({
@@ -98,6 +99,8 @@ export default function ProfilePage() {
     
         fetchUserData();
     }, [nameEmailForm.reset]);
+
+    const { fetchUser } = useUser();
     
     const onSubmitNameEmail = async (data: ProfileFormData) => {
         try {
@@ -107,6 +110,7 @@ export default function ProfilePage() {
                 newEmail: data.email
             });
 
+            fetchUser();
             toast.success("Údaje boli aktualizované.");
         } catch (error) {
             if (error instanceof AxiosError) {

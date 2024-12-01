@@ -2,43 +2,26 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import agent from '@/app/api/agent';
-import { useQuery } from '@tanstack/react-query';
-
-interface UserInfo {
-    id: string;
-    name: string;
-    email: string;
-};
-
-const fetchUserInfo = async (): Promise<UserInfo> => {
-    const result = await agent.Account.currentUser();
-    return result;
-};
+import { useUser } from '@/context/UserContext';
 
 const TopBar: React.FC = () => {
-    const { data, isLoading, error } = useQuery<UserInfo>({
-        queryKey: ["userInfo"],
-        queryFn: fetchUserInfo
-    });
+    const { user, logout } = useUser();
 
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
             await agent.Account.logout();
+            logout(); // remove user from UserContext
             navigate('/login');
         } catch (error) {
             console.error('Logout failed', error);
+            navigate('/login');
         }
     };
 
-    if (isLoading) {
+    if (!user) {
         return <p>Načítavam info o uživateľovi...</p>;
-    }
-
-    if (error) {
-        navigate('/login');
-        return <p>Nastala chyba pri načítaní informácií o uživateľovi.</p>;
     }
 
     return (
@@ -55,20 +38,8 @@ const TopBar: React.FC = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-                {isLoading ? (
-                    <div>
-                        <p><strong>Načítavam info...</strong></p>
-                    </div>
-                ) : error ? (
-                    <p>Nastala chyba pri získavaní údajov.</p>
-                ) : data ? (
-                    <>
-                        <p><strong>Prihlásený uživateľ:</strong> {data.name}</p>
-                        <p><strong>Email:</strong> {data.email}</p>
-                    </>
-                ) : (
-                    <p>Žiadne dostupné info.</p>
-                )}
+                <p><strong>Prihlásený uživateľ:</strong> {user?.name}</p>
+                <p><strong>Email:</strong> {user?.email}</p>
                 <Link to="/profile">
                     <Button variant="outline">
                         Môj profil

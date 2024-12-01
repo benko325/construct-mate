@@ -148,7 +148,8 @@ public class UsersEndpoint
     /// <param name="request"><see cref="ModifyUserRequest"/></param>
     /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
-    /// <returns>UserModified - id of modified user, new first name, last name, and email</returns>
+    /// <param name="httpContext">Injected HttpContext</param>
+    /// <returns>UserModified - id of modified user, new first name, last name, email and new token</returns>
     [ProducesResponseType<UserModified>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
@@ -156,10 +157,24 @@ public class UsersEndpoint
     [Authorize]
     [WolverinePatch("/users")]
     public static async Task<UserModified> ModifyUserAsync([FromBody] ModifyUserRequest request,
-        IApplicationUserContext userContext, IMessageBus bus)
+        IApplicationUserContext userContext, IMessageBus bus, HttpContext httpContext)
     {
         var command = request.Adapt<ModifyUserCommand>() with { Id = userContext.UserId };
         var result = await bus.InvokeAsync<UserModified>(command);
+        
+        // remove old token from the cookie
+        httpContext.Response.Cookies.Delete("cm-jwt");
+        
+        // add an updated one
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddHours(12)
+        };
+        httpContext.Response.Cookies.Append("cm-jwt", result.NewToken, cookieOptions);
+        
         return result;
     }
 
