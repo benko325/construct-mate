@@ -638,7 +638,7 @@ export default function ConstructionDiaryPage() {
                             <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>
                                     <DialogTitle>Vytvorte nový záznam</DialogTitle>
-                                    <DialogDescription></DialogDescription>
+                                    <DialogDescription>Záznam sa pridá do stránky s dnešným dňom.</DialogDescription>
                                 </DialogHeader>
                                 <div className="grid gap-2 py-2">
                                     <Form {...newRecordForm}>

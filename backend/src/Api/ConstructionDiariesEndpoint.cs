@@ -8,6 +8,8 @@ using ConstructMate.Infrastructure.StatusCodeGuard;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
 using Wolverine;
 using Wolverine.Http;
 using Wolverine.Http.Marten;
@@ -334,7 +336,32 @@ public class ConstructionDiariesEndpoint
         var result = await bus.InvokeAsync<QueryCollectionResponse<DiaryContributorInfo>>(query);
         return result.QueryResponseItems;
     }
+
+    /// <summary>
+    /// Export diary to the Pdf file
+    /// </summary>
+    /// <param name="id">Id of the diary to export</param>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>Pdf from the diary to download</returns>
+    [ProducesResponseType<FileContentResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [Authorize]
+    [WolverineGet("/construction-diaries/{id}/pdf-export")]
+    public static async Task<IResult> ExportDiaryToPdf([FromRoute] Guid id, IApplicationUserContext userContext,
+        IMessageBus bus)
+    {
+        QuestPDF.Settings.License = LicenseType.Community;
+        
+        var query = new GetDiaryPdfFileQuery(id, userContext.UserId);
+        var document = await bus.InvokeAsync<ConstructionDiaryPdf>(query);
+        
+        var pdfStream = new MemoryStream();
+        document.GeneratePdf(pdfStream);
+        pdfStream.Position = 0;
+
+        return Results.File(pdfStream, "application/pdf", "dennik-export.pdf");
+    }
     
-    // TODO: export diary to PDF
     // TODO: contribute to diary for non-registered user (one time code usage) - if there is time left
 }
