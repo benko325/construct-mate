@@ -4,9 +4,9 @@ import TopBar from '@/features/TopBar.tsx';
 
 const ProtectedRoute: React.FC = () => {
     return (
-        <div>
+        <div className="">
             <TopBar />
-            <div className="main-content">
+            <div className="main-content min-h-screen bg-gray-100">
                 <Outlet />
             </div>
         </div>
