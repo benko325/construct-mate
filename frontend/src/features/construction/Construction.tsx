@@ -1108,7 +1108,9 @@ export default function ConstructionData() {
                                     </DialogContent>
                                 </Dialog>
                                 <Button
-                                    className="bg-black hover:bg-gray-700"
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-gray-200 hover:bg-gray-100"
                                     disabled={constructionData.buildingPermitFileUrl == null}
                                     onClick={() => setIsBuildingPermitViewerOpen(true)}
                                 >
@@ -1122,6 +1124,7 @@ export default function ConstructionData() {
                                     onClose={() => setIsBuildingPermitViewerOpen(false)}
                                 />
                                 <Button
+                                    size="sm"
                                     disabled={constructionData.buildingPermitFileUrl == null}
                                     className="bg-red-600 hover:bg-red-400"
                                     onClick={() => setIsDeletePermitConfirmationOpen(true)}
@@ -1159,7 +1162,9 @@ export default function ConstructionData() {
                                     </DialogContent>
                                 </Dialog>
                                 <Button
-                                    className="bg-black hover:bg-gray-700"
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-gray-200 hover:bg-gray-100"
                                     disabled={constructionData.constructionApprovalFileUrl == null}
                                     onClick={() => setIsConstructionApprovalViewerOpen(true)}
                                 >
@@ -1173,6 +1178,7 @@ export default function ConstructionData() {
                                     onClose={() => setIsConstructionApprovalViewerOpen(false)}
                                 />
                                 <Button
+                                    size="sm"
                                     disabled={constructionData.constructionApprovalFileUrl == null}
                                     className="bg-red-600 hover:bg-red-400"
                                     onClick={() => setIsDeleteConstructionApprovalConfirmationOpen(true)}
@@ -1210,7 +1216,9 @@ export default function ConstructionData() {
                                     </DialogContent>
                                 </Dialog>
                                 <Button
-                                    className="bg-black hover:bg-gray-700"
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-gray-200 hover:bg-gray-100"
                                     disabled={constructionData.constructionHandoverFileUrl == null}
                                     onClick={() => setIsConstructionHandoverViewerOpen(true)}
                                 >
@@ -1224,6 +1232,7 @@ export default function ConstructionData() {
                                     onClose={() => setIsConstructionHandoverViewerOpen(false)}
                                 />
                                 <Button
+                                    size="sm"
                                     disabled={constructionData.constructionHandoverFileUrl == null}
                                     className="bg-red-600 hover:bg-red-400"
                                     onClick={() => setIsDeleteConstructionHandoverConfirmationOpen(true)}
