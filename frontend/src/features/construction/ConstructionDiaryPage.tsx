@@ -401,8 +401,10 @@ export default function ConstructionDiaryPage() {
         }
     };
 
+    const [isDownloadingLoading, setIsDownloadingLoading] = useState(false);
     const handleExportAndDownload = async () => {
         try {
+            setIsDownloadingLoading(true);
             const response = await agent.ConstructionDiary.exportToPdf(safeDiaryId);
 
             const url = window.URL.createObjectURL(new Blob([response]));
@@ -416,6 +418,8 @@ export default function ConstructionDiaryPage() {
             window.URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Error exporting and downloading the PDF:', error);
+        } finally {
+            setIsDownloadingLoading(false);
         }
     };
 
@@ -457,10 +461,13 @@ export default function ConstructionDiaryPage() {
                                 </h2>
    
                                 <div>
-                                    <Button className="mr-2 bg-black hover:bg-gray-600 text-white" onClick={handleExportAndDownload}>
-                                        Stiahnuť PDF
+                                    <Button
+                                        disabled={isDownloadingLoading}
+                                        className="mr-2 bg-black hover:bg-gray-600 text-white"
+                                        onClick={handleExportAndDownload}
+                                    >
+                                        {isDownloadingLoading ? 'Sťahujem...' : 'Stiahnuť PDF'}
                                     </Button>
-
                                     <Dialog>
                                         <DialogTrigger asChild>
                                             <Button variant="outline">
