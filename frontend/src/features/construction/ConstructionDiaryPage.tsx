@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { format } from "date-fns";
 import { UUID } from "crypto";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion.tsx";
+import BackButton from "../BackButton.tsx";
 
 interface FirstAndLastDayWithRecord {
     firstDay: string | null;
@@ -414,6 +415,9 @@ export default function ConstructionDiaryPage() {
     return (
         <div className="container mx-auto p-6 min-h-screen bg-gray-100">
             <div className="flex flex-col gap-4">
+                <div className="flex justify-start">
+                    <BackButton className="w-auto"/>
+                </div>
                 <Accordion type="single" collapsible>
                     <AccordionItem value="item-1">
                         <AccordionTrigger>

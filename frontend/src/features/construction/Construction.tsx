@@ -29,6 +29,7 @@ import ConfirmationDialog from "../ConfirmationDialog";
 import { FaFilePdf } from "react-icons/fa";
 import StatusIndicator from "../StatusIndicator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import BackButton from "../BackButton";
 
 const apiUrl = import.meta.env.VITE_API_URL + "/" || 'http://localhost:5000/';
 
@@ -596,7 +597,8 @@ export default function ConstructionData() {
     
     return (
         <div className="min-h-screen bg-gray-100">
-            <div className="flex justify-center items-start p-6 bg-gray-100 min-h-screen">
+            <div className="relative flex justify-center items-start p-6 bg-gray-100 min-h-screen">
+                <BackButton className="absolute top-6 left-6"/>
                 <Card className="max-w-4xl w-full p-6">
                     <CardHeader className="flex items-center justify-between">
                         <div className="flex items-center w-full">
