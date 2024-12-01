@@ -379,7 +379,7 @@ export default function ConstructionDiaryPage() {
                     console.error("Unknown add new diary record error:", error);
                     newRecordForm.setError('root', {
                         type: 'manual',
-                        message: 'Nastala neočakávaná chyba. Prosím skúste to znovu.',
+                        message: 'Nastala neočakávaná chyba. Prosím skúste to znova.',
                     });
                 }
             // TODO: make prettier so the code is not duplicated
@@ -387,7 +387,7 @@ export default function ConstructionDiaryPage() {
                 console.error("Unknown add new diary record error:", error);
                 newRecordForm.setError('root', {
                     type: 'manual',
-                    message: 'Nastala neočakávaná chyba. Prosím skúste to znovu.',
+                    message: 'Nastala neočakávaná chyba. Prosím skúste to znova.',
                 });
             }
         }

@@ -24,24 +24,24 @@ import "react-toastify/dist/ReactToastify.css";
 
 // validations match one's on BE
 const formSchema = z.object({
-    firstName: z.string().min(1, { message: 'First name must be at least 1 character' }).max(64, { message: 'First name must be max 64 characters' }),
-    lastName: z.string().min(1, { message: 'Last name must be at least 1 character' }).max(64, { message: 'Last name must be max 64 characters' }),
-    email: z.string().email({ message: 'Invalid email address' }),
+    firstName: z.string().min(1, { message: 'Meno musí obsahovať aspoň 1 znak' }).max(64, { message: 'Meno musí obsahovať maximálne 64 znakov' }),
+    lastName: z.string().min(1, { message: 'Priezvisko musí obsahovať aspoň 1 znak' }).max(64, { message: 'Priezvisko musí obsahovať maximálne 64 znakov' }),
+    email: z.string().email({ message: 'Neplatný tvar emailovej adresy' }),
     password: z.string()
-        .min(6, { message: 'Password must be at least 6 characters' })
-        .max(128, { message: 'Password must be max 128 characters'})
+        .min(6, { message: 'Heslo musí mať aspoň 6 znakov' })
+        .max(128, { message: 'Heslo musí mať maximálne 128 znakov'})
         .regex(new RegExp("[a-z]"), {
-            message: "Must contain at least one lowercase letter",
+            message: "Heslo musí obsahovať aspoň 1 malé písmeno",
         })
         .regex(new RegExp("[A-Z]"), {
-            message: "Must contain at least one uppercase letter",
+            message: "Heslo musí obsahovať aspoň 1 veľké písmeno",
         })
         .regex(new RegExp("[0-9]"), {
-            message: "Must contain at least one number",
+            message: "Heslo musí obsahovať aspoň 1 číslo",
         }),
     passwordConfirmation: z.string(),
 }).refine((data) => data.password === data.passwordConfirmation, {
-    message: "Passwords don't match",
+    message: "Heslá sa nezhodujú",
     path: ["passwordConfirmation"],
 });
 
@@ -103,7 +103,7 @@ export default function Register() {
                     console.error("Unknown register error:", error);
                     form.setError('root', {
                         type: 'manual',
-                        message: 'An error occurred. Please try again.',
+                        message: 'Nastala chyba. Prosím skúste znova.',
                     });
                 }
             // TODO: make prettier so the code is not duplicated
@@ -111,7 +111,7 @@ export default function Register() {
                 console.error("Unknown register error:", error);
                 form.setError('root', {
                     type: 'manual',
-                    message: 'An error occurred. Please try again.',
+                    message: 'Nastala chyba. Prosím skúste znova.',
                 });
             }
         }
@@ -186,9 +186,9 @@ export default function Register() {
                             name="passwordConfirmation"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Heslo znovu</FormLabel>
+                                <FormLabel>Heslo znova</FormLabel>
                                 <FormControl>
-                                    <Input type="password" placeholder="Zadajte znovu svoje heslo" {...field} />
+                                    <Input type="password" placeholder="Zadajte znova svoje heslo" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>

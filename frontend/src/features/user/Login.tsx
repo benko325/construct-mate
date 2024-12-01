@@ -2,7 +2,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Link, useNavigate } from "react-router-dom"
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -10,26 +9,24 @@ import agent from "@/app/api/agent"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Loader2 } from "lucide-react"
 import { AxiosError } from "axios"
-import { useAuth } from "../../context/AuthContext.tsx"
 
 const formSchema = z.object({
-    email: z.string().email({ message: 'Invalid email address' }),
+    email: z.string().email({ message: 'Neplatný tvar emailovej adresy' }),
     password: z.string()
-        .min(6, { message: 'Password must be at least 6 characters' })
-        .max(128, { message: 'Password must be max 128 characters' })
+        .min(6, { message: 'Heslo musí mať aspoň 6 znakov' })
+        .max(128, { message: 'Heslo musí mať maximálne 128 znakov' })
         .regex(new RegExp("[a-z]"), {
-            message: "Password must contain at least one lowercase letter",
+            message: "Heslo musí obsahovať aspoň 1 malé písmeno",
         })
         .regex(new RegExp("[A-Z]"), {
-            message: "Password must contain at least one uppercase letter",
+            message: "Heslo musí obsahovať aspoň 1 veľké písmeno",
         })
         .regex(new RegExp("[0-9]"), {
-            message: "Must contain at least one number",
+            message: "Heslo musí obsahovať aspoň 1 číslo",
         }),
 });
 
 export default function Login() {
-    // const { setIsAuthenticated } = useAuth(); // TODO: uncomment when useAuth is correctly resolved
     const navigate = useNavigate();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -49,7 +46,6 @@ export default function Login() {
 
         try {
             await agent.Account.login({email: values.email, password: values.password});
-            // setIsAuthenticated(true); // TODO: uncomment when useAuth is correctly resolved
             navigate('/dashboard');
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -61,7 +57,7 @@ export default function Login() {
             } else {
                 form.setError('root', {
                     type: 'manual',
-                    message: 'An error occurred. Please try again.',
+                    message: 'Nastala chyba. Prosím skúste znova.',
                 });
             }
         }

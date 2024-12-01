@@ -1,5 +1,4 @@
 import { useForm } from "react-hook-form";
-import TopBar from "../TopBar";
 import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,7 +28,7 @@ import { Loader2 } from "lucide-react";
 const newNameEmailFormSchema = z.object({
     firstName: z.string().min(1, { message: 'Meno je povinné' }).max(64, { message: 'Meno musí mať menej ako 64 znakov' }),
     lastName: z.string().min(1, { message: 'Priezvisko je povinné' }).max(64, { message: 'Priezvisko musí mať menej ako 64 znakov' }),
-    email: z.string().email({ message: 'Nevalidný formát emailovej adresy' }),
+    email: z.string().email({ message: 'Neplatný formát emailovej adresy' }),
 });
 
 type ProfileFormData = z.infer<typeof newNameEmailFormSchema>;
@@ -91,7 +90,7 @@ export default function ProfilePage() {
         const fetchUserData = async () => {
             try {
                 const { firstName, lastName, email } = await agent.Account.getNameAndEmail();
-                nameEmailForm.reset({ firstName, lastName, email }); // Set the initial values for the form
+                nameEmailForm.reset({ firstName, lastName, email });
             } catch (error) {
                 console.error('Failed to fetch user data', error);
             }
@@ -114,7 +113,7 @@ export default function ProfilePage() {
                 const responseData = error.response?.data || {};
                 let messages = "";
     
-                // valodation error - should not happen because of same setting of validator as in BE
+                // validation error - should not happen because of same setting of validator as in BE
                 if (responseData.status === 400 &&
                     responseData.errors) {
                     const validationErrors = responseData.errors;
@@ -138,7 +137,7 @@ export default function ProfilePage() {
                     console.error("Unknown register error:", error);
                     nameEmailForm.setError('root', {
                         type: 'manual',
-                        message: 'An error occurred. Please try again.',
+                        message: 'Nastala chyba. Prosím skúste znova.',
                     });
                 }
             // TODO: make prettier so the code is not duplicated
@@ -146,7 +145,7 @@ export default function ProfilePage() {
                 console.error("Unknown register error:", error);
                 nameEmailForm.setError('root', {
                     type: 'manual',
-                    message: 'An error occurred. Please try again.',
+                    message: 'Nastala chyba. Prosím skúste znova.',
                 });
             }
             console.error('Failed to update profile', error);
@@ -192,7 +191,7 @@ export default function ProfilePage() {
                     console.error("Unknown register error:", error);
                     newPasswordForm.setError('root', {
                         type: 'manual',
-                        message: 'An error occurred. Please try again.',
+                        message: 'Nastala chyba. Prosím skúste znova.',
                     });
                 }
             // TODO: make prettier so the code is not duplicated
@@ -200,7 +199,7 @@ export default function ProfilePage() {
                 console.error("Unknown register error:", error);
                 newPasswordForm.setError('root', {
                     type: 'manual',
-                    message: 'An error occurred. Please try again.',
+                    message: 'Nastala chyba. Prosím skúste znova.',
                 });
             }
             console.error('Failed to update password', error);
@@ -326,7 +325,7 @@ export default function ProfilePage() {
                                             name="newPasswordAgain"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Nové heslo znovu</FormLabel>
+                                                    <FormLabel>Nové heslo znova</FormLabel>
                                                     <FormControl>
                                                         <Input type="password" {...field} />
                                                     </FormControl>
