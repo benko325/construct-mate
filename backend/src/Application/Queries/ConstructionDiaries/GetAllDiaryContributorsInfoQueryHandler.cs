@@ -14,7 +14,7 @@ namespace ConstructMate.Application.Queries.ConstructionDiaries;
 public record GetAllDiaryContributorsInfoQuery(Guid DiaryId, Guid RequesterId);
 
 /// <summary>
-/// Get info about all diary contributors
+/// Get info about all diary contributors (without construction owner - construction manager)
 /// </summary>
 public class GetAllDiaryContributorsInfoQueryHandler
 {
@@ -29,9 +29,9 @@ public class GetAllDiaryContributorsInfoQueryHandler
         StatusCodeGuard.IsNotNull(construction.ConstructionDiary, StatusCodes.Status404NotFound,
             "Diary from which a contributors info has to be returned not found");
         
-        StatusCodeGuard.IsEqualTo(construction.OwnerId, contributorsInfoQuery.RequesterId,
+        StatusCodeGuard.IsTrue(construction.OwnerId == contributorsInfoQuery.RequesterId || construction.ConstructionDiary.DiaryContributors.Select(c => c.ContributorId).Contains(contributorsInfoQuery.RequesterId),
             StatusCodes.Status403Forbidden,
-            "Only owner of the construction can see all contributors info");
+            "Only owner of the construction and diary contributors can see all contributors info");
 
         return construction.ConstructionDiary;
     }

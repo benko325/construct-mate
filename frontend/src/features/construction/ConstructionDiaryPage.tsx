@@ -94,6 +94,7 @@ export default function ConstructionDiaryPage() {
     const [updatedDiary, setUpdatedDiary] = useState<ConstructionDiary | null>(diary);
 
     const [contributorInfos, setContributorInfos] = useState<ContributorInfo[] | null>(null);
+    
     useEffect(() => {
         const fetchContributors = async () => {
             try {
@@ -181,7 +182,8 @@ export default function ConstructionDiaryPage() {
         return <p className="text-center text-red-500">Denník nie je dostupný.</p>;
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    // it will be used in SK, so locale date string is Ok
+    const today = new Date().toLocaleDateString('en-CA');
 
     useEffect(() => {
         if (selectedDate) {
@@ -419,8 +421,8 @@ export default function ConstructionDiaryPage() {
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="flex justify-between items-center border p-6 rounded-md shadow-md">
-                                <h2 className="text-xl font-semibold">
-                                    <i>Názov:</i> {updatedDiary.name}, <i>Adresa:</i> {updatedDiary.address}, <i>Vytvorený:</i> {safeFormatDate(updatedDiary.createdAt) || "N/A"}
+                                <h2 className="text-lg font-normal">
+                                    <i className="underline">Názov:</i> {updatedDiary.name}, <i className="underline">Adresa:</i> {updatedDiary.address}, <i className="underline">Vytvorený:</i> {safeFormatDate(updatedDiary.createdAt) || "N/A"}
                                 </h2>
    
                                 <Dialog>
@@ -429,39 +431,47 @@ export default function ConstructionDiaryPage() {
                                             Zobraziť ďalšie informácie o denníku
                                         </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="max-w-lg">
+                                    <DialogContent className="max-w-4xl w-auto">
                                         <DialogHeader>
-                                            <DialogTitle className="text-xl font-bold text-blue-900">Ďalšie informácie o denníku</DialogTitle>
+                                            <DialogTitle className="text-xl font-bold text-blue-900 text-center">
+                                                Ďalšie informácie o denníku
+                                            </DialogTitle>
                                         </DialogHeader>
-                                        <div className="p-4 space-y-4 text-gray-800">
-                                            <div>
-                                                <span className="font-semibold">Stavbyvedúci:</span> {updatedDiary.constructionManager}
+                                        <div className="p-2 space-y-6 text-gray-800">
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-start gap-x-4">
+                                                    <span className="font-semibold text-gray-700">Stavbyvedúci:</span>
+                                                    <span className="text-gray-800">{updatedDiary.constructionManager}</span>
+                                                </div>
+                                                <div className="flex justify-between items-start gap-x-4">
+                                                    <span className="font-semibold text-gray-700">Stavebný dozor:</span>
+                                                    <span className="text-gray-800">{updatedDiary.constructionSupervisor}</span>
+                                                </div>
+                                                <div className="flex justify-between items-start gap-x-4">
+                                                    <span className="font-semibold text-gray-700">Stavebné povolenie:</span>
+                                                    <span className="text-gray-800">{updatedDiary.constructionApproval}</span>
+                                                </div>
+                                                <div className="flex justify-between items-start gap-x-4">
+                                                    <span className="font-semibold text-gray-700">Investor:</span>
+                                                    <span className="text-gray-800">{updatedDiary.investor}</span>
+                                                </div>
+                                                <div className="flex justify-between items-start gap-x-4">
+                                                    <span className="font-semibold text-gray-700">Realizátor:</span>
+                                                    <span className="text-gray-800">{updatedDiary.implementer}</span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <span className="font-semibold">Stavebný dozor:</span> {updatedDiary.constructionSupervisor}
-                                            </div>
-                                            <div>
-                                                <span className="font-semibold">Stavebné povolenie:</span> {updatedDiary.constructionApproval}
-                                            </div>
-                                            <div>
-                                                <span className="font-semibold">Investor:</span> {updatedDiary.investor}
-                                            </div>
-                                            <div>
-                                                <span className="font-semibold">Realizátor:</span> {updatedDiary.implementer}
-                                            </div>
-
-                                            {safeConstructionId !== "00000000-0000-0000-0000-000000000000" ? (
-                                                <div className="pt-2">
-                                                    <h3 className="text-lg font-bold text-blue-900 underline">
-                                                        Prispievatelia
-                                                    </h3>
-                                                    {contributorInfos.length > 0 ? (
-                                                        <ul className="space-y-2">
-                                                            {contributorInfos.map((contributor) => (
-                                                                <li
-                                                                    key={contributor.id}
-                                                                    className="flex justify-between items-center border rounded-md p-2 bg-gray-50 shadow-sm"
-                                                                >
+                                            <div className="pt-2">
+                                                <h3 className="text-lg font-bold text-blue-900">
+                                                    Prispievatelia
+                                                </h3>
+                                                {contributorInfos.length > 0 ? (
+                                                    <ul className="space-y-2">
+                                                        {contributorInfos.map((contributor) => (
+                                                            <li
+                                                                key={contributor.id}
+                                                                className="flex justify-between items-center border rounded-md p-3 bg-gray-50 shadow-sm"
+                                                            >
+                                                                <div className="grid grid-cols-3 gap-x-8 w-full text-center">
                                                                     <div>
                                                                         <span className="font-semibold">Meno:</span> {contributor.name}
                                                                     </div>
@@ -471,14 +481,14 @@ export default function ConstructionDiaryPage() {
                                                                     <div>
                                                                         <span className="font-semibold">Rola:</span> {getRoleName(contributor.role)}
                                                                     </div>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    ) : (
-                                                        <div className="text-gray-500 italic">Žiadni prispievatelia nie sú dostupní.</div>
-                                                    )}
-                                                </div>
-                                            ) : (<></>)}
+                                                                </div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                ) : (
+                                                    <div className="text-gray-500 italic">Žiadni prispievatelia nie sú dostupní.</div>
+                                                )}
+                                            </div>
                                         </div>
                                     </DialogContent>
                                 </Dialog>

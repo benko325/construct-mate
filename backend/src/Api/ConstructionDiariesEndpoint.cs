@@ -315,7 +315,7 @@ public class ConstructionDiariesEndpoint
     }
 
     /// <summary>
-    /// Get info about all diary contributors
+    /// Get info about all diary contributors (without construction owner - construction manager)
     /// </summary>
     /// <param name="id">Id of diary for which the contributors info have to be returned</param>
     /// <param name="userContext">Injected custom user context</param>
