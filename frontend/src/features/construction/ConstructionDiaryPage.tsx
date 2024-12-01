@@ -444,7 +444,8 @@ export default function ConstructionDiaryPage() {
                         <AccordionContent>
                             <div className="flex justify-between items-center border p-6 rounded-md shadow-md">
                                 <h2 className="text-lg font-normal">
-                                    <i className="underline">Názov:</i> {updatedDiary.name}, <i className="underline">Adresa:</i> {updatedDiary.address}, <i className="underline">Vytvorený:</i> {safeFormatDate(updatedDiary.createdAt) || "N/A"}
+                                    <i className="underline">Názov:</i> {updatedDiary.name}, <i className="underline">Adresa:</i> {updatedDiary.address}<br/>
+                                    <i className="underline">Vytvorený:</i> {safeFormatDate(updatedDiary.createdAt) || "N/A"}
                                 </h2>
    
                                 <div>
