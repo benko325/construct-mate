@@ -70,7 +70,7 @@ export default function Register() {
                 passwordAgain: values.passwordConfirmation
             });
 
-            toast.success("Registration successful.");
+            toast.success("Registrácia bola úspešná.");
             setTimeout(() => {
                 navigate('/login');
             }, 2500);

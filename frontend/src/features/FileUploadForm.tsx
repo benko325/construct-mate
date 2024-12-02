@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { UUID } from "crypto";
 import { toast } from "react-toastify";
 import { UploadedFile } from "@/app/api/types/responseTypes";
+import { AxiosError } from "axios";
 
 type FileUploadComponentProps = {
     uploadFunction: (id: UUID, data: FormData) => Promise<any>;
@@ -77,9 +78,20 @@ const FileUploadForm = ({ uploadFunction, id, setDialogOpen, updateField, respon
                 if (setDialogOpen) setDialogOpen(false);
             }, 2500);
         } catch (error) {
+            if (error instanceof AxiosError) {
+                const responseData = error.response?.data || {};
+                if (responseData.ErrorMessage) {
+                    console.error('Upload file error:', error);
+                    setError(`${responseData.ErrorMessage}`);
+                } else {
+                    console.error('Upload file error:', error);
+                    setError("Failed to upload file.");
+                }
+            } else {
+                console.error("Upload file error:", error);
+                setError("Failed to upload file.");
+            }
             toast.error("Súbor sa nepodarilo nahrať.");
-            console.error("Error uploading file:", error);
-            setError("Failed to upload file.");
         } finally {
             setLoading(false);
         }
