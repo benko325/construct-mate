@@ -1288,10 +1288,10 @@ export default function ConstructionData() {
                                             const isPDF = fileExtension === "pdf";
                                             const icon = isPDF
                                             ?
-                                            <FaFilePdf className="text-red-500 text-4xl" />
+                                            <FaFilePdf className="text-red-500 text-4xl w-10 h-10 rounded-lg" />
                                             :
                                             <Avatar className="text-gray-500 text-4xl">
-                                                <img src={apiUrl + file.filePath} alt={file.name} className="object-cover w-full h-full rounded-lg" />
+                                                <img src={apiUrl + file.filePath} alt={file.name} className="object-cover w-10 h-10 rounded-lg" />
                                             </Avatar>;
 
                                             return (
