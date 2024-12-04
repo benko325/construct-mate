@@ -145,19 +145,37 @@ public class ConstructionDiariesEndpoint
     }
     
     /// <summary>
-    /// Get all diaries where the logged-in user is added as a contributor (without those that he created)
+    /// Get all actual diaries where the logged-in user is added as a contributor (without those that he created)
     /// </summary>
     /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
-    /// <returns>Collection of construction diaries</returns>
+    /// <returns>Collection of not ended construction diaries</returns>
     [ProducesResponseType<IEnumerable<ConstructionDiary>>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [Authorize]
     [WolverineGet("/my-contribution-diaries")]
-    public static async Task<IEnumerable<ConstructionDiary>> GetAllDiariesWhereUserIsContributor(IApplicationUserContext userContext,
-        IMessageBus bus)
+    public static async Task<IEnumerable<ConstructionDiary>> GetAllDiariesWhereUserIsContributor(
+        IApplicationUserContext userContext, IMessageBus bus)
     {
-        var query = new GetAllContributionDiariesQuery(userContext.UserId);
+        var query = new GetAllUnfinishedContributionDiariesQuery(userContext.UserId);
+        var result = await bus.InvokeAsync<QueryCollectionResponse<ConstructionDiary>>(query);
+        return result.QueryResponseItems;
+    }
+    
+    /// <summary>
+    /// Get all finished diaries where the logged-in user is added as a contributor (without those that he created)
+    /// </summary>
+    /// <param name="userContext">Injected custom user context</param>
+    /// <param name="bus">Injected IMessageBus by Wolverine</param>
+    /// <returns>Collection of ended construction diaries</returns>
+    [ProducesResponseType<IEnumerable<ConstructionDiary>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [Authorize]
+    [WolverineGet("/my-finished-contribution-diaries")]
+    public static async Task<IEnumerable<ConstructionDiary>> GetAllEndedDiariesWhereUserIsContributor(
+        IApplicationUserContext userContext, IMessageBus bus)
+    {
+        var query = new GetAllFinishedContributionDiariesQuery(userContext.UserId);
         var result = await bus.InvokeAsync<QueryCollectionResponse<ConstructionDiary>>(query);
         return result.QueryResponseItems;
     }

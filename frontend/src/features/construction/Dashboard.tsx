@@ -57,8 +57,13 @@ const fetchFinishedConstructions = async (): Promise<Construction[]> => {
     return result;
 };
 
-const fetchContributionDiaries = async (): Promise<ConstructionDiary[]> => {
-    const result = await agent.ConstructionDiary.getDiariesWhereIAmContributor();
+const fetchUnfinishedContributionDiaries = async (): Promise<ConstructionDiary[]> => {
+    const result = await agent.ConstructionDiary.getUnfinishedDiariesWhereIAmContributor();
+    return result;
+};
+
+const fetchFinishedContributionDiaries = async (): Promise<ConstructionDiary[]> => {
+    const result = await agent.ConstructionDiary.getFinishedDiariesWhereIAmContributor();
     return result;
 };
 
@@ -74,7 +79,8 @@ type NewConstructionFormData = z.infer<typeof newConstructionFormSchema>;
 export default function Dashboard() {
     const { data: unfinishedConstructions, isLoading: unfinishedIsLoading, error: unfinishedError } = useQuery<Construction[]>({queryKey: ["unfinishedConstructions"], queryFn: fetchUnfinishedConstructions});
     const { data: finishedConstructions, isLoading: finishedIsLoading, error: finishedError } = useQuery<Construction[]>({queryKey: ["finishedConstructions"], queryFn: fetchFinishedConstructions});
-    const { data: contributionDiaries, isLoading: contributionDiariesIsLoading, error: contributionDiariesError } = useQuery<ConstructionDiary[]>({queryKey: ["contributionDiaries"], queryFn: fetchContributionDiaries});
+    const { data: unfinishedContributionDiaries, isLoading: unfinishedContributionDiariesIsLoading, error: unfinishedContributionDiariesError } = useQuery<ConstructionDiary[]>({queryKey: ["unfinishedContributionDiaries"], queryFn: fetchUnfinishedContributionDiaries});
+    const { data: finishedContributionDiaries, isLoading: finishedContributionDiariesIsLoading, error: finishedContributionDiariesError } = useQuery<ConstructionDiary[]>({queryKey: ["finishedContributionDiaries"], queryFn: fetchFinishedContributionDiaries});
 
     const navigate = useNavigate();
     const handleOpenDiaryButtonClick = (diary: ConstructionDiary) => {
@@ -165,7 +171,7 @@ export default function Dashboard() {
         return Math.min((elapsed / totalDuration) * 100, 100);
     }
 
-    if (unfinishedIsLoading || finishedIsLoading || contributionDiariesIsLoading) {
+    if (unfinishedIsLoading || finishedIsLoading || unfinishedContributionDiariesIsLoading || finishedContributionDiariesIsLoading) {
         return (
             <div className="min-h-screen bg-gray-100">
                 <p>Načítavam stavby a denníky...</p>
@@ -173,7 +179,7 @@ export default function Dashboard() {
         );
     };
 
-    if (unfinishedError || finishedError || contributionDiariesError) {
+    if (unfinishedError || finishedError || unfinishedContributionDiariesError || finishedContributionDiariesError) {
         return (
             <div className="min-h-screen bg-gray-100">
                 <p>Chyba pri načítavaní stavieb a denníkov.</p>
@@ -328,11 +334,11 @@ export default function Dashboard() {
                 <Accordion type="single" collapsible>
                     <AccordionItem value="item-1">
                         <AccordionTrigger>
-                            <h2 className="text-2xl font-semibold">Denníky, v ktorých som prispievateľ</h2>
+                            <h2 className="text-2xl font-semibold">Denníky, v ktorých som prispievateľ (aktuálne)</h2>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {contributionDiaries?.map((diary) => (
+                                {unfinishedContributionDiaries?.map((diary) => (
                                     <Card key={diary.id} className="w-full">
                                         <CardHeader>
                                             <div className="flex items-center justify-between">
@@ -355,7 +361,7 @@ export default function Dashboard() {
                                             <Progress value={calculateProgress(diary.diaryDateFrom, diary.diaryDateTo)} />
                                         </CardContent>
                                     </Card>
-                                    ))}
+                                ))}
                             </div>
                         </AccordionContent>
                     </AccordionItem>
@@ -365,7 +371,7 @@ export default function Dashboard() {
                 <Accordion type="single" collapsible>
                     <AccordionItem value="item-1">
                         <AccordionTrigger>
-                            <h2 className="text-2xl font-semibold">Moje dokončené stavby</h2>
+                            <h2 className="text-2xl font-semibold">Moje ukončené stavby</h2>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -399,6 +405,43 @@ export default function Dashboard() {
                                         <Progress value={calculateProgress(construction.startDate, construction.endDate)} />
                                     </CardContent>
                                 </Card>
+                                ))}
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+            </div>
+            <div className="p-6">
+                <Accordion type="single" collapsible>
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger>
+                            <h2 className="text-2xl font-semibold">Denníky, v ktorých som bol prispievateľ (ukončené)</h2>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {finishedContributionDiaries?.map((diary) => (
+                                    <Card key={diary.id} className="w-full">
+                                        <CardHeader>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-4">
+                                                    <Avatar>
+                                                        <AvatarFallback><Book /></AvatarFallback>
+                                                    </Avatar>
+                                                    <CardTitle>{diary.name}</CardTitle>
+                                                </div>
+                                                <Button variant="outline" size="sm" className="bg-blue-100 hover:bg-blue-50" onClick={() => handleOpenDiaryButtonClick(diary)}>
+                                                    Otvoriť
+                                                </Button>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="flex justify-between text-sm text-muted-foreground mb-2">
+                                                <span>{format(parseISO(diary.diaryDateFrom), 'dd.MM.yyyy')}</span>
+                                                <span>{format(parseISO(diary.diaryDateTo), 'dd.MM.yyyy')}</span>
+                                            </div>
+                                            <Progress value={calculateProgress(diary.diaryDateFrom, diary.diaryDateTo)} />
+                                        </CardContent>
+                                    </Card>
                                 ))}
                             </div>
                         </AccordionContent>
