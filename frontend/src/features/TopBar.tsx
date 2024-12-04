@@ -26,7 +26,7 @@ const TopBar: React.FC = () => {
     }
 
     return (
-        <div className="flex items-center justify-between shadow-md px-4 py-2">
+        <nav className="flex items-center justify-between shadow-md px-4 py-2">
             <div className="flex items-center space-x-4">
                 <h1 className="text-lg font-semibold">
                     Construct Mate
@@ -54,7 +54,7 @@ const TopBar: React.FC = () => {
                     Odhlásiť sa
                 </Button>
             </div>
-        </div>
+        </nav>
     );
 };
 

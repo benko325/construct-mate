@@ -318,7 +318,7 @@ export default function Dashboard() {
                                 <span>{format(parseISO(construction.startDate), 'dd.MM.yyyy')}</span>
                                 <span>{format(parseISO(construction.endDate), 'dd.MM.yyyy')}</span>
                             </div>
-                            <Progress value={calculateProgress(construction.startDate, construction.endDate)} />
+                            <Progress aria-label="construction-progress-bar" value={calculateProgress(construction.startDate, construction.endDate)} />
                         </CardContent>
                     </Card>
                     ))}
