@@ -87,7 +87,7 @@ public class UsersEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
-    [WolverinePost("/users/register")]
+    [WolverinePost("/users")]
     public static async Task<UserCreated> CreateNewUserAsync([FromBody] CreateUserRequest request, IMessageBus bus)
     {
         var command = request.Adapt<CreateUserCommand>();
@@ -108,7 +108,7 @@ public class UsersEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
     [AllowAnonymous]
-    [WolverinePost("/users/login")]
+    [WolverinePost("/auth/token")]
     public static async Task<UserLoggedIn> LoginAsync([FromBody] LoginUserRequest request, IMessageBus bus, HttpContext httpContext)
     {
         var command = request.Adapt<LoginUserCommand>();
@@ -135,7 +135,7 @@ public class UsersEndpoint
     [ProducesResponseType<UserLoggedOut>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [Authorize]
-    [WolverineDelete("/users/logout")]
+    [WolverineDelete("/auth/token")]
     public static UserLoggedOut Logout(IApplicationUserContext userContext, HttpContext httpContext)
     {
         httpContext.Response.Cookies.Delete("cm-jwt");
@@ -211,13 +211,15 @@ public class UsersEndpoint
     /// <returns>UserDeleted - id of deleted user</returns>
     [ProducesResponseType<UserFilesDeleted>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverineDelete("/users/{id}/files")]
-    public static async Task<UserFilesDeleted> DeleteUserAsync([FromRoute] Guid id, IApplicationUserContext userContext, IMessageBus bus)
+    public static async Task<UserFilesDeleted> DeleteUserAsync([FromRoute] Guid id, IApplicationUserContext userContext,
+        IMessageBus bus)
     {
-        StatusCodeGuard.IsEqualTo(userContext.UserId, id, StatusCodes.Status401Unauthorized, "User can delete his files only");
+        StatusCodeGuard.IsEqualTo(userContext.UserId, id, StatusCodes.Status403Forbidden, 
+            "User can delete his files only");
 
         var command = new DeleteUserFilesCommand(id);
         var result = await bus.InvokeAsync<UserFilesDeleted>(command);
@@ -252,7 +254,7 @@ public class UsersEndpoint
     [ProducesResponseType<UserInfo>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [Authorize]
-    [WolverineGet("/users/info")]
+    [WolverineGet("/users/me")]
     public static UserInfo GetMyInfo(IApplicationUserContext userContext)
     {
         return new UserInfo(userContext.UserId, userContext.UserName, userContext.UserEmail);

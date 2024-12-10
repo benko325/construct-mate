@@ -88,7 +88,7 @@ public class ConstructionsEndpoint
     /// <returns>ConstructionDeleted - Id of deleted construction</returns>
     [ProducesResponseType<ConstructionDeleted>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
     [WolverineDelete("/constructions/{id}")]
@@ -111,14 +111,16 @@ public class ConstructionsEndpoint
     [ProducesResponseType<ConstructionModified>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<ErrorResponse>(StatusCodes.Status405MethodNotAllowed)]
     [Authorize]
     [WolverinePatch("/constructions/{id}")]
-    public static async Task<ConstructionModified> ModifyConstructionAsync([FromRoute] Guid id, [FromBody] ModifyConstructionRequest request,
+    public static async Task<ConstructionModified> ModifyConstructionAsync([FromRoute] Guid id,
+        [FromBody] ModifyConstructionRequest request,
         IMessageBus bus, IApplicationUserContext userContext)
     {
-        StatusCodeGuard.IsEqualTo(id, request.Id, StatusCodes.Status400BadRequest, "Ids from route and request must be equal");
+        StatusCodeGuard.IsEqualTo(id, request.Id, StatusCodes.Status400BadRequest,
+            "Ids from route and request must be equal");
 
         var command = request.Adapt<ModifyConstructionCommand>() with { RequesterId = userContext.UserId };
         var result = await bus.InvokeAsync<ConstructionModified>(command);
@@ -137,14 +139,16 @@ public class ConstructionsEndpoint
     [ProducesResponseType<ConstructionStartEndDateModified>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
-    [WolverinePatch("/constructions/{id}/start-end-date")]
+    [WolverinePatch("/constructions/{id}/dates")]
     public static async Task<ConstructionStartEndDateModified> ModifyConstructionStartAndEndDate([FromRoute] Guid id,
         [FromBody] ModifyConstructionStartEndDateRequest request,
         IMessageBus bus, IApplicationUserContext userContext)
     {
-        StatusCodeGuard.IsEqualTo(id, request.ConstructionId, StatusCodes.Status400BadRequest, "Id from route and request must be equal");
+        StatusCodeGuard.IsEqualTo(id, request.ConstructionId, StatusCodes.Status400BadRequest,
+            "Id from route and request must be equal");
         StatusCodeGuard.IsGreaterThan(request.EndDate, request.StartDate, StatusCodes.Status400BadRequest,
             "EndDate must be later than StartDate");
 

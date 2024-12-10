@@ -40,13 +40,13 @@ const requests = {
 };
 
 const Account = {
-    login: (values: LoginUserRequest) => requests.post(`/users/login`, values),
-    logout: () => requests.del(`/users/logout`),
-    register: (values: RegisterUserRequest) => requests.post(`/users/register`, values),
+    login: (values: LoginUserRequest) => requests.post(`/auth/token`, values),
+    logout: () => requests.del(`/auth/token`),
+    register: (values: RegisterUserRequest) => requests.post(`/users`, values),
     getNameAndEmail: () => requests.get(`/users/name-email`),
     setNameAndEmail: (values: SetUserNameAndEmailRequest) => requests.patch(`/users`, values),
     changePassword: (values: ChangeUserPasswordRequest) => requests.patch(`/users/password`, values),
-    currentUser: () => requests.get(`/users/info`), // is also used to verify if the user is logged-in
+    currentUser: () => requests.get(`/users/me`), // is also used to verify if the user is logged-in
 };
 
 const Construction = {
@@ -55,7 +55,7 @@ const Construction = {
     getAllUnfinished: () => requests.get(`/constructions`),
     getAllFinished: () => requests.get(`/finished-constructions`),
     updateNameAndDescription: (id: UUID, values: UpdateConstructionNameAndDescriptionRequest) => requests.patch(`/constructions/${id}`, values),
-    updateStartEndDate: (id: UUID, values: UpdateConstructionStartEndDateRequest) => requests.patch(`/constructions/${id}/start-end-date`, values),
+    updateStartEndDate: (id: UUID, values: UpdateConstructionStartEndDateRequest) => requests.patch(`/constructions/${id}/dates`, values),
     uploadProfilePicture: (id: UUID, data: FormData) => requests.postForm(`/constructions/${id}/profile-picture`, data),
     uploadBuildingPermit: (id: UUID, data: FormData) => requests.postForm(`/constructions/${id}/building-permit`, data),
     deleteBuildingPermit: (id: UUID) => requests.del(`/constructions/${id}/building-permit`),
@@ -72,13 +72,13 @@ const Construction = {
 const ConstructionDiary = {
     createNew: (id: UUID, values: CreateNewConstructionDiaryRequest) => requests.post(`/constructions/${id}/diary`, values),
     addNewRecord: (id: UUID, values: CreateNewDiaryRecordRequest) => requests.post(`/construction-diaries/${id}/diary-text-records`, values),
-    addNewContributor: (id: UUID, values: AddNewDiaryContributorRequest) => requests.post(`/constructions/${id}/new-diary-contributor`, values),
-    getUnfinishedDiariesWhereIAmContributor: () => requests.get(`/my-contribution-diaries`),
+    addNewContributor: (id: UUID, values: AddNewDiaryContributorRequest) => requests.post(`/constructions/${id}/diary-contributors`, values),
+    getUnfinishedDiariesWhereIAmContributor: () => requests.get(`/contribution-diaries`),
     getFinishedDiariesWhereIAmContributor: () => requests.get(`/my-finished-contribution-diaries`),
-    modifyFromToDates: (id: UUID, values: ModifyDiaryFromToDatesRequest) => requests.patch(`/construction-diaries/${id}/from-to-dates`, values),
-    getFirstAndLastDayWithRecord: (id: UUID) => requests.get(`/construction-diaries/${id}/first-last-day-with-records`),
-    getAllContributorsInfo: (id: UUID) => requests.get(`/construction-diaries/${id}/contributors-info`),
-    exportToPdf: (id: UUID) => requests.getFile(`/construction-diaries/${id}/pdf-export`),
+    modifyFromToDates: (id: UUID, values: ModifyDiaryFromToDatesRequest) => requests.post(`/construction-diaries/${id}/dates`, values),
+    getFirstAndLastDayWithRecord: (id: UUID) => requests.get(`/construction-diaries/${id}/record-boundaries`),
+    getAllContributorsInfo: (id: UUID) => requests.get(`/construction-diaries/${id}/contributors`),
+    exportToPdf: (id: UUID) => requests.getFile(`/construction-diaries/${id}/export`),
 };
 
 const agent = {

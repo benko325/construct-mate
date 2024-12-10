@@ -153,7 +153,7 @@ public class ConstructionDiariesEndpoint
     [ProducesResponseType<IEnumerable<ConstructionDiary>>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [Authorize]
-    [WolverineGet("/my-contribution-diaries")]
+    [WolverineGet("/contribution-diaries")]
     public static async Task<IEnumerable<ConstructionDiary>> GetAllDiariesWhereUserIsContributor(
         IApplicationUserContext userContext, IMessageBus bus)
     {
@@ -193,7 +193,7 @@ public class ConstructionDiariesEndpoint
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
-    [WolverinePost("/constructions/{id}/new-diary-contributor")]
+    [WolverinePost("/constructions/{id}/diary-contributors")]
     public static async Task<ConstructionDiaryContributorAdded> AddNewContributorToTheConstructionDiary([FromRoute] Guid id,
         [FromBody] AddNewDiaryContributorRequest request, IMessageBus bus, IApplicationUserContext userContext)
     {
@@ -241,7 +241,7 @@ public class ConstructionDiariesEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
-    [WolverinePatch("/construction-diaries/{id}/from-to-dates")]
+    [WolverinePost("/construction-diaries/{id}/dates")]
     public static async Task<DiaryFromToDatesModified> ModifyDiaryDatesFromAndTo([FromRoute] Guid id,
         [FromBody] ModifyDiaryFromToDatesRequest request, IApplicationUserContext userContext,
         IMessageBus bus)
@@ -269,7 +269,7 @@ public class ConstructionDiariesEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status500InternalServerError)]
     [Authorize]
-    [WolverineGet("/construction-diaries/{id}/first-last-day-with-records")]
+    [WolverineGet("/construction-diaries/{id}/record-boundaries")]
     public static async Task<DiaryFirstLastDayWithRecords> GetFirstAndLastDayWithDiaryRecord(Guid id, IMessageBus bus)
     {
         var query = new GetDiaryFirstAndLastDayWithRecordQuery(id);
@@ -346,7 +346,7 @@ public class ConstructionDiariesEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
-    [WolverineGet("/construction-diaries/{id}/contributors-info")]
+    [WolverineGet("/construction-diaries/{id}/contributors")]
     public static async Task<IEnumerable<DiaryContributorInfo>> GetAllContributorsInfo([FromRoute] Guid id,
         IApplicationUserContext userContext, IMessageBus bus)
     {
@@ -366,7 +366,7 @@ public class ConstructionDiariesEndpoint
     [ProducesResponseType<FileContentResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [Authorize]
-    [WolverineGet("/construction-diaries/{id}/pdf-export")]
+    [WolverineGet("/construction-diaries/{id}/export")]
     public static async Task<IResult> ExportDiaryToPdf([FromRoute] Guid id, IApplicationUserContext userContext,
         IMessageBus bus)
     {
