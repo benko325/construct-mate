@@ -570,8 +570,7 @@ export default function ConstructionDiaryPage() {
                             </div>
                         </div>
                         <Button
-                            // TODO: uncomment and with dates update revaluate the button or in function onClick just check the conditions
-                            // disabled={new Date(today).getDate() < new Date(updatedDiary.diaryDateFrom).getDate() || new Date(today).getDate() > new Date(updatedDiary.diaryDateTo).getDate()}
+                            disabled={new Date(today).getDate() < new Date(updatedDiary.diaryDateFrom).getDate() || new Date(today).getDate() > new Date(updatedDiary.diaryDateTo).getDate()}
                             variant="outline" 
                             onClick={() => setSelectedDate(today)}
                         >
