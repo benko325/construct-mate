@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import TopBar from "./TopBar";
+import NavBar from "./NavBar";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
@@ -10,9 +10,9 @@ export default function NotFound() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <TopBar />
-            <div className="flex flex-col items-center justify-start h-screen">
+        <div className="h-screen bg-gray-100">
+            <NavBar />
+            <div className="flex flex-col items-center justify-start">
                 <h1 className="text-2xl font-semibold m-2">Ups, stránka sa nenašla :(</h1>
                 <Button onClick={goToDashboard} variant="outline">
                     Späť na úvod

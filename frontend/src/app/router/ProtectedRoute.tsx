@@ -1,12 +1,12 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import TopBar from '@/features/TopBar.tsx';
+import NavBar from '@/features/NavBar';
 
 const ProtectedRoute: React.FC = () => {
     return (
-        <div className="">
-            <TopBar />
-            <div className="main-content min-h-screen bg-gray-100">
+        <div className="bg-gray-100 h-screen overflow-auto">
+            <div className="h-full w-full flex flex-col">
+                <NavBar />
                 <Outlet />
             </div>
         </div>

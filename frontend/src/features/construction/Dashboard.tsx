@@ -173,7 +173,7 @@ export default function Dashboard() {
 
     if (unfinishedIsLoading || finishedIsLoading || unfinishedContributionDiariesIsLoading || finishedContributionDiariesIsLoading) {
         return (
-            <div className="min-h-screen bg-gray-100">
+            <div className="bg-gray-100">
                 <p>Načítavam stavby a denníky...</p>
             </div>
         );
@@ -181,7 +181,7 @@ export default function Dashboard() {
 
     if (unfinishedError || finishedError || unfinishedContributionDiariesError || finishedContributionDiariesError) {
         return (
-            <div className="min-h-screen bg-gray-100">
+            <div className="bg-gray-100">
                 <p>Chyba pri načítavaní stavieb a denníkov.</p>
             </div>
         );
