@@ -46,7 +46,7 @@ const Account = {
     getNameAndEmail: () => requests.get(`/users/name-email`),
     setNameAndEmail: (values: SetUserNameAndEmailRequest) => requests.patch(`/users`, values),
     changePassword: (values: ChangeUserPasswordRequest) => requests.patch(`/users/password`, values),
-    currentUser: () => requests.get(`/users/me`), // is also used to verify if the user is logged-in
+    currentUser: () => requests.get(`/users/me`), // also used to verify if the user is logged-in
 };
 
 const Construction = {
