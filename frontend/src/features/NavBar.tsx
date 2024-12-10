@@ -5,7 +5,7 @@ import agent from '@/app/api/agent';
 import { useUser } from '@/context/UserContext';
 import { Home, User, LogOut } from "lucide-react";
 
-const TopBar: React.FC = () => {
+const NavBar: React.FC = () => {
     const { user, logout } = useUser();
 
     const navigate = useNavigate();
@@ -26,7 +26,7 @@ const TopBar: React.FC = () => {
     }
 
     return (
-        <nav className="flex items-center justify-between shadow-md px-4 py-2">
+        <nav className="bg-white flex items-center justify-between shadow-md px-4 py-2">
             <div className="flex items-center space-x-4">
                 <h1 className="text-lg font-semibold">
                     Construct Mate
@@ -58,4 +58,4 @@ const TopBar: React.FC = () => {
     );
 };
 
-export default TopBar;
+export default NavBar;
