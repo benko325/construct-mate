@@ -25,10 +25,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowLocalFrontendOrigin", policy =>
     {
         policy
-            .WithOrigins("http://localhost:3000") // Allow only the frontend's origin
-            .AllowCredentials()                   // Allow cookies and credentials
-            .AllowAnyHeader()                     // Allow any header
-            .AllowAnyMethod();                    // Allow any HTTP method (GET, POST, etc.)
+            .WithOrigins("http://localhost:3000")
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -67,7 +67,6 @@ builder.Services.AddIdentityCore<ApplicationUser>(opts =>
     //.AddRoles<IdentityRole>()
     .AddDefaultTokenProviders();
 
-// Register UserManager and other Identity services
 builder.Services.AddScoped<UserManager<ApplicationUser>>();
 builder.Services.AddScoped<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
 builder.Services.AddScoped<IUserValidator<ApplicationUser>, UserValidator<ApplicationUser>>();

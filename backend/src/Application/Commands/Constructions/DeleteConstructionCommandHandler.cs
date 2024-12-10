@@ -24,7 +24,7 @@ public class DeleteConstructionCommandHandler
         var construction = await session.LoadAsync<Construction>(constructionCommand.Id, cancellationToken);
         StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound, "Construction to delete not found");
         StatusCodeGuard.IsEqualTo(construction.OwnerId, constructionCommand.RequesterId,
-            StatusCodes.Status401Unauthorized, "User can only delete his constructions");
+            StatusCodes.Status403Forbidden, "User can only delete his constructions");
 
         return construction;
     }

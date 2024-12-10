@@ -134,7 +134,6 @@ public class MartenUserStore(IDocumentSession documentSession, IQuerySession que
 
     public async Task<IdentityResult> UpdateAsync(ApplicationUser user, CancellationToken cancellationToken)
     {
-        // gpt says .Store
         documentSession.Update(user);
         await documentSession.SaveChangesAsync(cancellationToken);
         return IdentityResult.Success;

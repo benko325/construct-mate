@@ -6,9 +6,9 @@ public class Construction
     public required string Name { get; set; }
     public string? Description { get; set; }
     public required string ProfilePictureUrl { get; set; } = Constants.DefaultConstructionProfilePictureUrl;
-    public string? BuildingPermitFileUrl { get; set; } = null;
-    public string? ConstructionApprovalFileUrl { get; set; } = null;
-    public string? ConstructionHandoverFileUrl { get; set; } = null;
+    public string? BuildingPermitFileUrl { get; set; } = null; // stavebne povolenie
+    public string? ConstructionApprovalFileUrl { get; set; } = null; // kolaudacia
+    public string? ConstructionHandoverFileUrl { get; set; } = null;  // odovzdanie stavby
     public Guid OwnerId { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }

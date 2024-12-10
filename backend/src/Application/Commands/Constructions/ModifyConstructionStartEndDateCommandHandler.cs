@@ -19,22 +19,24 @@ public record ModifyConstructionStartEndDateCommand(Guid ConstructionId, DateOnl
 /// </summary>
 public class ModifyConstructionStartEndDateCommandHandler
 {
-    public static async Task<Construction> LoadAsync(ModifyConstructionStartEndDateCommand constructioncommand,
+    public static async Task<Construction> LoadAsync(ModifyConstructionStartEndDateCommand constructionCommand,
         IQuerySession session, CancellationToken cancellationToken)
     {
-        var construction = await session.LoadAsync<Construction>(constructioncommand.ConstructionId, cancellationToken);
-        StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound, "Construction to modify not found");
-        StatusCodeGuard.IsEqualTo(construction.OwnerId, constructioncommand.RequesterId, StatusCodes.Status401Unauthorized,
-            "User can modify only his constructions");
+        var construction = await session.LoadAsync<Construction>(constructionCommand.ConstructionId, cancellationToken);
+        StatusCodeGuard.IsNotNull(construction, StatusCodes.Status404NotFound,
+            "Construction to modify not found");
+        StatusCodeGuard.IsEqualTo(construction.OwnerId, constructionCommand.RequesterId,
+            StatusCodes.Status403Forbidden, "User can modify only his constructions");
 
         return construction;
     }
 
-    public static async Task<ConstructionStartEndDateModified> Handle(ModifyConstructionStartEndDateCommand constructioncommand,
+    public static async Task<ConstructionStartEndDateModified> Handle(
+        ModifyConstructionStartEndDateCommand constructionCommand,
         Construction construction, IDocumentSession session, CancellationToken cancellationToken)
     {
-        construction.StartDate = constructioncommand.StartDate;
-        construction.EndDate = constructioncommand.EndDate;
+        construction.StartDate = constructionCommand.StartDate;
+        construction.EndDate = constructionCommand.EndDate;
         
         session.Update(construction);
         await session.SaveChangesAsync(cancellationToken);
