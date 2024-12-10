@@ -600,7 +600,7 @@ export default function ConstructionData() {
     );
     
     return (
-        <div className="relative flex justify-center items-start p-6 bg-gray-100">
+        <div className="relative flex justify-center items-start p-6">
             <BackButton className="absolute top-6 left-6"/>
             <Card className="max-w-4xl w-full p-6">
                 <CardHeader className="flex items-center justify-between">
