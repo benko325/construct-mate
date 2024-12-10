@@ -44,4 +44,4 @@ export default function FileViewer({ fileUrl, fileType, fileName, open, onClose 
             </DialogContent>
         </Dialog>
     );
-}
+};

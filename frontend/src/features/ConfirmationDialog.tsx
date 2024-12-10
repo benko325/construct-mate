@@ -8,7 +8,7 @@ interface ConfirmationDialogProps {
     onClose: () => void;
     onConfirm: () => void;
     message: string;
-}
+};
 
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({ isOpen, onClose, onConfirm, message }) => {
     const [isLoading, setIsLoading] = useState(false);

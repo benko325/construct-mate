@@ -7,17 +7,17 @@ interface UserInfo {
     id: UUID;
     name: string;
     email: string;
-}
+};
 
 interface UserContextValue {
     user: UserInfo | null;
     fetchUser: () => Promise<void>;
     logout: () => void;
-}
+};
 
 interface UserProviderProps {
     children: ReactNode;
-}
+};
 
 const UserContext = createContext<UserContextValue | null>(null);
 

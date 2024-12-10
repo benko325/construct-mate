@@ -300,7 +300,7 @@ export default function ConstructionData() {
                 toast.error("Nastala neočakávaná chyba pri mazaní stavebného povolenia.");
             }
         }
-    }
+    };
 
     const [isDeleteConstructionApprovalConfirmationOpen, setIsDeleteConstructionApprovalConfirmationOpen] = useState(false);
     const onDeleteConstructionApproval = async () => {
@@ -330,7 +330,7 @@ export default function ConstructionData() {
                 toast.error("Nastala neočakávaná chyba pri mazaní kolaudácie.");
             }
         }
-    }
+    };
 
     const [isDeleteConstructionHandoverConfirmationOpen, setIsDeleteConstructionHandoverConfirmationOpen] = useState(false);
     const onDeleteConstructionHandover = async () => {
@@ -360,7 +360,7 @@ export default function ConstructionData() {
                 toast.error("Nastala neočakávaná chyba pri mazaní odovzdania.");
             }
         }
-    }
+    };
 
     const [uploadProfilePictureDialogOpen, setUploadProfilePictureDialogOpen] = useState(false);
 
@@ -1348,4 +1348,4 @@ export default function ConstructionData() {
             </Card>
         </div>
     );
-}
+};

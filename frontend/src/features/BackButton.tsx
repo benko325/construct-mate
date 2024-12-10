@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 interface BackButtonProps {
     className?: string;
-}
+};
 
 export default function BackButton({ className }: BackButtonProps) {
     const navigate = useNavigate();
@@ -28,4 +28,4 @@ export default function BackButton({ className }: BackButtonProps) {
             Naspäť
         </Button>
     );
-}
+};

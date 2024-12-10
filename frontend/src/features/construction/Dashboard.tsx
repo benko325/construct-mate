@@ -169,7 +169,7 @@ export default function Dashboard() {
         const elapsed = today.getTime() - start.getTime();
 
         return Math.min((elapsed / totalDuration) * 100, 100);
-    }
+    };
 
     if (unfinishedIsLoading || finishedIsLoading || unfinishedContributionDiariesIsLoading || finishedContributionDiariesIsLoading) {
         return (
@@ -450,4 +450,4 @@ export default function Dashboard() {
             </div>
         </div>
     );
-}
+};

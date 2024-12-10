@@ -1,15 +1,15 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Link, useNavigate } from "react-router-dom"
-import { useForm } from "react-hook-form"
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import agent from "@/app/api/agent"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Loader2 } from "lucide-react"
-import { AxiosError } from "axios"
-import { useUser } from '../../context/UserContext.tsx'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import agent from "@/app/api/agent";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Loader2 } from "lucide-react";
+import { AxiosError } from "axios";
+import { useUser } from '../../context/UserContext.tsx';
 
 const formSchema = z.object({
     email: z.string().email({ message: 'Neplatný tvar emailovej adresy' }),
@@ -64,70 +64,70 @@ export default function Login() {
                 });
             }
         }
-    }
+    };
     
     return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <Card className="mx-auto max-w-sm">
-            <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl font-bold">Login</CardTitle>
-                <CardDescription>Zadajte email a heslo pre prihlásanie do účtu</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Zadajte email" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <Card className="mx-auto max-w-sm">
+                <CardHeader className="space-y-1">
+                    <CardTitle className="text-2xl font-bold">Login</CardTitle>
+                    <CardDescription>Zadajte email a heslo pre prihlásanie do účtu</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Zadajte email" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Heslo</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" placeholder="Zadajte heslo" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            {form.formState.errors.root && (
+                            <div className="text-red-500 text-sm mt-2">
+                                {form.formState.errors.root.message}
+                            </div>
                             )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Heslo</FormLabel>
-                                    <FormControl>
-                                        <Input type="password" placeholder="Zadajte heslo" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        {form.formState.errors.root && (
-                        <div className="text-red-500 text-sm mt-2">
-                            {form.formState.errors.root.message}
-                        </div>
-                        )}
-                        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                            {form.formState.isSubmitting ? (
-                                <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Prosím počkajte...
-                                </>
-                            ) : (
-                                'Prihlásiť sa'
-                            )}
-                        </Button>
-                    </form>
-                </Form>
-                <div className="mt-4 text-center">
-                    <Link to="/register">
-                        <Button variant="outline" className="w-full">
-                            Vytvoriť nový účet
-                        </Button>
-                    </Link>
-                </div>
-            </CardContent>
-        </Card>
-    </div>
-  )
-}
+                            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                                {form.formState.isSubmitting ? (
+                                    <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Prosím počkajte...
+                                    </>
+                                ) : (
+                                    'Prihlásiť sa'
+                                )}
+                            </Button>
+                        </form>
+                    </Form>
+                    <div className="mt-4 text-center">
+                        <Link to="/register">
+                            <Button variant="outline" className="w-full">
+                                Vytvoriť nový účet
+                            </Button>
+                        </Link>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    )
+};
