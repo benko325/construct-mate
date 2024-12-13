@@ -241,7 +241,7 @@ public class ConstructionDiariesEndpoint
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
-    [WolverinePost("/construction-diaries/{id}/dates")]
+    [WolverinePut("/construction-diaries/{id}/dates")]
     public static async Task<DiaryFromToDatesModified> ModifyDiaryDatesFromAndTo([FromRoute] Guid id,
         [FromBody] ModifyDiaryFromToDatesRequest request, IApplicationUserContext userContext,
         IMessageBus bus)
