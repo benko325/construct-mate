@@ -1,3 +1,3 @@
 namespace ConstructMate.Core.Events.Users;
 
-public record UserLoggedOut(Guid UserId);
+public record UserLoggedOut(Guid Id);

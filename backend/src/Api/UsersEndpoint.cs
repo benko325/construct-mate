@@ -200,29 +200,29 @@ public class UsersEndpoint
     }
 
     /// <summary>
-    /// Delete an existing user's files (all files and constructions that belongs to him) - user can only delete his files
+    /// Delete test user
     /// </summary>
     /// <remarks>
-    /// User will remain in the db (because he can contribute to the other diaries), just all his files will be removed
+    /// This endpoint is just for automatic testing purposes
     /// </remarks>
-    /// <param name="id">Id of user to be deleted</param>
+    /// <param name="id">Id of test user to be deleted</param>
     /// <param name="userContext">Injected custom user context</param>
     /// <param name="bus">Injected IMessageBus by Wolverine</param>
-    /// <returns>UserDeleted - id of deleted user</returns>
-    [ProducesResponseType<UserFilesDeleted>(StatusCodes.Status200OK)]
+    /// <returns><see cref="TestUserDeleted"/></returns>
+    [ProducesResponseType<TestUserDeleted>(StatusCodes.Status200OK)]
     [ProducesResponseType<object>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     [Authorize]
-    [WolverineDelete("/users/{id}/files")]
-    public static async Task<UserFilesDeleted> DeleteUserAsync([FromRoute] Guid id, IApplicationUserContext userContext,
+    [WolverineDelete("/users/{id}")]
+    public static async Task<TestUserDeleted> DeleteUserAsync([FromRoute] Guid id, IApplicationUserContext userContext,
         IMessageBus bus)
     {
         StatusCodeGuard.IsEqualTo(userContext.UserId, id, StatusCodes.Status403Forbidden, 
-            "User can delete his files only");
+            "User can delete himself only");
 
-        var command = new DeleteUserFilesCommand(id);
-        var result = await bus.InvokeAsync<UserFilesDeleted>(command);
+        var command = new DeleteTestUserCommand(id);
+        var result = await bus.InvokeAsync<TestUserDeleted>(command);
         return result;
     }
 
