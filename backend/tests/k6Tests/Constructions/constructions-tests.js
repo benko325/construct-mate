@@ -8,6 +8,12 @@ export default function() {
         group('Create New Construction Test', function () {
             tests.CreateNewConstructionTest();
         })
+        group('Upload New File To Construction Test', function () {
+            tests.UploadNewFileToConstructionTest();
+        })
+        group('Delete File From Construction Test', function () {
+            tests.DeleteFileFromConstructionTest();
+        })
         group('Get Construction Test', function () {
             tests.GetConstructionTest();
         })

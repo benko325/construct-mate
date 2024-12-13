@@ -1,6 +1,7 @@
 import { ApiBase } from "../api-base.js";
 import http from 'k6/http';
 import { check } from "k6";
+import { FormData } from "../utils/form-data.js";
 
 let baseUrl;
 let params;
@@ -16,6 +17,10 @@ const modifiedDescription = "Modified Test Description";
 const modifiedStartDate = "2024-10-02";
 const modifiedEndDate = "2024-12-12";
 
+const fileData = open('./test-image.png', 'b');
+const fileName = `test-image.png`;
+
+let fileId;
 let testConstructionId;
 
 export class ConstructionsTests extends ApiBase {
@@ -47,6 +52,48 @@ export class ConstructionsTests extends ApiBase {
         });
 
         testConstructionId = body.id;
+    }
+
+    UploadNewFileToConstructionTest() {
+        const formData = new FormData();
+
+        const file = http.file(fileData, fileName);
+
+        formData.append('image', file);
+
+        const uploadParams = {
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${formData.boundary}`,
+            },
+        };
+
+        const response = http.post(constructionsApiUrl + `${testConstructionId}/files`, formData.body(), uploadParams);
+        let body = JSON.parse(response.body);
+
+        check(response, {
+            'Upload file to construction is status 200': r => r.status === 200,
+            'Upload file to construction has id': body.hasOwnProperty('id'),
+            'Upload file to construction has constructionId': body.hasOwnProperty('constructionId'),
+            'Upload file to construction has correct constructionId': body.constructionId === testConstructionId,
+            'Upload file to construction has filePath': body.hasOwnProperty('filePath'),
+            'Upload file to construction has name': body.hasOwnProperty('name'),
+            'Upload file to construction has correct name': body.name === fileName,
+        });
+
+        fileId = body.id;
+    }
+
+    DeleteFileFromConstructionTest() {
+        let response = http.del(`${constructionsApiUrl}${testConstructionId}/files/${fileId}`, null, params);
+        let body = JSON.parse(response.body);
+
+        check(response, {
+            'Delete file from construction is status 200': r => r.status === 200,
+            'Delete file from construction has fileId': body.hasOwnProperty('fileId'),
+            'Delete file from construction has correct fileId': body.fileId === fileId,
+            'Delete file from construction has constructionId': body.hasOwnProperty('constructionId'),
+            'Delete file from construction has correct constructionId': body.constructionId === testConstructionId,
+        })
     }
 
     GetConstructionTest() {
