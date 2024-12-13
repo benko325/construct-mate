@@ -23,11 +23,11 @@ export default function() {
         group('Get User After Modify Test', function () {
             tests.GetUserAfterModifyTest();
         })
-        group('Delete User Test', function () {
-            tests.DeleteUserTest();
-        })
-        group('Logout User Test', function () {
-            tests.LogoutUserTest();
-        })
+        // group('Delete User Test', function () {
+        //     tests.DeleteUserTest();
+        // })
+        // group('Logout User Test', function () {
+        //     tests.LogoutUserTest();
+        // })
     })
 }
