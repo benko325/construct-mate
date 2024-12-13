@@ -6,6 +6,7 @@ import { FormData } from "../utils/form-data.js";
 let baseUrl;
 let params;
 let constructionsApiUrl;
+let diariesApiUrl;
 
 const name = "Test Construction";
 const description = "Test Construction Description";
@@ -16,12 +17,17 @@ const modifiedName = "Modified Test Name";
 const modifiedDescription = "Modified Test Description";
 const modifiedStartDate = "2024-10-02";
 const modifiedEndDate = "2024-12-12";
+const today = new Date();
+const todayDateOnly = today.toISOString().split('T')[0];
+
+const nonEmptyString = "AaAaAaaaaaaaaaaBBbb";
 
 const fileData = open('./test-image.png', 'b');
 const fileName = `test-image.png`;
 
 let fileId;
 let testConstructionId;
+let testDiaryId;
 
 export class ConstructionsTests extends ApiBase {
     constructor() {
@@ -29,6 +35,7 @@ export class ConstructionsTests extends ApiBase {
         baseUrl = this.baseUrl;
         params = this.params;
         constructionsApiUrl = `${this.baseUrl}constructions/`;
+        diariesApiUrl = `${this.baseUrl}construction-diaries/`;
     }
 
     CreateNewConstructionTest() {
@@ -46,7 +53,7 @@ export class ConstructionsTests extends ApiBase {
             'Create construction is status 200': r => r.status === 200,
             'Create construction has id': body.hasOwnProperty('id'),
             'Create construction has correct name field': body.name === name,
-            'Create construction has correct lastName field': body.description === description,
+            'Create construction has correct description field': body.description === description,
             'Create construction has correct startDate field': body.startDate === startDate,
             'Create construction has correct endDate field': body.endDate === endDate,
         });
@@ -120,6 +127,97 @@ export class ConstructionsTests extends ApiBase {
         check(response, {
             'Get all unfinished constructions is status 200': r => r.status === 200,
             'Get all unfinished constructions contains correct construction': body.some(item => item.id == testConstructionId)
+        });
+    }
+
+    CreateNewDiaryTest() {
+        const payload = JSON.stringify({
+            diaryDateFrom: startDate,
+            diaryDateTo: "2025-12-12",
+            constructionManager: nonEmptyString,
+            constructionSupervisor: nonEmptyString,
+            name: nonEmptyString,
+            address: nonEmptyString,
+            constructionApproval: nonEmptyString,
+            investor: nonEmptyString,
+            implementer: nonEmptyString,
+            updateConstructionDates: false
+        });
+
+        let response = http.post(`${constructionsApiUrl}${testConstructionId}/diary`, payload, params);
+        let body = JSON.parse(response.body);
+
+        check(response, {
+            'Create diary is status 200': r => r.status === 200,
+            'Create diary has id': body.hasOwnProperty('id'),
+            'Create diary has correct constructionId field': body.constructionId === testConstructionId,
+            'Create diary has correct name field': body.name === nonEmptyString,
+            'Create diary has correct address field': body.address === nonEmptyString,
+            'Create diary has correct investor field': body.investor === nonEmptyString,
+            'Create diary has correct implementer field': body.implementer === nonEmptyString,
+            'Create diary has correct constructionApproval field': body.constructionApproval === nonEmptyString,
+            'Create diary has correct constructionSupervisor field': body.constructionSupervisor === nonEmptyString,
+            'Create diary has correct constructionManager field': body.constructionManager === nonEmptyString,
+            'Create diary has correct diaryDateFrom field': body.diaryDateFrom === startDate,
+            'Create diary has correct diaryDateTo field': body.diaryDateTo === "2025-12-12",
+        });
+
+        testDiaryId = body.id;
+    }
+
+    GetDiaryTest() {
+        let response = http.get(`${constructionsApiUrl}${testConstructionId}/diary`, params);
+        let body = JSON.parse(response.body);
+
+        check(response, {
+            'Get diary is status 200': r => r.status === 200,
+            'Get diary has id': body.hasOwnProperty('id'),
+            'Get diary has correct id': body.id === testDiaryId,
+            'Get diary has correct name field': body.name === nonEmptyString,
+            'Get diary has correct address field': body.address === nonEmptyString,
+            'Get diary has correct investor field': body.investor === nonEmptyString,
+            'Get diary has correct implementer field': body.implementer === nonEmptyString,
+            'Get diary has correct constructionApproval field': body.constructionApproval === nonEmptyString,
+            'Get diary has correct constructionSupervisor field': body.constructionSupervisor === nonEmptyString,
+            'Get diary has correct constructionManager field': body.constructionManager === nonEmptyString,
+            'Get diary has correct diaryDateFrom field': body.diaryDateFrom === startDate,
+            'Get diary has correct diaryDateTo field': body.diaryDateTo === "2025-12-12",
+        });
+    }
+
+    ModifyDiaryFromToDatesTest() {
+        const payload = JSON.stringify({
+            newDateFrom: modifiedStartDate,
+            newDateTo: todayDateOnly,
+            updateConstructionDates: false
+        });
+
+        let response = http.put(`${diariesApiUrl}${testDiaryId}/dates`, payload, params);
+        let body = JSON.parse(response.body);
+
+        check(response, {
+            'Modify diary dates is status 200': r => r.status === 200,
+            'Modify diary dates has diaryId': body.hasOwnProperty('diaryId'),
+            'Modify diary dates has correct diaryId': body.diaryId === testDiaryId,
+            'Modify diary dates has correct newDateFrom field': body.newDateFrom === modifiedStartDate,
+            'Modify diary dates has correct newDateTo field': body.newDateTo === todayDateOnly,
+        });
+    }
+
+    AddNewDiaryRecordTest() {
+        const payload = JSON.stringify({
+            content: nonEmptyString,
+            recordCategory: 1,
+        });
+
+        let response = http.post(`${diariesApiUrl}${testDiaryId}/diary-text-records`, payload, params);
+        let body = JSON.parse(response.body);
+
+        check(response, {
+            'Add new diary record is status 200': r => r.status === 200,
+            'Add new diary record has diaryId': body.hasOwnProperty('diaryId'),
+            'Add new diary record has correct diaryId field': body.diaryId === testDiaryId,
+            'Add new diary record has correct content field': body.content === nonEmptyString,
         });
     }
 

@@ -20,6 +20,18 @@ export default function() {
         group('Get All Unfinished Constructions Test', function () {
             tests.GetAllUnfinishedConstructionsTest();
         })
+        group('Create New Diary Test', function () {
+            tests.CreateNewDiaryTest();
+        })
+        group('Get Diary Test', function () {
+            tests.GetDiaryTest();
+        })
+        group('Modify Diary From To Dates Test', function () {
+            tests.ModifyDiaryFromToDatesTest();
+        })
+        group('Add New Diary Record Test', function () {
+            tests.AddNewDiaryRecordTest();
+        })
         group('Modify Construction Name And Description Test', function () {
             tests.ModifyConstructionNameDescriptionTest();
         })
