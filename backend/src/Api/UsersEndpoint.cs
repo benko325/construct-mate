@@ -118,7 +118,7 @@ public class UsersEndpoint
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Expires = DateTime.UtcNow.AddHours(12)
         };
         httpContext.Response.Cookies.Append("cm-jwt", result.Token, cookieOptions);

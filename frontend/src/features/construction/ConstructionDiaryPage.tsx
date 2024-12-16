@@ -74,9 +74,8 @@ const newRecordFormSchema = z.object({
         .min(10, { message: 'Obsah musí obsahovať aspoň 10 znakov' })
         .max(5000, { message: 'Obsah musí obsahovať maximálne 5000 znakov' }),
     recordCategory: z.nativeEnum(DiaryRecordCategory)
-        .refine((val) => val !== DiaryRecordCategory.None, {
-            message: "Kategória musí byť vybraná",
-        }),
+}).refine(schema => schema.recordCategory !== DiaryRecordCategory.None, {
+    message: "Kategória musí byť vybraná"
 });
 type NewRecordFormData = z.infer<typeof newRecordFormSchema>;
 
@@ -120,7 +119,7 @@ export default function ConstructionDiaryPage() {
         };
 
         fetchContributors();
-    }, [diaryId]);
+    }, [diaryId, safeDiaryId]);
 
     const createModifyFromToDatesFormSchema = (firstLastDayWithRecord: FirstAndLastDayWithRecord | null) => {
         return z
@@ -169,7 +168,7 @@ export default function ConstructionDiaryPage() {
         };
 
         loadDateRange();
-    }, []);
+    }, [safeDiaryId]);
 
     // const modifyFromToDatesFormSchema = z.object({
     //     newDateFrom: z.date()

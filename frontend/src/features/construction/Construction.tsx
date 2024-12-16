@@ -63,10 +63,9 @@ type CreateNewDiaryFormData = z.infer<typeof createNewDiaryFormSchema>;
 const addNewDiaryContributorFormSchema = z.object({
     contributorEmail: z.string().email({ message: "Email musí byť v správnom formáte" }),
     contributorRole: z.nativeEnum(DiaryContributorRole)
-        .refine((val) => val !== DiaryContributorRole.None, {
-            message: "Rola prispievateľa musí byť vybraná",
-        }),
-});
+}).refine(schema => schema.contributorRole !== DiaryContributorRole.None, {
+        message: "Rola prispievateľa musí byť vybraná"
+    });
 type AddNewDiaryContributorFormData = z.infer<typeof addNewDiaryContributorFormSchema>;
 
 const contributorRoleTranslations = {
@@ -251,7 +250,7 @@ export default function ConstructionData() {
             }
         };
         fetchConstructionData();
-    }, [id]);
+    }, [id, safeId]);
 
     useEffect(() => {
         if (constructionData) {

@@ -34,16 +34,30 @@ builder.Services.AddCors(options =>
 
 var dbSchemeName = builder.Configuration.GetSection("DbSettings")["DbSchemeName"];
 var connectionString = builder.Configuration.GetSection("DbSettings:ConnectionStrings")["MartenDb"];
+var dockerConnectionString = builder.Configuration.GetSection("DbSettings:ConnectionStrings")["DockerMartenDb"];
 Guard.IsNotNullOrEmpty(dbSchemeName, "Db scheme");
 Guard.IsNotNullOrEmpty(connectionString, "Connection string");
+Guard.IsNotNullOrEmpty(dockerConnectionString, "Docker connection string");
+var environment = Environment.GetEnvironmentVariable("ENVIRONMENT");
 
-// Adding Marten for persistence
-builder.Services.AddMarten(opts =>
+if (environment == "DOCKER")
 {
-    opts.Connection(connectionString);
-    opts.DatabaseSchemaName = "todo";
-})
-    .IntegrateWithWolverine();
+    builder.Services.AddMarten(opts =>
+        {
+            opts.Connection(dockerConnectionString);
+            opts.DatabaseSchemaName = dbSchemeName;
+        })
+        .IntegrateWithWolverine();
+}
+else
+{
+    builder.Services.AddMarten(opts =>
+        {
+            opts.Connection(connectionString);
+            opts.DatabaseSchemaName = dbSchemeName;
+        })
+        .IntegrateWithWolverine();
+}
 
 builder.Services.AddIdentityCore<ApplicationUser>(opts =>
 {
@@ -131,9 +145,9 @@ builder.Services.AddSwaggerGen( opt =>
 {
     opt.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Contruct Mate Api",
+        Title = "Construct Mate Api",
         Version = "v1",
-        Description = "Api endpoints used to integrate with Counstruct Mate application.",
+        Description = "Api endpoints used to integrate with Construct Mate application.",
         Contact = new OpenApiContact()
         {
             Name = "Benjamin Havlik",
