@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import { UUID } from 'crypto';
 import agent from '@/app/api/agent';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface UserInfo {
     id: UUID;
@@ -22,6 +22,7 @@ interface UserProviderProps {
 const UserContext = createContext<UserContextValue | null>(null);
 
 export const UserProvider = ({ children }: UserProviderProps) => {
+    const location = useLocation(); 
     const navigate = useNavigate();
     const [user, setUser] = useState<UserInfo | null>(null);
 
@@ -32,7 +33,10 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         } catch (error) {
             console.error('Failed to fetch user info:', error);
             setUser(null);
-            navigate('/login');
+            // do not navigate to login when register page is opened
+            if (location.pathname !== '/register') {
+                navigate('/login');
+            }
         }
     };
 

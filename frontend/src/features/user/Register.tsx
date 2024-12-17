@@ -135,7 +135,7 @@ export default function Register() {
                                 <FormItem className="flex-1">
                                     <FormLabel>Meno</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Peter" {...field} />
+                                        <Input placeholder="Zadajte meno" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -148,7 +148,7 @@ export default function Register() {
                                 <FormItem className="flex-1">
                                     <FormLabel>Priezvisko</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Toth" {...field} />
+                                        <Input placeholder="Zadajte priezvisko" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -162,7 +162,7 @@ export default function Register() {
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input type="email" placeholder="peter.toth@example.com" {...field} />
+                                        <Input type="email" placeholder="Zadajte email" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -175,7 +175,7 @@ export default function Register() {
                                 <FormItem>
                                 <FormLabel>Heslo</FormLabel>
                                 <FormControl>
-                                    <Input type="password" placeholder="Vložte svoje heslo" {...field} />
+                                    <Input type="password" placeholder="Zadajte heslo" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -188,7 +188,7 @@ export default function Register() {
                                 <FormItem>
                                 <FormLabel>Heslo znova</FormLabel>
                                 <FormControl>
-                                    <Input type="password" placeholder="Zadajte znova svoje heslo" {...field} />
+                                    <Input type="password" placeholder="Zadajte heslo znova" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
