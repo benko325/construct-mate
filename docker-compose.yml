@@ -1,0 +1,58 @@
+services:
+  frontend:
+    container_name: frontend_container
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    depends_on:
+      - backend
+    environment:
+      - NODE_ENV=production
+    networks:
+      - mynet
+
+  backend:
+    container_name: backend_container
+    build:
+      context: ./backend/src
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/src/data:/app/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DbSettings__ConnectionStrings__DockerMartenDb=Host=database;Port=5432;Database=cmdb;User Id=cmpostgres;Password=constructmatepostgres
+      - DbSettings__DbSchemeName=constructMate
+      - ENVIRONMENT=DOCKER
+      - ASPNETCORE_URLS=http://+:5000
+    depends_on:
+      - database
+    networks:
+      - mynet
+
+  database:
+    image: postgres:alpine
+    container_name: cmpostgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgressu -d textbooks"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+    environment:
+      POSTGRES_USER: cmpostgres
+      POSTGRES_PASSWORD: constructmatepostgres
+      POSTGRES_DB: cmdb
+    ports:
+      - "5432:5432"
+    networks:
+      - mynet
+
+volumes:
+  db_data:
+
+networks:
+  mynet:
+    name: my-shared-db-network
