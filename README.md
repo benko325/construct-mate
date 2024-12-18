@@ -8,7 +8,7 @@ It also contains the implementation of the construction diary based on the Slova
 - [Docker](https://www.docker.com/) (optional for simplified setup)
 - [.NET SDK](https://dotnet.microsoft.com/) (if running manually)
 - [Node.js](https://nodejs.org/) (if running manually)
-- Access to a database (PostgreSQL)
+- Access to a database - PostgreSQL (if running manually)
 
 ---
 
