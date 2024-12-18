@@ -38,6 +38,10 @@ If Docker is not available, follow these steps to start the application manually
      ```bash
      cd frontend
      ```
+   - Install necessary modules:
+     ```bash
+     npm i
+     ```
    - Start the frontend using:
      ```bash
      npm start
